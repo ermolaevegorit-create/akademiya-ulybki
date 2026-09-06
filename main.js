@@ -144,7 +144,7 @@
     gsap.set(stage, { scale: 1, transformOrigin: '50% 50%' });
     gsap.set(glow,  { xPercent: -50, yPercent: -50, scale: .55, opacity: 0 });
     gsap.set(bloom, { xPercent: -50, yPercent: -50, scale: .18, opacity: 0 });
-    gsap.set(on,    { opacity: 0, filter: 'brightness(1) saturate(1)' });
+    gsap.set(on,    { opacity: 0 });
     gsap.set(flash, { opacity: 0 });
     gsap.set(words, { opacity: 0, y: 44, scale: .9 });
     gsap.set([slogan, hint], { opacity: 1 });
@@ -163,8 +163,9 @@
       .to(stage,  { scale: 2.8, duration: .14, ease: 'power1.in' }, .38)
       .to(glow,   { opacity: 1, scale: 3.1, duration: .14, ease: 'power1.in' }, .38)
       .to(bloom,  { opacity: .96, scale: 1.35, duration: .14, ease: 'power1.in' }, .38)
-      .to(on,     { filter: 'brightness(1.3) saturate(1.04)', duration: .14 }, .38)
-      .to(stage,  { scale: 9, duration: .12, ease: 'power2.in' }, .52)
+      .to(stage,  { scale: 6.5, duration: .12, ease: 'power2.in' }, .52)
+      /* корпус растворяется в свете, иначе на весь кадр расползается серый пластик */
+      .to(stage,  { opacity: 0, duration: .09, ease: 'power1.in' }, .49)
       .to(bloom,  { scale: 2.4, duration: .12, ease: 'power2.in' }, .52)
       .to(flash,  { opacity: 1, duration: .06, ease: 'power2.in' }, .52)
       /* слова: шире амплитуда, спокойнее выход */
@@ -182,6 +183,8 @@
       box.style.opacity = pos > .93 ? String(Math.max(0, 1 - (pos - .93) / .065)) : '1';
       const open = pos > .985;
       box.classList.toggle('is-moving', pos > .004);
+      /* кадр залит белым — лампу и сияние снимаем с отрисовки совсем */
+      box.classList.toggle('is-blank', pos > .60);
       html.classList.toggle('ready', open);
       if (hdrEl) hdrEl.classList.toggle('hdr--ghost', !open);
       box.style.pointerEvents = open ? 'none' : '';
@@ -198,7 +201,7 @@
       const qx = gsap.quickTo(par, 'x', { duration: 1.2, ease: 'power2.out' }),
             qy = gsap.quickTo(par, 'y', { duration: 1.2, ease: 'power2.out' });
       box.addEventListener('pointermove', e => {
-        if (closed) return;
+        if (closed || pos > .2) return;
         const k = Math.max(0, 1 - pos * 5);
         qx((e.clientX / innerWidth - .5) * 24 * k); qy((e.clientY / innerHeight - .5) * 15 * k);
       });
@@ -214,21 +217,27 @@
 
     if (tall) {                       /* обычная страница: шкалу ведёт скролл, назад тоже */
       box.classList.add('is-tall');
-      let raf = 0;
-      const fromScroll = () => {
-        raf = 0;
+      let raf = 0, driving = false;
+      const at = y => {
         const len = box.offsetHeight - innerHeight;
-        pos = len > 0 ? Math.min(1, Math.max(0, scrollY / len)) : 1;
+        pos = len > 0 ? Math.min(1, Math.max(0, y / len)) : 1;
         apply();
       };
-      addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(fromScroll); }, { passive: true });
-      addEventListener('resize', fromScroll);
-      scrollTo(0, 0); fromScroll();
+      const fromScroll = () => { raf = 0; if (!driving) at(scrollY); };
+      addEventListener('scroll', () => { if (!raf && !driving) raf = requestAnimationFrame(fromScroll); }, { passive: true });
+      addEventListener('resize', () => at(scrollY));
+      scrollTo(0, 0); at(0);
+      /* Прокрутку по нажатию ведём сами: ставим положение и тут же перерисовываем
+         в том же кадре. Иначе событие scroll разбирается через кадр и картина
+         отстаёт от позиции — это и читается как рывки. */
       const run = () => {
         const len = box.offsetHeight - innerHeight, to = target();
+        driving = true;
         gsap.to({ y: scrollY }, { y: len * to + (to === 1 ? 2 : 0), duration: to === 1 ? 2.6 : 3.6,
           ease: 'power2.inOut', overwrite: true,
-          onUpdate() { scrollTo({ top: this.targets()[0].y, behavior: 'instant' }); }, onComplete: afterRun });
+          onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
+          onComplete() { driving = false; at(scrollY); afterRun(); },
+          onInterrupt() { driving = false; } });
       };
       btn.addEventListener('click', run);
       $$('.intro__go', box).forEach(el => el.addEventListener('click', run));

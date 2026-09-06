@@ -104,22 +104,26 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .intro__lamp{position:relative;display:block;width:100%;padding:0;margin:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .intro__lamp:focus-visible{outline:2px solid var(--navy);outline-offset:4px;border-radius:24px}
 .intro__off,.intro__on{width:100%;height:auto;display:block;filter:drop-shadow(0 26px 52px rgba(20,30,50,.10))}
+/* в движении фильтр снимаем: тень пересчитывается на каждом кадре и роняет плавность */
+.intro.is-moving .intro__off,.intro.is-moving .intro__on{filter:none}
+/* после засвета лампу вообще не рисуем — она под белым и только жрёт кадры */
+.intro.is-blank .intro__stage,.intro.is-blank .intro__glow,.intro.is-blank .intro__bloom{visibility:hidden}
 .intro__on{position:absolute;inset:0;opacity:0;filter:none}
 /* тихая жизнь до первого скролла: свет медленно дышит; при движении дыхание гаснет */
 .intro__aura{position:absolute;left:50%;top:50%;width:180%;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle,rgba(255,253,247,.9) 0%,rgba(255,250,238,.4) 28%,rgba(255,255,255,0) 62%);
-  filter:blur(12px);opacity:.45;animation:aura 8s ease-in-out infinite alternate}
+  background:radial-gradient(circle,rgba(255,253,247,.9) 0%,rgba(255,251,242,.62) 16%,rgba(255,250,238,.34) 30%,rgba(255,252,244,.12) 46%,rgba(255,255,255,0) 64%);
+  opacity:.45;animation:aura 8s ease-in-out infinite alternate}
 @keyframes aura{from{opacity:.26}to{opacity:.66}}
 .intro.is-moving .intro__aura{animation:none;opacity:0;transition:opacity .5s ease}
 .intro__glow{position:absolute;left:50%;top:50%;width:230%;aspect-ratio:1;translate:-50% -50%;opacity:0;pointer-events:none;transform-origin:50% 50%;will-change:transform,opacity;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.98) 0%,rgba(255,253,246,.86) 22%,rgba(255,252,240,.42) 42%,rgba(255,255,255,0) 68%);filter:blur(6px)}
+  background:radial-gradient(circle,rgba(255,255,255,.98) 0%,rgba(255,254,249,.92) 14%,rgba(255,253,246,.78) 24%,rgba(255,252,242,.52) 36%,rgba(255,252,240,.28) 47%,rgba(255,253,246,.10) 58%,rgba(255,255,255,0) 70%)}
 .intro__slogan{position:absolute;left:50%;bottom:calc(50% + min(24vmin,238px));translate:-50% 0;width:min(92vw,880px);text-align:center;margin:0;z-index:5;pointer-events:none}
 .intro__slogan b{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.6vw,62px);line-height:1.12;
   color:var(--ink);text-wrap:balance;letter-spacing:-.01em;text-shadow:0 2px 28px rgba(255,255,255,.9),0 1px 3px rgba(255,255,255,.9)}
 .intro__slogan span{display:block;margin-top:clamp(10px,1.4vw,18px);font-size:clamp(13px,1.3vw,18px);color:var(--ink-2);
   letter-spacing:.01em;text-shadow:0 1px 16px rgba(255,255,255,.95)}
-.intro__bloom{position:absolute;left:50%;top:50%;width:150vmax;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;opacity:0;z-index:4;
-  background:radial-gradient(circle,rgba(255,255,255,1) 0%,rgba(255,254,250,.9) 26%,rgba(255,253,246,.5) 46%,rgba(255,255,255,0) 70%);will-change:transform,opacity}
+.intro__bloom{position:absolute;left:50%;top:50%;width:105vmax;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;opacity:0;z-index:4;
+  background:radial-gradient(circle,rgba(255,255,255,1) 0%,rgba(255,254,251,.94) 18%,rgba(255,254,250,.82) 30%,rgba(255,253,247,.56) 44%,rgba(255,253,246,.26) 58%,rgba(255,255,255,0) 74%);will-change:transform,opacity}
 .intro__flash{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 44%,#fff 0%,#fff 62%,rgba(255,255,255,.94) 100%);opacity:0;pointer-events:none;z-index:6}
 .intro__words{position:absolute;left:50%;top:50%;translate:-50% -50%;margin:0;z-index:7;pointer-events:none;
   display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:clamp(14px,3.2vw,54px);width:min(94vw,1040px);text-align:center}
@@ -133,8 +137,10 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .intro__arrow{display:block;width:14px;height:14px;border-right:1.2px solid currentColor;border-bottom:1.2px solid currentColor;rotate:45deg;animation:arrow 2.4s ease-in-out infinite}
 @keyframes arrow{0%,100%{transform:translateY(-3px);opacity:.35}50%{transform:translateY(3px);opacity:.9}}
 /* шапка видна и на первом экране — полупрозрачная, при наведении проявляется */
-.hdr--ghost{background:rgba(255,255,255,0);backdrop-filter:none;opacity:.42;transition:opacity .45s ease,background .45s ease}
-.hdr--ghost:hover,.hdr--ghost:focus-within{opacity:1;background:rgba(255,255,255,.72);backdrop-filter:blur(10px)}
+/* на первом экране шапка без полосы, но логотип и кнопки читаются полностью */
+.hdr--ghost{background:rgba(255,255,255,0);backdrop-filter:none;opacity:1;border-color:transparent!important;transition:background .45s ease}
+.hdr--ghost .brand,.hdr--ghost .nav a,.hdr--ghost .hdr__tel{text-shadow:0 1px 14px rgba(255,255,255,.95),0 1px 3px rgba(255,255,255,.9)}
+.hdr--ghost:hover,.hdr--ghost:focus-within{background:rgba(255,255,255,.72);backdrop-filter:blur(10px)}
 @media(max-width:900px){.intro__stage{width:min(94vmin,580px)}}
 
 /* ПЕРВЫЙ ЭКРАН */

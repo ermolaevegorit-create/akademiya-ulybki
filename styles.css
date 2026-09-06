@@ -103,9 +103,13 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .intro__stage{position:absolute;left:50%;top:50%;width:min(88vmin,660px);translate:-50% -50%;transform-origin:50% 42%;will-change:transform}
 .intro__lamp{position:relative;display:block;width:100%;padding:0;margin:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .intro__lamp:focus-visible{outline:2px solid var(--navy);outline-offset:4px;border-radius:24px}
-.intro__off,.intro__on{width:100%;height:auto;display:block;filter:drop-shadow(0 26px 52px rgba(20,30,50,.10))}
-/* в движении фильтр снимаем: тень пересчитывается на каждом кадре и роняет плавность */
-.intro.is-moving .intro__off,.intro.is-moving .intro__on{filter:none}
+/* Тени на лампе нет намеренно: фильтр пришлось бы снимать при первом же
+   движении, а это перерисовка обеих картинок ровно в тот момент, когда
+   начинается анимация. Объём лампе даёт аура под ней. */
+.intro__off,.intro__on{width:100%;height:auto;display:block}
+/* Когда лампа разгорелась, погашенная копия полностью скрыта под горящей —
+   держать её в отрисовке незачем: при наезде это вторая картинка на пол-экрана. */
+.intro.is-lit .intro__off{visibility:hidden}
 /* после засвета лампу вообще не рисуем — она под белым и только жрёт кадры */
 .intro.is-blank .intro__stage,.intro.is-blank .intro__glow,.intro.is-blank .intro__bloom{visibility:hidden}
 .intro__on{position:absolute;inset:0;opacity:0;filter:none}
@@ -124,7 +128,7 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
   letter-spacing:.01em;text-shadow:0 1px 16px rgba(255,255,255,.95)}
 .intro__bloom{position:absolute;left:50%;top:50%;width:105vmax;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;opacity:0;z-index:4;
   background:radial-gradient(circle,rgba(255,255,255,1) 0%,rgba(255,254,251,.94) 18%,rgba(255,254,250,.82) 30%,rgba(255,253,247,.56) 44%,rgba(255,253,246,.26) 58%,rgba(255,255,255,0) 74%);will-change:transform,opacity}
-.intro__flash{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 44%,#fff 0%,#fff 62%,rgba(255,255,255,.94) 100%);opacity:0;pointer-events:none;z-index:6}
+.intro__flash{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 44%,#fff 0%,#fff 62%,rgba(255,255,255,.94) 100%);opacity:0;pointer-events:none;z-index:6;will-change:opacity}
 .intro__words{position:absolute;left:50%;top:50%;translate:-50% -50%;margin:0;z-index:7;pointer-events:none;
   display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:clamp(14px,3.2vw,54px);width:min(94vw,1040px);text-align:center}
 .intro__words i{font-style:normal;font-family:var(--serif);font-size:clamp(19px,3vw,42px);line-height:1.1;color:var(--ink);

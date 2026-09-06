@@ -142,7 +142,11 @@
          0.93–1.00  растворение, дальше первый экран
        Лампа увеличивается вокруг собственного центра и никуда не смещается.        */
     gsap.set(stage, { scale: 1, transformOrigin: '50% 50%' });
-    gsap.set(glow,  { xPercent: -50, yPercent: -50, scale: .55, opacity: 0 });
+    /* Ореол лежит внутри лампы, поэтому его собственный масштаб перемножался
+       с масштабом наезда — к концу выходила поверхность в десятки тысяч
+       пикселей, которую браузер растрировал заново каждый кадр. Рост ореолу
+       теперь даёт сама лампа, ему остаётся только яркость. */
+    gsap.set(glow,  { xPercent: -50, yPercent: -50, scale: 1, opacity: 0 });
     gsap.set(bloom, { xPercent: -50, yPercent: -50, scale: .18, opacity: 0 });
     gsap.set(on,    { opacity: 0 });
     gsap.set(flash, { opacity: 0 });
@@ -153,21 +157,25 @@
 
     const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
     tl.to(on,     { opacity: 1, duration: .07, ease: 'power1.inOut' }, 0)
-      .to(glow,   { opacity: .32, scale: .8, duration: .07, ease: 'power1.inOut' }, 0)
+      .to(glow,   { opacity: .32, duration: .07, ease: 'power1.inOut' }, 0)
       .to(slogan, { opacity: 0, y: -22, duration: .06, ease: 'power1.in' }, 0)
       .to(hint,   { opacity: 0, duration: .04, ease: 'power1.in' }, 0)
       /* приближение: свет расходится по кадру, а не только по корпусу лампы */
       .to(stage,  { scale: 1.45, duration: .31, ease: 'power1.inOut' }, .07)
-      .to(glow,   { opacity: .68, scale: 1.5, duration: .31, ease: 'power1.inOut' }, .07)
+      .to(glow,   { opacity: .68, duration: .31, ease: 'power1.inOut' }, .07)
       .to(bloom,  { opacity: .45, scale: .55, duration: .31, ease: 'power1.inOut' }, .07)
       .to(stage,  { scale: 2.8, duration: .14, ease: 'power1.in' }, .38)
-      .to(glow,   { opacity: 1, scale: 3.1, duration: .14, ease: 'power1.in' }, .38)
+      .to(glow,   { opacity: 1, duration: .14, ease: 'power1.in' }, .38)
       .to(bloom,  { opacity: .96, scale: 1.35, duration: .14, ease: 'power1.in' }, .38)
-      .to(stage,  { scale: 6.5, duration: .12, ease: 'power2.in' }, .52)
-      /* корпус растворяется в свете, иначе на весь кадр расползается серый пластик */
-      .to(stage,  { opacity: 0, duration: .09, ease: 'power1.in' }, .49)
-      .to(bloom,  { scale: 2.4, duration: .12, ease: 'power2.in' }, .52)
-      .to(flash,  { opacity: 1, duration: .06, ease: 'power2.in' }, .52)
+      /* Самый тяжёлый участок шкалы. Держим его коротким и заканчиваем всё
+         разом к 0.575: дальше кадр полностью залит белым и лампу с ореолом
+         снимает с отрисовки класс is-blank. */
+      /* Корпус растворяется в свете ДО того, как кадр зальёт белым: дальше
+         увеличивать растровую картинку не нужно — свет доводят градиенты,
+         которые рисуются несравнимо дешевле. */
+      .to(stage,  { opacity: 0, duration: .06, ease: 'power1.in' }, .46)
+      .to(bloom,  { scale: 2.2, duration: .07, ease: 'power2.in' }, .50)
+      .to(flash,  { opacity: 1, duration: .06, ease: 'power2.in' }, .50)
       /* слова: шире амплитуда, спокойнее выход */
       .to(words,  { opacity: 1, y: 0, scale: 1, duration: .075, stagger: .028, ease: 'power2.out' }, .53)
       .to(words,  { opacity: 0, y: -40, scale: .94, duration: .075, stagger: .028, ease: 'power2.in' }, .80)
@@ -184,7 +192,8 @@
       const open = pos > .985;
       box.classList.toggle('is-moving', pos > .004);
       /* кадр залит белым — лампу и сияние снимаем с отрисовки совсем */
-      box.classList.toggle('is-blank', pos > .60);
+      box.classList.toggle('is-lit', pos > .10);
+      box.classList.toggle('is-blank', pos > .525);
       html.classList.toggle('ready', open);
       if (hdrEl) hdrEl.classList.toggle('hdr--ghost', !open);
       box.style.pointerEvents = open ? 'none' : '';
@@ -452,6 +461,8 @@
     const ec = etchC.getContext('2d', { willReadFrequently: true });
     const pc = paintC.getContext('2d', { willReadFrequently: true });
 
+    /* сколько нужно покрыть, чтобы этап засчитался; дальше доводим сами */
+    const GOAL = .80;
     let stage = 1, W = 0, H = 0, done = 0, seen = 0, last = null, ops = 0, busy = false;
     let ptsEdge = [], ptsFull = [], imgEdge = null, imgFull = null;
     const bits = makeParticles($('#bits'), stageEl);
@@ -521,26 +532,57 @@
     }
     /* показываем прогресс, но НИКОГДА не переключаем этап во время мазка */
     function readout() {
-      if (stage === 1) say.textContent = 'Подготовка: ' + pc100(cover(ec, ptsEdge) / .82) + ' %';
-      else if (stage === 2) say.textContent = 'Промывание: ' + pc100(1 - cover(ec, ptsEdge) / .82) + ' %';
-      else if (stage === 3) { const v = cover(pc, ptsFull) / .99;
+      if (stage === 1) say.textContent = 'Подготовка: ' + pc100(cover(ec, ptsEdge) / GOAL) + ' %';
+      else if (stage === 2) say.textContent = 'Промывание: ' + pc100((1 - cover(ec, ptsEdge)) / GOAL) + ' %';
+      else if (stage === 3) { const v = cover(pc, ptsFull) / GOAL;
         say.textContent = 'Заполнено ' + pc100(v) + ' %' + (v >= 1 ? ' — теперь лампа' : ''); }
     }
     const pc100 = v => Math.round(Math.max(0, Math.min(1, v)) * 100);
+
+    /* Дозаполнение: как только пройдено 80 %, остаток доводим сами — ровно и
+       без выискивания последних пикселей. Кадр за кадром возвращаем снимок
+       холста и поверх кладём заливку с растущей прозрачностью, поэтому переход
+       идёт плавно и не зависит от частоты кадров. */
+    function flood(ctx, color, erase, cb) {
+      if (!W) { cb && cb(); return; }
+      busy = true; last = null;
+      const snap = document.createElement('canvas'); snap.width = W; snap.height = H;
+      snap.getContext('2d').drawImage(ctx.canvas, 0, 0);
+      gsap.to({ v: 0 }, { v: 1, duration: .5, ease: 'power2.inOut',
+        onUpdate() {
+          const v = this.targets()[0].v;
+          ctx.clearRect(0, 0, W, H); ctx.drawImage(snap, 0, 0);
+          ctx.save();
+          ctx.globalAlpha = v; ctx.globalCompositeOperation = erase ? 'destination-out' : 'source-over';
+          ctx.fillStyle = color; ctx.fillRect(0, 0, W, H);
+          ctx.restore();
+        },
+        onComplete() {
+          ctx.clearRect(0, 0, W, H);
+          if (!erase) { ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = color; ctx.fillRect(0, 0, W, H); }
+          busy = false; cb && cb();
+        } });
+    }
     /* переключаем этап только когда инструмент отпущен */
     function finishStroke() {
       if (busy) return;
-      if (stage === 1 && cover(ec, ptsEdge) > .82) setStage(2);
-      else if (stage === 2 && cover(ec, ptsEdge) < .12) setStage(3);
-      else if (stage === 3 && cover(pc, ptsFull) >= .99) setStage(4);
-      else readout();
+      if (stage === 1 && cover(ec, ptsEdge) >= GOAL) {
+        say.textContent = 'Край пройден — гель ложится ровным слоем.';
+        flood(ec, '#3FC3DC', false, () => setStage(2));
+      } else if (stage === 2 && cover(ec, ptsEdge) <= 1 - GOAL) {
+        say.textContent = 'Гель смывается начисто.';
+        flood(ec, '#000', true, () => setStage(3));
+      } else if (stage === 3 && cover(pc, ptsFull) >= GOAL) {
+        say.textContent = 'Дефект закрыт — композит расходится до краёв.';
+        flood(pc, '#EFA0C6', false, () => setStage(4));
+      } else readout();
     }
 
     /* ---- этапы ---- */
     const TXT = {
       1: 'Этап 1. Подготовка: синим шприцом пройдите по краю дефекта.',
       2: 'Этап 2. Промывание: смойте гель водой из пистолета.',
-      3: 'Этап 3. Композит: заполните дефект целиком, до 100 %.',
+      3: 'Этап 3. Композит: закрывайте дефект — с 80 % материал разойдётся до краёв сам.',
       4: 'Этап 4. Свет: поднесите лампу к зубу и держите, пока полоса не заполнится.',
       5: 'Этап 5. Полировка: пройдите щёткой по зубу — реставрация заблестит.'
     };
@@ -598,7 +640,7 @@
     function tipNear(t) {
       const r = t.el.getBoundingClientRect(), b = box.getBoundingClientRect();
       const x = r.left + r.width * t.tip[0], y = r.top + r.height * t.tip[1];
-      const pad = b.width * .18;
+      const pad = b.width * .36;
       return x > b.left - pad && x < b.right + pad && y > b.top - pad && y < b.bottom + pad;
     }
     function loop(t) {
@@ -613,7 +655,7 @@
     }
     function startCure() {
       if (raf || busy) return;
-      if (cover(pc, ptsFull) < .90) { crumble(); return; }   // меньше 90 % — реставрация срывается
+      if (cover(pc, ptsFull) < GOAL) { crumble(); return; }   // меньше 80 % — реставрация срывается
       tPrev = 0; fill.classList.add('is-arming'); raf = requestAnimationFrame(loop);
     }
     function stopCure() {
@@ -624,7 +666,7 @@
     }
     function finishCure() {
       cancelAnimationFrame(raf); raf = 0; lamp = null;
-      full = cover(pc, ptsFull) > .99;
+      full = cover(pc, ptsFull) > .95;
       fill.classList.remove('is-curing', 'is-arming');
       fill.classList.add('is-done'); TOOLS[3].el.classList.remove('is-lit', 'wiggle');
       /* зуб становится здоровым: свет размывает границы и проявляет целую коронку */
@@ -708,13 +750,13 @@
         onDrag() {
           if (t.k >= 4) return;
           const r = t.el.getBoundingClientRect();
-          work(r.left + r.width * t.tip[0], r.top + r.height * t.tip[1], 15);
+          work(r.left + r.width * t.tip[0], r.top + r.height * t.tip[1], 30);
         } });
     });
 
     /* ---- палец или курсор прямо по зубу ---- */
     let on = false;
-    const radFor = e => e.pointerType === 'touch' ? 22 : 16;
+    const radFor = e => e.pointerType === 'touch' ? 44 : 32;
     box.addEventListener('pointerdown', e => { if (stage !== 1 && stage !== 2 && stage !== 3 || busy) return; on = true; last = null; box.setPointerCapture(e.pointerId); work(e.clientX, e.clientY, radFor(e)); });
     box.addEventListener('pointermove', e => { if (on) work(e.clientX, e.clientY, radFor(e)); });
     ['pointerup', 'pointercancel'].forEach(ev => box.addEventListener(ev, () => { if (!on) return; on = false; last = null; finishStroke(); }));
@@ -771,9 +813,43 @@
     const o = new IntersectionObserver(es => { es.forEach(e => { if (!e.isIntersecting) return; o.disconnect();
       gsap.to(tools, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', stagger: .12 }); }); }, { threshold: .3 });
     o.observe(stage);
+    /* Примагничивание: пять мест в лотке, инструмент сам встаёт в ближайшее
+       свободное, если отпущен где-то рядом. Ловить точку внутри рамки не нужно. */
+    const SLOT_X = [.20, .35, .50, .65, .80], SLOT_Y = .76;
+    const anchor = el => { const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height * .62 }; };
+    const slotPoint = i => { const s = stage.getBoundingClientRect();
+      return { x: s.left + s.width * SLOT_X[i], y: s.top + s.height * SLOT_Y }; };
+    function nearTray(el) {
+      const s = stage.getBoundingClientRect(), a = anchor(el);
+      return (a.y - s.top) / s.height > .45;
+    }
+    function snap(el) {
+      const taken = new Set(tools.filter(t => t !== el && t.dataset.slot !== undefined).map(t => +t.dataset.slot));
+      const a = anchor(el);
+      let best = -1, bd = Infinity;
+      SLOT_X.forEach((_, i) => { if (taken.has(i)) return;
+        const p = slotPoint(i), d = Math.hypot(p.x - a.x, p.y - a.y);
+        if (d < bd) { bd = d; best = i; } });
+      if (best < 0) return false;
+      const p = slotPoint(best); el.dataset.slot = best;
+      gsap.to(el, { x: '+=' + (p.x - a.x), y: '+=' + (p.y - a.y), scale: 1,
+        duration: .5, ease: 'back.out(1.5)', onComplete: check });
+      return true;
+    }
     Draggable.create(tools, { type: 'x,y', bounds: stage, zIndexBoost: false, minimumMovement: 3,
-      onPress() { gsap.killTweensOf(this.target); this.target.classList.add('is-drag'); this.target.classList.remove('wiggle'); },
-      onRelease() { this.target.classList.remove('is-drag'); check(); } });
+      onPress() {
+        gsap.killTweensOf(this.target);
+        this.target.classList.add('is-drag'); this.target.classList.remove('wiggle');
+        delete this.target.dataset.slot;
+        gsap.to(this.target, { scale: 1.12, duration: .2, ease: 'power2.out' });
+      },
+      onRelease() {
+        const el = this.target; el.classList.remove('is-drag');
+        if (nearTray(el) && snap(el)) return;                 // масштаб вернёт сама анимация укладки
+        gsap.to(el, { scale: 1, duration: .3, ease: 'power2.out' });
+        check();
+      } });
   })();
 
   addEventListener('load', () => ScrollTrigger.refresh());

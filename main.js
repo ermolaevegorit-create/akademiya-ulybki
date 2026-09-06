@@ -127,7 +127,8 @@
           bloom = $('.intro__bloom', box),
           flash = $('.intro__flash', box),
           hint  = $('.intro__hint', box),
-          slogan= $('.intro__slogan', box),
+          slogan= $$('.intro__slogan', box),
+          slogTop = slogan[0], slogBot = slogan[1],
           btn   = $('#intro-lamp'),
           hdrEl = $('#hdr');
 
@@ -148,12 +149,13 @@
     gsap.set(bloom, { xPercent: -50, yPercent: -50, scale: .18, opacity: 0 });
     gsap.set(on,    { opacity: 0 });
     gsap.set(flash, { opacity: 0 });
-    gsap.set([slogan, hint], { opacity: 1 });
+    gsap.set(slogan.concat([hint]), { opacity: 1, y: 0 });
 
     const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
     tl.to(on,     { opacity: 1, duration: .10, ease: 'power1.inOut' }, 0)
       .to(glow,   { opacity: .32, duration: .10, ease: 'power1.inOut' }, 0)
-      .to(slogan, { opacity: 0, y: -22, duration: .085, ease: 'power1.in' }, 0)
+      .to(slogTop, { opacity: 0, y: -24, duration: .085, ease: 'power1.in' }, 0)
+      .to(slogBot, { opacity: 0, y: 24, duration: .085, ease: 'power1.in' }, 0)
       .to(hint,   { opacity: 0, duration: .06, ease: 'power1.in' }, 0)
       /* приближение: свет расходится по кадру, а не только по корпусу лампы */
       .to(stage,  { scale: 1.45, duration: .43, ease: 'power1.inOut' }, .10)
@@ -325,33 +327,6 @@
       let eg = tc.createLinearGradient(0, H - 10 * dpr, 0, H); eg.addColorStop(0, 'rgba(70,66,60,0)'); eg.addColorStop(1, 'rgba(70,66,60,.35)'); tc.fillStyle = eg; tc.fillRect(0, H - 10 * dpr, W, 10 * dpr);
       eg = tc.createLinearGradient(W - 7 * dpr, 0, W, 0); eg.addColorStop(0, 'rgba(70,66,60,0)'); eg.addColorStop(1, 'rgba(70,66,60,.28)'); tc.fillStyle = eg; tc.fillRect(W - 7 * dpr, 0, 7 * dpr, H);
       eg = tc.createLinearGradient(0, 0, 0, 6 * dpr); eg.addColorStop(0, 'rgba(255,255,255,.55)'); eg.addColorStop(1, 'rgba(255,255,255,0)'); tc.fillStyle = eg; tc.fillRect(0, 0, W, 6 * dpr);
-      carve(W, H);
-    }
-    /* надпись, выдавленная в камне: тень снизу-справа, свет сверху-слева */
-    function carve(W, H) {
-      const TXT = 'СПЕЦИАЛЬНОЕ ПРЕДЛОЖЕНИЕ', FIT = W * .74;
-      let size = H * .12;
-      const setFont = s => { tc.font = '400 ' + s + 'px Prata, Georgia, "Times New Roman", serif'; };
-      const width = s => { setFont(s); const tr = s * .16;
-        return TXT.split('').reduce((a, ch) => a + tc.measureText(ch).width + tr, -tr); };
-      let w = width(size);
-      if (w > FIT) { size *= FIT / w; w = width(size); }          // ужимаем под ширину плиты
-      const d = Math.max(1.2, size * .06), track = size * .16;
-      tc.save();
-      tc.textAlign = 'center'; tc.textBaseline = 'middle'; setFont(size);
-      const draw = (dx, dy, color) => {
-        tc.fillStyle = color;
-        let x = W / 2 - w / 2;
-        for (const ch of TXT) {
-          const cw = tc.measureText(ch).width;
-          tc.fillText(ch, x + cw / 2 + dx, H * .5 + dy);
-          x += cw + track;
-        }
-      };
-      draw(d, d, 'rgba(86,82,76,.40)');            // тень в глубине борозды
-      draw(-d, -d, 'rgba(255,255,255,.75)');       // подсвеченная кромка
-      draw(0, 0, 'rgba(203,198,190,.70)');         // дно борозды
-      tc.restore();
     }
     const pct = document.getElementById('drill-pct');
     function setDrill(r) { if (!pct) return; const v = Math.round(Math.min(1, r / .62) * 100); pct.textContent = v > 2 ? v + ' %' : ''; }
@@ -391,8 +366,8 @@
       return true;
     }
     let scrubbing = false;
-    stone.addEventListener('pointerdown', e => { scrubbing = true; last = null; stone.setPointerCapture(e.pointerId); scrub(e.clientX, e.clientY, e.pointerType === 'touch' ? 30 : 22); });
-    stone.addEventListener('pointermove', e => { if (scrubbing) scrub(e.clientX, e.clientY, e.pointerType === 'touch' ? 30 : 22); });
+    stone.addEventListener('pointerdown', e => { scrubbing = true; last = null; stone.setPointerCapture(e.pointerId); scrub(e.clientX, e.clientY, e.pointerType === 'touch' ? 46 : 36); });
+    stone.addEventListener('pointermove', e => { if (scrubbing) scrub(e.clientX, e.clientY, e.pointerType === 'touch' ? 46 : 36); });
     ['pointerup', 'pointercancel'].forEach(ev => stone.addEventListener(ev, () => { scrubbing = false; last = null; }));
 
     if (hp && finePointer) {
@@ -403,7 +378,7 @@
       Draggable.create(hp, { type: 'x,y', zIndexBoost: false, minimumMovement: 3,
         onPress() { gsap.killTweensOf(hp); hp.classList.add('is-drag'); hp.classList.remove('wiggle'); last = null; },
         onRelease() { hp.classList.remove('is-drag', 'is-drill'); last = null; },
-        onDrag() { const r = hp.getBoundingClientRect(); hp.classList.toggle('is-drill', !!scrub(r.left + r.width * .998, r.top + r.height * .117, 20)); } });
+        onDrag() { const r = hp.getBoundingClientRect(); hp.classList.toggle('is-drill', !!scrub(r.left + r.width * .998, r.top + r.height * .117, 38)); } });
     }
     function openOffer(how) {
       if (open) return; open = true; offer.classList.add('is-open'); if (hp) hp.classList.remove('is-drill');
@@ -625,11 +600,11 @@
     }
 
     /* ---- полимеризация ---- */
-    const NEED = 2600; let exposure = 0, tPrev = 0, raf = 0, lamp = null, full = false;
+    const NEED = 1500; let exposure = 0, tPrev = 0, raf = 0, lamp = null, full = false;
     function tipNear(t) {
       const r = t.el.getBoundingClientRect(), b = box.getBoundingClientRect();
       const x = r.left + r.width * t.tip[0], y = r.top + r.height * t.tip[1];
-      const pad = b.width * .36;
+      const pad = b.width * .52;
       return x > b.left - pad && x < b.right + pad && y > b.top - pad && y < b.bottom + pad;
     }
     function loop(t) {
@@ -669,7 +644,7 @@
     }
 
     /* ---- полировка: щётка ходит по зубу, полоса набирается ---- */
-    const POL = 2200; let polish = 0, pPrev = 0, praf = 0, brush = null;
+    const POL = 1300; let polish = 0, pPrev = 0, praf = 0, brush = null;
     function polLoop(t) {
       const dt = pPrev ? t - pPrev : 16; pPrev = t;
       const near = !!(brush && !busy && stage === 5 && tipNear(brush));
@@ -739,13 +714,13 @@
         onDrag() {
           if (t.k >= 4) return;
           const r = t.el.getBoundingClientRect();
-          work(r.left + r.width * t.tip[0], r.top + r.height * t.tip[1], 30);
+          work(r.left + r.width * t.tip[0], r.top + r.height * t.tip[1], 46);
         } });
     });
 
     /* ---- палец или курсор прямо по зубу ---- */
     let on = false;
-    const radFor = e => e.pointerType === 'touch' ? 44 : 32;
+    const radFor = e => e.pointerType === 'touch' ? 64 : 48;
     box.addEventListener('pointerdown', e => { if (stage !== 1 && stage !== 2 && stage !== 3 || busy) return; on = true; last = null; box.setPointerCapture(e.pointerId); work(e.clientX, e.clientY, radFor(e)); });
     box.addEventListener('pointermove', e => { if (on) work(e.clientX, e.clientY, radFor(e)); });
     ['pointerup', 'pointercancel'].forEach(ev => box.addEventListener(ev, () => { if (!on) return; on = false; last = null; finishStroke(); }));
@@ -798,13 +773,28 @@
         });
       });
     }
+    /* ---- появление ---- */
+    let live = false;                       // магнит включаем только после выкладки
     gsap.set(tools, { y: -50, opacity: 0 });
     const o = new IntersectionObserver(es => { es.forEach(e => { if (!e.isIntersecting) return; o.disconnect();
-      gsap.to(tools, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', stagger: .12 }); }); }, { threshold: .3 });
+      gsap.to(tools, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', stagger: .12,
+        onComplete() { M.forEach(m => { m.cx = 0; m.cy = 0; m.bx = 0; m.by = 0; }); live = true; } }); }); }, { threshold: .3 });
     o.observe(stage);
-    /* Примагничивание: пять мест в лотке, инструмент сам встаёт в ближайшее
-       свободное, если отпущен где-то рядом. Ловить точку внутри рамки не нужно. */
+
+    /* Пять мест в лотке: отпущенный рядом инструмент сам встаёт в ближайшее
+       свободное. Пока инструмент не уложен, он тянется к курсору и подрастает —
+       так его заметно проще подхватить. Положение каждого инструмента ведёт
+       один общий цикл, поэтому магнит, перетаскивание и укладка не спорят
+       друг с другом за одно и то же свойство. */
     const SLOT_X = [.20, .35, .50, .65, .80], SLOT_Y = .76;
+    const R = 190, PULL = .34, GROW = .22, DRAG_S = 1.14, K = .18;
+
+    const M = tools.map(el => ({ el, bx: 0, by: 0, cx: 0, cy: 0, cs: 1,
+      sx: gsap.quickSetter(el, 'x', 'px'), sy: gsap.quickSetter(el, 'y', 'px'),
+      /* scale в quickSetter не поддерживается — ставим обе оси по отдельности */
+      sa: gsap.quickSetter(el, 'scaleX'), sb: gsap.quickSetter(el, 'scaleY') }));
+    tools.forEach((el, i) => { el.__m = M[i]; });
+
     const anchor = el => { const r = el.getBoundingClientRect();
       return { x: r.left + r.width / 2, y: r.top + r.height * .62 }; };
     const slotPoint = i => { const s = stage.getBoundingClientRect();
@@ -815,29 +805,64 @@
     }
     function snap(el) {
       const taken = new Set(tools.filter(t => t !== el && t.dataset.slot !== undefined).map(t => +t.dataset.slot));
-      const a = anchor(el);
       let best = -1, bd = Infinity;
+      const a = anchor(el);
       SLOT_X.forEach((_, i) => { if (taken.has(i)) return;
         const p = slotPoint(i), d = Math.hypot(p.x - a.x, p.y - a.y);
         if (d < bd) { bd = d; best = i; } });
       if (best < 0) return false;
-      const p = slotPoint(best); el.dataset.slot = best;
-      gsap.to(el, { x: '+=' + (p.x - a.x), y: '+=' + (p.y - a.y), scale: 1,
-        duration: .5, ease: 'back.out(1.5)', onComplete: check });
+      const p = slotPoint(best), m = el.__m;
+      m.bx = m.cx + (p.x - a.x); m.by = m.cy + (p.y - a.y);
+      el.dataset.slot = best; kick();
+      clearTimeout(m.t); m.t = setTimeout(check, 560);
       return true;
     }
+
+    let mx = -1e5, my = -1e5, raf = 0, over = false;
+    function kick() { if (!raf) raf = requestAnimationFrame(loop); }
+    function loop() {
+      raf = 0;
+      let busy = false;
+      for (const m of M) {
+        if (m.el.classList.contains('is-drag')) {          // тащат: положение ведёт Draggable
+          m.cx = gsap.getProperty(m.el, 'x'); m.cy = gsap.getProperty(m.el, 'y');
+          if (Math.abs(DRAG_S - m.cs) > .002) { m.cs += (DRAG_S - m.cs) * K; m.sa(m.cs); m.sb(m.cs); }
+          busy = true; continue;
+        }
+        let tx = m.bx, ty = m.by, ts = 1;
+        if (over && m.el.dataset.slot === undefined) {     // не уложен — тянется к курсору
+          const r = m.el.getBoundingClientRect();
+          const dx = mx - (r.left + r.width / 2 - m.cx), dy = my - (r.top + r.height * .55 - m.cy);
+          const k = Math.max(0, 1 - Math.hypot(dx, dy) / R);
+          if (k > 0) { tx = m.bx + dx * PULL * k; ty = m.by + dy * PULL * k; ts = 1 + GROW * k; }
+        }
+        if (Math.abs(tx - m.cx) > .06 || Math.abs(ty - m.cy) > .06 || Math.abs(ts - m.cs) > .002) {
+          m.cx += (tx - m.cx) * K; m.cy += (ty - m.cy) * K; m.cs += (ts - m.cs) * K;
+          m.sx(m.cx); m.sy(m.cy); m.sa(m.cs); m.sb(m.cs); busy = true;
+        }
+      }
+      if (busy) raf = requestAnimationFrame(loop);
+    }
+    if (finePointer && !reduced) {
+      stage.addEventListener('pointermove', e => { if (!live) return;
+        mx = e.clientX; my = e.clientY; over = true; kick(); });
+      stage.addEventListener('pointerleave', () => { over = false; kick(); });
+    }
+
     Draggable.create(tools, { type: 'x,y', bounds: stage, zIndexBoost: false, minimumMovement: 3,
       onPress() {
-        gsap.killTweensOf(this.target);
-        this.target.classList.add('is-drag'); this.target.classList.remove('wiggle');
-        delete this.target.dataset.slot;
-        gsap.to(this.target, { scale: 1.12, duration: .2, ease: 'power2.out' });
+        const el = this.target, m = el.__m;
+        gsap.killTweensOf(el); live = true;
+        el.classList.add('is-drag'); el.classList.remove('wiggle');
+        delete el.dataset.slot; clearTimeout(m.t);
+        gsap.set(el, { x: m.cx, y: m.cy });               // стартуем ровно оттуда, где инструмент виден
       },
       onRelease() {
-        const el = this.target; el.classList.remove('is-drag');
-        if (nearTray(el) && snap(el)) return;                 // масштаб вернёт сама анимация укладки
-        gsap.to(el, { scale: 1, duration: .3, ease: 'power2.out' });
-        check();
+        const el = this.target, m = el.__m;
+        el.classList.remove('is-drag');
+        m.cx = gsap.getProperty(el, 'x'); m.cy = gsap.getProperty(el, 'y');
+        m.bx = m.cx; m.by = m.cy;
+        if (!(nearTray(el) && snap(el))) { kick(); check(); }
       } });
   })();
 

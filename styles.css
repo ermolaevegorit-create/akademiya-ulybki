@@ -103,7 +103,9 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .intro__inner{position:sticky;top:0;overflow:hidden;z-index:40;
   background:radial-gradient(115% 92% at 50% 38%,#FCFDFE 0%,#F2F4F7 46%,#E3E7ED 100%)}
 .intro__par{position:absolute;inset:0;will-change:transform}
-.intro__stage{position:absolute;left:50%;top:50%;width:min(88vmin,660px);translate:-50% -50%;transform-origin:50% 42%;will-change:transform}
+/* высоту прибора ограничиваем и по высоте окна — иначе на низком экране
+   лампа съедает весь кадр и строки слогана упираются в шапку */
+.intro__stage{position:absolute;left:50%;top:50%;width:min(88vmin,660px,75svh);translate:-50% -50%;transform-origin:50% 42%;will-change:transform}
 .intro__lamp{position:relative;display:block;width:100%;padding:0;margin:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .intro__lamp:focus-visible{outline:2px solid var(--navy);outline-offset:4px;border-radius:24px}
 /* Тени на лампе нет намеренно: фильтр пришлось бы снимать при первом же
@@ -124,11 +126,18 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .intro.is-moving .intro__aura{animation:none;opacity:0;transition:opacity .5s ease}
 .intro__glow{position:absolute;left:50%;top:50%;width:230%;aspect-ratio:1;translate:-50% -50%;opacity:0;pointer-events:none;transform-origin:50% 50%;will-change:transform,opacity;border-radius:50%;
   background:radial-gradient(circle,rgba(255,255,255,.98) 0%,rgba(255,254,249,.92) 14%,rgba(255,253,246,.78) 24%,rgba(255,252,242,.52) 36%,rgba(255,252,240,.28) 47%,rgba(255,253,246,.10) 58%,rgba(255,255,255,0) 70%)}
-.intro__slogan{position:absolute;left:50%;bottom:calc(50% + min(24vmin,238px));translate:-50% 0;width:min(92vw,880px);text-align:center;margin:0;z-index:5;pointer-events:none}
-.intro__slogan b{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.6vw,62px);line-height:1.12;
+/* Слоган в две строки: одна над прибором, вторая под ним, одним шрифтом и
+   кеглем. Отступы считаем от центра кадра, чтобы обе строки держались
+   на равном расстоянии от лампы при любой ширине экрана. */
+/* Отступ считаем от половины высоты прибора (ширина * 0.589), плюс воздух —
+   тогда обе строки держатся на равном расстоянии от лампы и не наезжают на
+   неё ни на широком экране, ни на низком. */
+.intro__slogan{position:absolute;left:50%;bottom:calc(50% + min(26vmin,196px,39svh) + clamp(14px,2.8vh,44px));translate:-50% 0;width:min(94vw,1180px);text-align:center;margin:0;z-index:5;pointer-events:none}
+.intro__slogan--under{bottom:auto;top:calc(50% + min(26vmin,196px,39svh) + clamp(14px,2.8vh,44px))}
+.intro__slogan b{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(24px,3.9vw,52px);line-height:1.14;
   color:var(--ink);text-wrap:balance;letter-spacing:-.01em;text-shadow:0 2px 28px rgba(255,255,255,.9),0 1px 3px rgba(255,255,255,.9)}
-.intro__slogan span{display:block;margin-top:clamp(10px,1.4vw,18px);font-size:clamp(13px,1.3vw,18px);color:var(--ink-2);
-  letter-spacing:.01em;text-shadow:0 1px 16px rgba(255,255,255,.95)}
+@media(max-width:900px){.intro__slogan b{font-size:clamp(21px,4.4vw,34px)}}
+@media(max-height:820px){.intro__slogan b{font-size:clamp(20px,2.9vw,36px)}}
 .intro__bloom{position:absolute;left:50%;top:50%;width:105vmax;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;opacity:0;z-index:4;
   background:radial-gradient(circle,rgba(255,255,255,1) 0%,rgba(255,254,251,.94) 18%,rgba(255,254,250,.82) 30%,rgba(255,253,247,.56) 44%,rgba(255,253,246,.26) 58%,rgba(255,255,255,0) 74%);will-change:transform,opacity}
 .intro__flash{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 44%,#fff 0%,#fff 62%,rgba(255,255,255,.94) 100%);opacity:0;pointer-events:none;z-index:6;will-change:opacity}
@@ -319,7 +328,9 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 
 /* ИГРА: ЛОТОК И УЛЬТРАФИОЛЕТ */
 .tray__stage{position:relative;max-width:680px;margin:0 auto;aspect-ratio:800/330}
-.tray__svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+/* рисунок лотка не должен перехватывать нажатия: его овалы лежали поверх
+   инструментов и часть из них было невозможно подхватить */
+.tray__svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .tray__rect{fill:var(--tint);stroke:var(--hair);stroke-width:1.5;transition:fill .8s}
 .tray__rim{fill:none;stroke:var(--hair-2);stroke-width:1}
 .tray__tube{stroke:#C9CBD0;transition:stroke .8s}
@@ -329,6 +340,8 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .tray__stage.is-uv .tray__halo,.tray__stage.is-uv .tray__wash{opacity:1;transition:opacity .6s ease}
 .tray__stage.is-uv .tray__rect{fill:#F3EFFF}
 .tool{position:absolute;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transform-origin:50% 60%;will-change:transform}
+/* область захвата чуть шире самого инструмента — тонкий бор иначе не поймать */
+.tool::after{content:"";position:absolute;inset:-12px}
 .tool img{filter:drop-shadow(0 6px 8px rgba(20,22,26,.16));transition:filter .6s}
 .tool.is-drag{cursor:grabbing;z-index:5}
 .tool.is-drag img{filter:drop-shadow(0 18px 20px rgba(20,22,26,.2))}

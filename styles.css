@@ -93,7 +93,10 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 
 /* ВСТУПЛЕНИЕ: лампа крупная с самого начала, свет набирает силу и открывает сайт */
 .intro{display:none;position:relative;height:clamp(480px,100svh,860px);margin-top:calc(-1 * var(--hdr));background:#F7F8F9;overscroll-behavior:contain}
-.intro.is-tall{height:540svh;overscroll-behavior:auto}
+/* Отрицательный отступ снизу подводит первый экран ровно под залитый светом
+   кадр: пока засвет расходится, содержимое уже стоит на своём месте и
+   проступает сквозь него. Пустого белого кадра между ними не остаётся. */
+.intro.is-tall{height:400svh;margin-bottom:-100svh;overscroll-behavior:auto}
 .intro__inner{height:100%}
 .intro.is-tall .intro__inner{height:100svh}
 .js .intro{display:block}
@@ -129,11 +132,6 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .intro__bloom{position:absolute;left:50%;top:50%;width:105vmax;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;opacity:0;z-index:4;
   background:radial-gradient(circle,rgba(255,255,255,1) 0%,rgba(255,254,251,.94) 18%,rgba(255,254,250,.82) 30%,rgba(255,253,247,.56) 44%,rgba(255,253,246,.26) 58%,rgba(255,255,255,0) 74%);will-change:transform,opacity}
 .intro__flash{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 44%,#fff 0%,#fff 62%,rgba(255,255,255,.94) 100%);opacity:0;pointer-events:none;z-index:6;will-change:opacity}
-.intro__words{position:absolute;left:50%;top:50%;translate:-50% -50%;margin:0;z-index:7;pointer-events:none;
-  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:clamp(14px,3.2vw,54px);width:min(94vw,1040px);text-align:center}
-.intro__words i{font-style:normal;font-family:var(--serif);font-size:clamp(19px,3vw,42px);line-height:1.1;color:var(--ink);
-  letter-spacing:.02em;opacity:0;white-space:nowrap;will-change:transform,opacity}
-@media(max-width:640px){.intro__words{flex-direction:column;gap:18px}}
 .intro__hint{position:absolute;left:0;right:0;bottom:clamp(20px,4vh,40px);text-align:center;margin:0;z-index:2}
 .intro__go{display:inline-flex;flex-direction:column;align-items:center;gap:10px;border:0;background:none;cursor:pointer;padding:8px 14px;
   font:inherit;font-size:var(--fs-1);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);transition:color .3s}

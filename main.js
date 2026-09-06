@@ -112,8 +112,9 @@
 
   /* ---------- ВСТУПЛЕНИЕ ----------
      Лампа крупная с самого начала и горит ровно, без мигания: по мере движения
-     усиливается сияние и блики, лампа наезжает и уходит за границы экрана,
-     открывая содержимое. Надписи видны сразу и растворяются при первом движении.
+     усиливается сияние, лампа наезжает, растворяется в свете — и кадр сразу
+     переходит в первый экран. Одно движение без остановок и промежуточных
+     экранов. Надписи видны сразу и растворяются при первом движении.
      Два режима: если документ прокручивается сам — ведёт скролл (назад тоже);
      если нет (страница внутри iframe по высоте контента — так устроен артефакт),
      ведём колесом и жестом. */
@@ -127,20 +128,17 @@
           flash = $('.intro__flash', box),
           hint  = $('.intro__hint', box),
           slogan= $('.intro__slogan', box),
-          words = $$('.intro__words i', box),
           btn   = $('#intro-lamp'),
           hdrEl = $('#hdr');
 
-    /* Одна шкала 0→1. Пять «прокруток» — лампа и засвет, ещё три — экран со словами.
-         0.00–0.07  включается свет, слоган уходит
-         0.07–0.38  спокойное приближение, сияние набирает силу
-         0.38–0.52  ещё ближе и ярче, засвет расходится по всему кадру
-         0.52–0.58  кадр залит светом
-         0.53–0.66  три слова проступают по одному
-         0.66–0.80  пауза: слова держатся
-         0.80–0.93  слова уходят по одному
-         0.93–1.00  растворение, дальше первый экран
-       Лампа увеличивается вокруг собственного центра и никуда не смещается.        */
+    /* Одна шкала 0→1, примерно пять прокруток или одно нажатие.
+         0.00–0.10  включается свет, слоган и подсказка уходят
+         0.10–0.53  спокойное приближение, сияние набирает силу
+         0.53–0.72  ещё ближе и ярче, свет расходится по всему кадру
+         0.64–0.73  корпус растворяется в свете
+         0.70–0.79  кадр залит светом
+         0.80–1.00  свет расходится, проступает первый экран
+       Лампа увеличивается вокруг собственного центра и никуда не смещается.      */
     gsap.set(stage, { scale: 1, transformOrigin: '50% 50%' });
     /* Ореол лежит внутри лампы, поэтому его собственный масштаб перемножался
        с масштабом наезда — к концу выходила поверхность в десятки тысяч
@@ -150,54 +148,46 @@
     gsap.set(bloom, { xPercent: -50, yPercent: -50, scale: .18, opacity: 0 });
     gsap.set(on,    { opacity: 0 });
     gsap.set(flash, { opacity: 0 });
-    gsap.set(words, { opacity: 0, y: 44, scale: .9 });
     gsap.set([slogan, hint], { opacity: 1 });
 
-    const STOP = .66;                        // конец «ламповой» части: слова показаны
-
     const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
-    tl.to(on,     { opacity: 1, duration: .07, ease: 'power1.inOut' }, 0)
-      .to(glow,   { opacity: .32, duration: .07, ease: 'power1.inOut' }, 0)
-      .to(slogan, { opacity: 0, y: -22, duration: .06, ease: 'power1.in' }, 0)
-      .to(hint,   { opacity: 0, duration: .04, ease: 'power1.in' }, 0)
+    tl.to(on,     { opacity: 1, duration: .10, ease: 'power1.inOut' }, 0)
+      .to(glow,   { opacity: .32, duration: .10, ease: 'power1.inOut' }, 0)
+      .to(slogan, { opacity: 0, y: -22, duration: .085, ease: 'power1.in' }, 0)
+      .to(hint,   { opacity: 0, duration: .06, ease: 'power1.in' }, 0)
       /* приближение: свет расходится по кадру, а не только по корпусу лампы */
-      .to(stage,  { scale: 1.45, duration: .31, ease: 'power1.inOut' }, .07)
-      .to(glow,   { opacity: .68, duration: .31, ease: 'power1.inOut' }, .07)
-      .to(bloom,  { opacity: .45, scale: .55, duration: .31, ease: 'power1.inOut' }, .07)
-      .to(stage,  { scale: 2.8, duration: .14, ease: 'power1.in' }, .38)
-      .to(glow,   { opacity: 1, duration: .14, ease: 'power1.in' }, .38)
-      .to(bloom,  { opacity: .96, scale: 1.35, duration: .14, ease: 'power1.in' }, .38)
-      /* Самый тяжёлый участок шкалы. Держим его коротким и заканчиваем всё
-         разом к 0.575: дальше кадр полностью залит белым и лампу с ореолом
-         снимает с отрисовки класс is-blank. */
+      .to(stage,  { scale: 1.45, duration: .43, ease: 'power1.inOut' }, .10)
+      .to(glow,   { opacity: .68, duration: .43, ease: 'power1.inOut' }, .10)
+      .to(bloom,  { opacity: .45, scale: .55, duration: .43, ease: 'power1.inOut' }, .10)
+      .to(stage,  { scale: 2.8, duration: .19, ease: 'power1.in' }, .53)
+      .to(glow,   { opacity: 1, duration: .19, ease: 'power1.in' }, .53)
+      .to(bloom,  { opacity: .96, scale: 1.35, duration: .19, ease: 'power1.in' }, .53)
       /* Корпус растворяется в свете ДО того, как кадр зальёт белым: дальше
          увеличивать растровую картинку не нужно — свет доводят градиенты,
          которые рисуются несравнимо дешевле. */
-      .to(stage,  { opacity: 0, duration: .06, ease: 'power1.in' }, .46)
-      .to(bloom,  { scale: 2.2, duration: .07, ease: 'power2.in' }, .50)
-      .to(flash,  { opacity: 1, duration: .06, ease: 'power2.in' }, .50)
-      /* слова: шире амплитуда, спокойнее выход */
-      .to(words,  { opacity: 1, y: 0, scale: 1, duration: .075, stagger: .028, ease: 'power2.out' }, .53)
-      .to(words,  { opacity: 0, y: -40, scale: .94, duration: .075, stagger: .028, ease: 'power2.in' }, .80)
+      .to(stage,  { opacity: 0, duration: .09, ease: 'power1.in' }, .64)
+      .to(bloom,  { scale: 2.2, duration: .10, ease: 'power2.in' }, .70)
+      .to(flash,  { opacity: 1, duration: .085, ease: 'power2.in' }, .70)
       .to(flash,  { opacity: 1, duration: 0 }, 1);   // держим длительность шкалы равной 1
 
     const saneViewport = innerHeight >= 320 && innerHeight <= 1700;
     const tall = saneViewport && document.documentElement.scrollHeight - innerHeight > 60;
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
-    let pos = 0, closed = false, phase = 0;
+    let pos = 0, closed = false;
     function apply() {
       tl.progress(pos);
-      box.style.opacity = pos > .93 ? String(Math.max(0, 1 - (pos - .93) / .065)) : '1';
+      /* белый не держим отдельным экраном: как только кадр залит, он сразу
+         расходится и под ним проступает первый экран */
+      box.style.opacity = pos > .80 ? String(Math.max(0, 1 - (pos - .80) / .18)) : '1';
       const open = pos > .985;
       box.classList.toggle('is-moving', pos > .004);
       /* кадр залит белым — лампу и сияние снимаем с отрисовки совсем */
-      box.classList.toggle('is-lit', pos > .10);
-      box.classList.toggle('is-blank', pos > .525);
+      box.classList.toggle('is-lit', pos > .14);
+      box.classList.toggle('is-blank', pos > .74);
       html.classList.toggle('ready', open);
       if (hdrEl) hdrEl.classList.toggle('hdr--ghost', !open);
       box.style.pointerEvents = open ? 'none' : '';
-      if (pos < STOP - .02) phase = 0;
       if (open && !closed) {
         closed = true; track('intro_done');
         if (!tall) setTimeout(() => { if (box.parentNode) box.remove(); }, 260);
@@ -217,13 +207,6 @@
       box.addEventListener('pointerleave', () => { qx(0); qy(0); });
     }
 
-    /* нажатие: первое — до экрана со словами, второе — слова уходят и открывается сайт */
-    function target() { return phase === 0 ? STOP : 1; }
-    function afterRun() {
-      if (phase === 0) { phase = 1; return; }
-      const h = $('#hero'); if (h) h.scrollIntoView({ behavior: tall ? 'auto' : 'smooth', block: 'start' });
-    }
-
     if (tall) {                       /* обычная страница: шкалу ведёт скролл, назад тоже */
       box.classList.add('is-tall');
       let raf = 0, driving = false;
@@ -239,13 +222,17 @@
       /* Прокрутку по нажатию ведём сами: ставим положение и тут же перерисовываем
          в том же кадре. Иначе событие scroll разбирается через кадр и картина
          отстаёт от позиции — это и читается как рывки. */
+      /* Одно нажатие проводит весь путь: лампа, засвет и дальше прямо к первому
+         экрану — без остановки на промежуточном кадре. */
       const run = () => {
-        const len = box.offsetHeight - innerHeight, to = target();
+        const h = $('#hero');
+        const end = h ? Math.round(h.getBoundingClientRect().top + scrollY)
+                      : box.offsetHeight - innerHeight + 2;
+        if (end - scrollY < 8) return;
         driving = true;
-        gsap.to({ y: scrollY }, { y: len * to + (to === 1 ? 2 : 0), duration: to === 1 ? 2.6 : 3.6,
-          ease: 'power2.inOut', overwrite: true,
+        gsap.to({ y: scrollY }, { y: end, duration: 3.8, ease: 'power2.inOut', overwrite: true,
           onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
-          onComplete() { driving = false; at(scrollY); afterRun(); },
+          onComplete() { driving = false; at(scrollY); },
           onInterrupt() { driving = false; } });
       };
       btn.addEventListener('click', run);
@@ -260,16 +247,18 @@
     }
 
     /* документ не прокручивается сам (артефакт в iframe по высоте контента) */
-    const BUDGET = 3960;   // столько же «пути», сколько на обычной странице
+    const BUDGET = 2700;   // столько же «пути», сколько на обычной странице
     const step = dy => { pos = Math.min(1, Math.max(0, pos + dy / BUDGET)); apply(); };
     box.addEventListener('wheel', e => { if (closed) return; if (e.deltaY > 0 && pos < 1) e.preventDefault(); step(e.deltaY); }, { passive: false });
     let ty = null;
     box.addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
     box.addEventListener('touchmove', e => { if (closed) return; const y = e.touches[0].clientY;
       if (ty != null) { if (ty > y && pos < 1) e.preventDefault(); step((ty - y) * 1.6); } ty = y; }, { passive: false });
-    const run = () => { const to = target();
-      gsap.to({ v: pos }, { v: to, duration: to === 1 ? 2.6 : 3.6, ease: 'power2.inOut', overwrite: true,
-        onUpdate() { pos = this.targets()[0].v; apply(); }, onComplete: afterRun }); };
+    const run = () => {
+      if (pos > .98) return;
+      gsap.to({ v: pos }, { v: 1, duration: 3.8, ease: 'power2.inOut', overwrite: true,
+        onUpdate() { pos = this.targets()[0].v; apply(); },
+        onComplete() { const h = $('#hero'); if (h) h.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }); };
     addEventListener('keydown', e => { if (closed) return;
       if (['Enter', ' ', 'Spacebar'].includes(e.key)) { e.preventDefault(); run(); return; }
       if (['ArrowDown', 'PageDown'].includes(e.key)) { e.preventDefault(); step(600); }

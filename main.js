@@ -211,31 +211,64 @@
 
     if (tall) {                       /* обычная страница: шкалу ведёт скролл, назад тоже */
       box.classList.add('is-tall');
-      let raf = 0, driving = false;
-      const at = y => {
-        const len = box.offsetHeight - innerHeight;
-        pos = len > 0 ? Math.min(1, Math.max(0, y / len)) : 1;
-        apply();
+      let raf = 0, driving = false, LEN = 1;
+      /* Единица шкалы — ровно то положение прокрутки, при котором первый экран
+         встаёт по верху кадра. Иначе конец шкалы и конец вступления расходятся
+         на высоту шапки, и любое движение вверх у первого экрана возвращало
+         обратно к лампе. */
+      const heroTop = () => { const h = $('#hero');
+        return h ? Math.max(1, Math.round(h.getBoundingClientRect().top + scrollY))
+                 : Math.max(1, box.offsetHeight - innerHeight); };
+      const measure = () => { const y = scrollY; scrollTo({ top: 0, behavior: 'instant' });
+        LEN = heroTop(); scrollTo({ top: y, behavior: 'instant' }); };
+      const at = y => { pos = Math.min(1, Math.max(0, y / LEN)); apply(); };
+      /* Инерция: как только прокрутка замерла посреди вступления, доводим её
+         сами — вниз до первого экрана, вверх обратно к лампе. Зависнуть на
+         белом кадре нельзя. */
+      let prevY = 0, dir = 1, settle = 0, ride = null;
+      function stopRide() { if (ride) { ride.kill(); ride = null; } driving = false; }
+      function coast() {
+        settle = 0;
+        if (driving || closed) return;
+        if (pos <= .015 || pos >= .985) return;
+        /* Вверх у самого первого экрана вступление не переигрываем: небольшой
+           откат назад чаще случайность, чем желание вернуться к лампе. */
+        const end = (dir >= 0 || pos > .93) ? LEN : 0;
+        driving = true;
+        ride = gsap.to({ y: scrollY }, { y: end, duration: Math.max(.55, Math.abs(end - scrollY) / LEN * 1.6),
+          ease: 'power2.out', overwrite: true,
+          onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
+          onComplete() { ride = null; driving = false; at(scrollY); },
+          onInterrupt() { ride = null; driving = false; } });
+      }
+      const fromScroll = () => {
+        raf = 0;
+        if (driving) return;
+        if (scrollY !== prevY) dir = scrollY > prevY ? 1 : -1;
+        prevY = scrollY;
+        at(scrollY);
+        clearTimeout(settle);
+        if (pos > .015 && pos < .985) settle = setTimeout(coast, 140);
       };
-      const fromScroll = () => { raf = 0; if (!driving) at(scrollY); };
       addEventListener('scroll', () => { if (!raf && !driving) raf = requestAnimationFrame(fromScroll); }, { passive: true });
-      addEventListener('resize', () => at(scrollY));
-      scrollTo(0, 0); at(0);
+      addEventListener('resize', () => { measure(); at(scrollY); });
+      /* палец на вступлении: отпустили — доводим */
+      box.addEventListener('touchstart', () => { clearTimeout(settle); stopRide(); }, { passive: true });
+      box.addEventListener('touchend', () => { clearTimeout(settle); settle = setTimeout(coast, 80); }, { passive: true });
+      scrollTo(0, 0); measure(); at(0);
       /* Прокрутку по нажатию ведём сами: ставим положение и тут же перерисовываем
          в том же кадре. Иначе событие scroll разбирается через кадр и картина
          отстаёт от позиции — это и читается как рывки. */
       /* Одно нажатие проводит весь путь: лампа, засвет и дальше прямо к первому
          экрану — без остановки на промежуточном кадре. */
       const run = () => {
-        const h = $('#hero');
-        const end = h ? Math.round(h.getBoundingClientRect().top + scrollY)
-                      : box.offsetHeight - innerHeight + 2;
+        const end = LEN;
         if (end - scrollY < 8) return;
-        driving = true;
-        gsap.to({ y: scrollY }, { y: end, duration: 3.8, ease: 'power2.inOut', overwrite: true,
+        clearTimeout(settle); stopRide(); driving = true;
+        ride = gsap.to({ y: scrollY }, { y: end, duration: 3.8, ease: 'power2.inOut', overwrite: true,
           onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
-          onComplete() { driving = false; at(scrollY); },
-          onInterrupt() { driving = false; } });
+          onComplete() { ride = null; driving = false; at(scrollY); },
+          onInterrupt() { ride = null; driving = false; } });
       };
       btn.addEventListener('click', run);
       $$('.intro__go', box).forEach(el => el.addEventListener('click', run));
@@ -427,6 +460,7 @@
 
     /* сколько нужно покрыть, чтобы этап засчитался; дальше доводим сами */
     const GOAL = .80;
+    const touchOnly = !finePointer;   // на телефоне инструменты не таскаем — работает палец
     let stage = 1, W = 0, H = 0, done = 0, seen = 0, last = null, ops = 0, busy = false;
     let ptsEdge = [], ptsFull = [], imgEdge = null, imgFull = null;
     const bits = makeParticles($('#bits'), stageEl);
@@ -543,7 +577,13 @@
     }
 
     /* ---- этапы ---- */
-    const TXT = {
+    const TXT = touchOnly ? {
+      1: 'Этап 1. Подготовка: проведите пальцем по краю дефекта.',
+      2: 'Этап 2. Промывание: проведите пальцем ещё раз — гель смоется.',
+      3: 'Этап 3. Композит: закрывайте дефект — с 80 % материал разойдётся до краёв сам.',
+      4: 'Этап 4. Свет: приложите палец к зубу и держите, пока полоса не заполнится.',
+      5: 'Этап 5. Полировка: держите палец на зубе — реставрация заблестит.'
+    } : {
       1: 'Этап 1. Подготовка: синим шприцом пройдите по краю дефекта.',
       2: 'Этап 2. Промывание: смойте гель водой из пистолета.',
       3: 'Этап 3. Композит: закрывайте дефект — с 80 % материал разойдётся до краёв сам.',
@@ -609,7 +649,7 @@
     }
     function loop(t) {
       const dt = tPrev ? t - tPrev : 16; tPrev = t;
-      const near = !!(lamp && !busy && (stage === 3 || stage === 4) && tipNear(lamp));
+      const near = !!(lamp && !busy && (stage === 3 || stage === 4) && (held || tipNear(lamp)));
       TOOLS[3].el.classList.toggle('is-lit', near);
       fill.classList.toggle('is-curing', near);
       if (near) exposure = Math.min(NEED, exposure + dt); else exposure = Math.max(0, exposure - dt * .5);
@@ -617,7 +657,7 @@
       if (exposure >= NEED) { finishCure(); return; }
       raf = requestAnimationFrame(loop);
     }
-    function startCure() {
+    function startCure(byHand) {
       if (raf || busy) return;
       if (cover(pc, ptsFull) < GOAL) { crumble(); return; }   // меньше 80 % — реставрация срывается
       tPrev = 0; fill.classList.add('is-arming'); raf = requestAnimationFrame(loop);
@@ -647,14 +687,15 @@
     const POL = 1300; let polish = 0, pPrev = 0, praf = 0, brush = null;
     function polLoop(t) {
       const dt = pPrev ? t - pPrev : 16; pPrev = t;
-      const near = !!(brush && !busy && stage === 5 && tipNear(brush));
+      const near = !!(brush && !busy && stage === 5 && (held || tipNear(brush)));
       fill.classList.toggle('is-polishing', near);
       if (near) polish = Math.min(POL, polish + dt); else polish = Math.max(0, polish - dt * .5);
       barFill.style.width = (polish / POL * 100) + '%';
       if (polish >= POL) { finishPolish(); return; }
       praf = requestAnimationFrame(polLoop);
     }
-    function startPolish() { if (praf || busy) return; pPrev = 0; fill.classList.add('is-arming'); praf = requestAnimationFrame(polLoop); }
+    function startPolish(byHand) { if (praf || busy) return;
+      pPrev = 0; fill.classList.add('is-arming'); praf = requestAnimationFrame(polLoop); }
     function stopPolish() {
       cancelAnimationFrame(praf); praf = 0; fill.classList.remove('is-polishing');
       gsap.to({ v: polish }, { v: 0, duration: .6, onUpdate() { polish = this.targets()[0].v; barFill.style.width = (polish / POL * 100) + '%'; },
@@ -694,8 +735,8 @@
       });
     }
 
-    /* ---- инструменты ---- */
-    TOOLS.forEach(t => {
+    /* ---- инструменты: перетаскиваем только мышью ---- */
+    if (!touchOnly) TOOLS.forEach(t => {
       Draggable.create(t.el, { type: 'x,y', zIndexBoost: false, minimumMovement: 2,
         onPress() {
           if (!canUse(t) || busy) { this.endDrag(); return; }
@@ -718,12 +759,27 @@
         } });
     });
 
-    /* ---- палец или курсор прямо по зубу ---- */
-    let on = false;
+    /* ---- палец или курсор прямо по зубу ----
+       На телефоне это единственный способ работы: инструменты не перетаскиваем,
+       палец сам делает то, что нужно на текущем этапе — мажет на первых трёх,
+       держит свет и полировку на последних двух. */
+    let on = false, held = 0;
     const radFor = e => e.pointerType === 'touch' ? 64 : 48;
-    box.addEventListener('pointerdown', e => { if (stage !== 1 && stage !== 2 && stage !== 3 || busy) return; on = true; last = null; box.setPointerCapture(e.pointerId); work(e.clientX, e.clientY, radFor(e)); });
+    box.addEventListener('pointerdown', e => {
+      if (busy) return;
+      if (stage >= 4) {                       // свет и полировка: держим палец на зубе
+        if (!touchOnly && e.pointerType !== 'touch') return;
+        held = e.pointerId; box.setPointerCapture(e.pointerId);
+        if (stage === 4) { lamp = TOOLS[3]; gsap.set(TOOLS[3].el, { x: 0, y: 0 }); startCure(true); }
+        else { brush = TOOLS[4]; gsap.set(TOOLS[4].el, { x: 0, y: 0 }); startPolish(true); }
+        return;
+      }
+      on = true; last = null; box.setPointerCapture(e.pointerId); work(e.clientX, e.clientY, radFor(e));
+    });
     box.addEventListener('pointermove', e => { if (on) work(e.clientX, e.clientY, radFor(e)); });
-    ['pointerup', 'pointercancel'].forEach(ev => box.addEventListener(ev, () => { if (!on) return; on = false; last = null; finishStroke(); }));
+    ['pointerup', 'pointercancel'].forEach(ev => box.addEventListener(ev, () => {
+      if (held) { held = 0; lamp = null; brush = null; if (!busy) { stopCure(); stopPolish(); } return; }
+      if (!on) return; on = false; last = null; finishStroke(); }));
 
     /* ---- появление и старт ---- */
     gsap.set(TOOLS.map(t => t.el), { y: 24, opacity: 0 });
@@ -778,7 +834,7 @@
     gsap.set(tools, { y: -50, opacity: 0 });
     const o = new IntersectionObserver(es => { es.forEach(e => { if (!e.isIntersecting) return; o.disconnect();
       gsap.to(tools, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', stagger: .12,
-        onComplete() { M.forEach(m => { m.cx = 0; m.cy = 0; m.bx = 0; m.by = 0; }); live = true; } }); }); }, { threshold: .3 });
+        onComplete() { M.forEach(m => { if (m.el.dataset.slot === undefined && !m.up) { m.cx = 0; m.cy = 0; m.bx = 0; m.by = 0; } }); live = true; } }); }); }, { threshold: .3 });
     o.observe(stage);
 
     /* Пять мест в лотке: отпущенный рядом инструмент сам встаёт в ближайшее
@@ -789,7 +845,8 @@
     const SLOT_X = [.20, .35, .50, .65, .80], SLOT_Y = .76;
     const R = 190, PULL = .34, GROW = .22, DRAG_S = 1.14, K = .18;
 
-    const M = tools.map(el => ({ el, bx: 0, by: 0, cx: 0, cy: 0, cs: 1,
+    const touchTray = !finePointer;
+    const M = tools.map(el => ({ el, bx: 0, by: 0, cx: 0, cy: 0, cs: 1, up: false,
       sx: gsap.quickSetter(el, 'x', 'px'), sy: gsap.quickSetter(el, 'y', 'px'),
       /* scale в quickSetter не поддерживается — ставим обе оси по отдельности */
       sa: gsap.quickSetter(el, 'scaleX'), sb: gsap.quickSetter(el, 'scaleY') }));
@@ -813,12 +870,11 @@
       if (best < 0) return false;
       const p = slotPoint(best), m = el.__m;
       m.bx = m.cx + (p.x - a.x); m.by = m.cy + (p.y - a.y);
-      el.dataset.slot = best; kick();
-      clearTimeout(m.t); m.t = setTimeout(check, 560);
+      el.dataset.slot = best; dirty = true; kick();
       return true;
     }
 
-    let mx = -1e5, my = -1e5, raf = 0, over = false;
+    let mx = -1e5, my = -1e5, raf = 0, over = false, dirty = false;
     function kick() { if (!raf) raf = requestAnimationFrame(loop); }
     function loop() {
       raf = 0;
@@ -829,7 +885,11 @@
           if (Math.abs(DRAG_S - m.cs) > .002) { m.cs += (DRAG_S - m.cs) * K; m.sa(m.cs); m.sb(m.cs); }
           busy = true; continue;
         }
-        let tx = m.bx, ty = m.by, ts = 1;
+        let tx = m.bx, ty = m.by, ts = m.up ? DRAG_S : 1;
+        if (m.up) {                                        // взят в руку по тапу
+          if (Math.abs(ts - m.cs) > .002) { m.cs += (ts - m.cs) * K; m.sa(m.cs); m.sb(m.cs); busy = true; }
+          continue;
+        }
         if (over && m.el.dataset.slot === undefined) {     // не уложен — тянется к курсору
           const r = m.el.getBoundingClientRect();
           const dx = mx - (r.left + r.width / 2 - m.cx), dy = my - (r.top + r.height * .55 - m.cy);
@@ -841,7 +901,8 @@
           m.sx(m.cx); m.sy(m.cy); m.sa(m.cs); m.sb(m.cs); busy = true;
         }
       }
-      if (busy) raf = requestAnimationFrame(loop);
+      if (busy) { raf = requestAnimationFrame(loop); return; }
+      if (dirty) { dirty = false; check(); }   // всё доехало на места — пересчитываем
     }
     if (finePointer && !reduced) {
       stage.addEventListener('pointermove', e => { if (!live) return;
@@ -849,12 +910,32 @@
       stage.addEventListener('pointerleave', () => { over = false; kick(); });
     }
 
-    Draggable.create(tools, { type: 'x,y', bounds: stage, zIndexBoost: false, minimumMovement: 3,
+    /* Телефон: инструменты не таскаем — тап по инструменту берёт его в руку,
+       тап по лотку кладёт на свободное место. Пальцем это заметно надёжнее,
+       чем волочить мелкий предмет по экрану. */
+    if (touchTray) {
+      let picked = null;
+      const lift = (el, up) => { el.__m.up = up; el.classList.toggle('is-pick', up); kick(); };
+      function place() {
+        if (!picked) return;
+        const el = picked; picked = null; lift(el, false);
+        if (!snap(el)) check();
+      }
+      tools.forEach(el => el.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        if (picked) { place(); return; }   // что-то в руке — любой следующий тап кладёт
+        delete el.dataset.slot;
+        picked = el; el.classList.remove('wiggle'); lift(el, true);
+      }));
+      stage.addEventListener('click', place);
+      hint.textContent = 'Нажмите на инструмент, потом на лоток — начнётся многоступенчатая стерилизация.';
+    }
+    if (!touchTray) Draggable.create(tools, { type: 'x,y', bounds: stage, zIndexBoost: false, minimumMovement: 3,
       onPress() {
         const el = this.target, m = el.__m;
         gsap.killTweensOf(el); live = true;
         el.classList.add('is-drag'); el.classList.remove('wiggle');
-        delete el.dataset.slot; clearTimeout(m.t);
+        delete el.dataset.slot;
         gsap.set(el, { x: m.cx, y: m.cy });               // стартуем ровно оттуда, где инструмент виден
       },
       onRelease() {

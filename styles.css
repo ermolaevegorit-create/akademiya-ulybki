@@ -103,7 +103,7 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .js .intro{display:block}
 .intro__inner{position:sticky;top:0;overflow:hidden;z-index:40;
   background:radial-gradient(115% 92% at 50% 38%,#FCFDFE 0%,#F2F4F7 46%,#E3E7ED 100%)}
-.intro__par{position:absolute;inset:0;will-change:transform}
+.intro__par{position:absolute;inset:0;z-index:3;will-change:transform}
 /* высоту прибора ограничиваем и по высоте окна — иначе на низком экране
    лампа съедает весь кадр и строки слогана упираются в шапку */
 .intro__stage{position:absolute;left:50%;top:50%;width:min(88vmin,660px,75svh);translate:-50% -50%;transform-origin:50% 42%;will-change:transform}
@@ -124,9 +124,17 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
   background:radial-gradient(circle,rgba(255,253,247,.9) 0%,rgba(255,251,242,.62) 16%,rgba(255,250,238,.34) 30%,rgba(255,252,244,.12) 46%,rgba(255,255,255,0) 64%);
   opacity:.45;animation:aura 8s ease-in-out infinite alternate}
 @keyframes aura{from{opacity:.26}to{opacity:.66}}
-.intro.is-moving .intro__aura{animation:none;opacity:0;transition:opacity .5s ease}
-.intro__glow{position:absolute;left:50%;top:50%;width:230%;aspect-ratio:1;translate:-50% -50%;opacity:0;pointer-events:none;transform-origin:50% 50%;will-change:transform,opacity;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.98) 0%,rgba(255,254,249,.92) 14%,rgba(255,253,246,.78) 24%,rgba(255,252,242,.52) 36%,rgba(255,252,240,.28) 47%,rgba(255,253,246,.10) 58%,rgba(255,255,255,0) 70%)}
+.intro.is-moving .intro__aura{animation:none;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility 0s linear .5s}
+/* У обоих световых слоёв прозрачный край стоял на 70–74 % радиуса: почти
+   половина площади каждый кадр закрашивалась впустую. Края сдвинуты на
+   100 %, а сами слои уменьшены ровно во столько же — картинка та же.
+   Сияние лежит отдельным слоем поверх кадра, а не внутри лампы. Раньше оно
+   росло вместе с наездом, и к концу браузер каждый кадр перерисовывал
+   градиент шириной в несколько тысяч пикселей — это и была основная плата
+   за вступление. Теперь размер у слоя постоянный, меняется только яркость:
+   рост света берёт на себя ореол. */
+.intro__glow{position:absolute;left:50%;top:50%;width:133vmin;aspect-ratio:1;translate:-50% -50%;opacity:0;pointer-events:none;will-change:opacity;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(255,255,255,.98) 0%,rgba(255,254,249,.92) 20%,rgba(255,253,246,.78) 34%,rgba(255,252,242,.52) 51%,rgba(255,252,240,.28) 67%,rgba(255,253,246,.10) 83%,rgba(255,255,255,0) 100%)}
 /* Слоган в две строки: одна над прибором, вторая под ним, одним шрифтом и
    кеглем. Отступы считаем от центра кадра, чтобы обе строки держались
    на равном расстоянии от лампы при любой ширине экрана. */
@@ -146,8 +154,8 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
   .intro__slogan--under b{font-size:14px}
 }
 @media(max-height:760px){.intro__slogan b{font-size:clamp(22px,3.2vw,40px)}}
-.intro__bloom{position:absolute;left:50%;top:50%;width:105vmax;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;opacity:0;z-index:4;
-  background:radial-gradient(circle,rgba(255,255,255,1) 0%,rgba(255,254,251,.94) 18%,rgba(255,254,250,.82) 30%,rgba(255,253,247,.56) 44%,rgba(255,253,246,.26) 58%,rgba(255,255,255,0) 74%);will-change:transform,opacity}
+.intro__bloom{position:absolute;left:50%;top:50%;width:78vmax;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;opacity:0;z-index:4;
+  background:radial-gradient(circle,rgba(255,255,255,1) 0%,rgba(255,254,251,.94) 24%,rgba(255,254,250,.82) 41%,rgba(255,253,247,.56) 59%,rgba(255,253,246,.26) 78%,rgba(255,255,255,0) 100%);will-change:transform,opacity}
 .intro__flash{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 44%,#fff 0%,#fff 62%,rgba(255,255,255,.94) 100%);opacity:0;pointer-events:none;z-index:6;will-change:opacity}
 .intro__hint{position:absolute;left:0;right:0;bottom:clamp(20px,4vh,40px);text-align:center;margin:0;z-index:2}
 .intro__go{display:inline-flex;flex-direction:column;align-items:center;gap:10px;border:0;background:none;cursor:pointer;padding:8px 14px;
@@ -524,34 +532,21 @@ html.lite .ftr{content-visibility:auto;contain-intrinsic-size:auto 620px}
   html.sda .intro__hint{animation-name:iHint}
   html.sda .intro.is-tall .intro__inner{animation-name:iVeil}
 
-  @keyframes iOn{0%{opacity:0;animation-timing-function:cubic-bezier(.45,0,.55,1)}10%,100%{opacity:1}}
+  @keyframes iOn{0%{opacity:0}18%,100%{opacity:1}}
   @keyframes iZoom{
-    0%{transform:scale(1)}
-    10%{transform:scale(1);animation-timing-function:cubic-bezier(.45,0,.55,1)}
-    53%{transform:scale(1.45);animation-timing-function:cubic-bezier(.11,0,.5,0)}
-    72%,100%{transform:scale(2.8)}
+    0%{transform:scale(1);animation-timing-function:cubic-bezier(.11,0,.5,0)}
+    74%,100%{transform:scale(2.8)}
   }
-  @keyframes iStageOut{0%,64%{opacity:1;animation-timing-function:cubic-bezier(.11,0,.5,0)}73%,100%{opacity:0}}
-  @keyframes iGlow{
-    0%{opacity:0;animation-timing-function:cubic-bezier(.45,0,.55,1)}
-    10%{opacity:.32;animation-timing-function:cubic-bezier(.45,0,.55,1)}
-    53%{opacity:.68;animation-timing-function:cubic-bezier(.11,0,.5,0)}
-    72%,100%{opacity:1}
-  }
-  @keyframes iBloomFade{
-    0%,10%{opacity:0;animation-timing-function:cubic-bezier(.45,0,.55,1)}
-    53%{opacity:.45;animation-timing-function:cubic-bezier(.11,0,.5,0)}
-    72%,100%{opacity:.96}
-  }
+  @keyframes iStageOut{0%,60%{opacity:1;animation-timing-function:cubic-bezier(.11,0,.5,0)}72%,100%{opacity:0}}
+  @keyframes iGlow{0%{opacity:0}70%,100%{opacity:1}}
+  @keyframes iBloomFade{0%,10%{opacity:0}76%,100%{opacity:1}}
   @keyframes iBloomScale{
-    0%,10%{transform:scale(.18);animation-timing-function:cubic-bezier(.45,0,.55,1)}
-    53%{transform:scale(.55);animation-timing-function:cubic-bezier(.11,0,.5,0)}
-    70%{transform:scale(1.19);animation-timing-function:cubic-bezier(.32,0,.67,0)}
-    80%,100%{transform:scale(2.2)}
+    0%,10%{transform:scale(.18);animation-timing-function:cubic-bezier(.32,0,.67,0)}
+    76%,100%{transform:scale(2.2)}
   }
-  @keyframes iFlash{0%,70%{opacity:0;animation-timing-function:cubic-bezier(.32,0,.67,0)}78.5%,100%{opacity:1}}
-  @keyframes iSlogTop{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.11,0,.5,0)}8.5%,100%{opacity:0;transform:translateY(-24px)}}
-  @keyframes iSlogBot{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.11,0,.5,0)}8.5%,100%{opacity:0;transform:translateY(24px)}}
-  @keyframes iHint{0%{opacity:1;animation-timing-function:cubic-bezier(.11,0,.5,0)}6%,100%{opacity:0}}
-  @keyframes iVeil{0%,80%{opacity:1}98%,100%{opacity:0}}
+  @keyframes iFlash{0%,60%{opacity:0;animation-timing-function:cubic-bezier(.32,0,.67,0)}78%,100%{opacity:1}}
+  @keyframes iSlogTop{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.11,0,.5,0)}7%,100%{opacity:0;transform:translateY(-24px)}}
+  @keyframes iSlogBot{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.11,0,.5,0)}7%,100%{opacity:0;transform:translateY(24px)}}
+  @keyframes iHint{0%{opacity:1;animation-timing-function:cubic-bezier(.11,0,.5,0)}5%,100%{opacity:0}}
+  @keyframes iVeil{0%,82%{opacity:1}100%{opacity:0}}
 }

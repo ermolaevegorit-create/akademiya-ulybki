@@ -93,7 +93,7 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 }
 
 /* ВСТУПЛЕНИЕ: лампа крупная с самого начала, свет набирает силу и открывает сайт */
-.intro{display:none;position:relative;height:clamp(480px,100svh,860px);margin-top:calc(-1 * var(--hdr));background:#DBE3EE;overscroll-behavior:contain}
+.intro{display:none;position:relative;height:clamp(480px,100svh,860px);margin-top:calc(-1 * var(--hdr));background:#F7F8F9;overscroll-behavior:contain}
 /* Отрицательный отступ снизу подводит первый экран ровно под залитый светом
    кадр: пока засвет расходится, содержимое уже стоит на своём месте и
    проступает сквозь него. Пустого белого кадра между ними не остаётся. */
@@ -102,7 +102,7 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .intro.is-tall .intro__inner{height:100svh}
 .js .intro{display:block}
 .intro__inner{position:sticky;top:0;overflow:hidden;z-index:40;
-  background:radial-gradient(118% 95% at 50% 40%,#EDF1F7 0%,#DBE3EE 46%,#BDC9D9 100%)}
+  background:radial-gradient(115% 92% at 50% 38%,#FCFDFE 0%,#F2F4F7 46%,#E3E7ED 100%)}
 .intro__par{position:absolute;inset:0;z-index:3;will-change:transform}
 /* высоту прибора ограничиваем и по высоте окна — иначе на низком экране
    лампа съедает весь кадр и строки слогана упираются в шапку */
@@ -117,7 +117,7 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
    держать её в отрисовке незачем: при наезде это вторая картинка на пол-экрана. */
 .intro.is-lit .intro__off{visibility:hidden}
 /* после засвета лампу вообще не рисуем — она под белым и только жрёт кадры */
-.intro.is-blank .intro__stage,.intro.is-blank .intro__glow,.intro.is-blank .intro__bloom,.intro.is-blank .intro__streak{visibility:hidden}
+.intro.is-blank .intro__stage,.intro.is-blank .intro__glow,.intro.is-blank .intro__bloom{visibility:hidden}
 .intro__on,.intro__hot{position:absolute;inset:0;opacity:0;filter:none}
 /* Раскалённое состояние — отдельная картинка с бликами на каждом светодиоде.
    Свет во время наезда нарастает перетеканием растров, а не расчётом
@@ -137,15 +137,14 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
    градиент шириной в несколько тысяч пикселей — это и была основная плата
    за вступление. Теперь размер у слоя постоянный, меняется только яркость:
    рост света берёт на себя ореол. */
-/* Ореол и полоса — присланные заготовки бликов, уведённые к холодному
-   белому. Растр вместо градиента: рисунок настоящей оптики (кольца, спад)
+/* Ореол — присланная заготовка блика, уведённая к холодному белому. Растр вместо градиента: рисунок настоящей оптики (кольца, спад)
    градиентом не набрать, а стоит он не дороже.
+   Горизонтальной полосы блика здесь нет намеренно: она читается как
+   наклейка поверх кадра, особенно к концу наезда, когда перестаёт двигаться.
    Сияние лежит отдельным слоем и не масштабируется: пока оно росло вместе
    с наездом, браузер каждый кадр перерисовывал полотно в несколько тысяч
    пикселей — это и была основная плата за вступление. */
 .intro__glow{position:absolute;left:50%;top:48%;width:118vmin;max-width:none;height:auto;translate:-50% -50%;opacity:0;pointer-events:none;will-change:opacity;z-index:1}
-/* Полоса рождается в объективе, поэтому лежит поверх прибора. */
-.intro__streak{position:absolute;left:50%;top:48%;width:min(168vmin,1500px);max-width:none;height:auto;translate:-50% -50%;opacity:0;pointer-events:none;transform-origin:50% 50%;will-change:transform,opacity;z-index:5}
 /* Слоган в две строки: одна над прибором, вторая под ним, одним шрифтом и
    кеглем. Отступы считаем от центра кадра, чтобы обе строки держались
    на равном расстоянии от лампы при любой ширине экрана. */
@@ -519,7 +518,6 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   html.sda .intro__hot,
   html.sda .intro__stage,
   html.sda .intro__glow,
-  html.sda .intro__streak,
   html.sda .intro__bloom,
   html.sda .intro__flash,
   html.sda .intro__slogan,
@@ -540,7 +538,6 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   html.sda .intro__on{animation-name:iOn}
   html.sda .intro__hot{animation-name:iHot}
   html.sda .intro__glow{animation-name:iGlow}
-  html.sda .intro__streak{animation-name:iStreak,iStreakZoom}
   html.sda .intro__bloom{animation-name:iBloomFade,iBloomScale}
   html.sda .intro__flash{animation-name:iFlash}
   html.sda .intro__slogan{animation-name:iSlogTop}
@@ -556,11 +553,6 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   }
   @keyframes iStageOut{0%,62%{opacity:1;animation-timing-function:cubic-bezier(.11,0,.5,0)}74%,100%{opacity:0}}
   @keyframes iGlow{0%,18%{opacity:0}72%,100%{opacity:1}}
-  @keyframes iStreak{0%,20%{opacity:0}60%,100%{opacity:1}}
-  @keyframes iStreakZoom{
-    0%,20%{transform:scale(.55);animation-timing-function:cubic-bezier(.11,0,.5,0)}
-    76%,100%{transform:scale(1.5)}
-  }
   @keyframes iBloomFade{0%,26%{opacity:0}78%,100%{opacity:1}}
   @keyframes iBloomScale{
     0%,26%{transform:scale(.18);animation-timing-function:cubic-bezier(.32,0,.67,0)}

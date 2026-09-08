@@ -167,7 +167,6 @@
           on    = $('.intro__on', box),
           hotim = $('.intro__hot', box),
           glow  = $('.intro__glow', box),
-          strk  = $('.intro__streak', box),
           bloom = $('.intro__bloom', box),
           flash = $('.intro__flash', box),
           hint  = $('.intro__hint', box),
@@ -184,7 +183,6 @@
          0.00–0.12  слоган и подсказка уходят
          0.00–0.18  лампа разгорается ровно, от погашенной до горящей
          0.18–0.62  свет продолжает расти: горящая перетекает в раскалённую
-         0.20–0.76  блик разгорается и расходится полосой поперёк кадра
          0.18–0.76  наезд 1→2.8 одной дугой, всё быстрее к концу
          0.18–0.72  сияние набирает силу ровно, без ступеней
          0.26–0.78  ореол расходится по кадру, всё быстрее
@@ -221,7 +219,6 @@
        яркость. Пока оно росло вместе с наездом, браузер каждый кадр
        перерисовывал градиент в несколько тысяч пикселей. */
     gsap.set(glow,  { xPercent: -50, yPercent: -50, opacity: 0 });
-    gsap.set(strk,  { xPercent: -50, yPercent: -50, scale: .55, opacity: 0 });
     gsap.set(bloom, { xPercent: -50, yPercent: -50, scale: .18, opacity: 0 });
     gsap.set(on,    { opacity: 0 });
     gsap.set(hotim, { opacity: 0 });
@@ -240,9 +237,6 @@
       /* наезд одной дугой с разгоном — начинается, когда свет уже полный */
       .to(stage,  { scale: 2.8, duration: .58, ease: 'power1.in' }, .18)
       .to(glow,   { opacity: 1, duration: .54 }, .18)
-      /* полоса блика: разгорается и расходится вместе с приближением */
-      .to(strk,   { opacity: 1, duration: .40 }, .20)
-      .to(strk,   { scale: 1.5, duration: .56, ease: 'power1.in' }, .20)
       .to(bloom,  { opacity: 1, duration: .52 }, .26)
       .to(bloom,  { scale: 2.2, duration: .52, ease: 'power2.in' }, .26)
       /* засвет: белое заливает кадр раньше, чем корпус успевает исчезнуть */

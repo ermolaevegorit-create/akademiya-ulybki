@@ -147,13 +147,17 @@
           hdrEl = $('#hdr');
 
     /* Одна шкала 0→1: примерно два экрана прокрутки или одно нажатие.
-         0.00–0.07  слоган и подсказка уходят
+       Сначала включается свет и уходит текст — наезда в это время нет вовсе.
+       Наезд начинается только с 0.18, поэтому нажатие на лампу может сразу
+       перевести шкалу в эту точку: свет вспыхивает, надписи уходят, а размер
+       кадра при этом не меняется ни на пиксель.
+         0.00–0.12  слоган и подсказка уходят
          0.00–0.18  лампа разгорается ровно, от погашенной до полной
-         0.00–0.74  наезд 1→2.8 одной дугой, всё быстрее к концу
-         0.00–0.70  сияние набирает силу ровно, без ступеней
-         0.10–0.76  ореол расходится по кадру, всё быстрее
-         0.60–0.78  засвет: кадр заливает белым
-         0.60–0.72  корпус растворяется в свете, пока не вырос до предела:
+         0.18–0.76  наезд 1→2.8 одной дугой, всё быстрее к концу
+         0.18–0.72  сияние набирает силу ровно, без ступеней
+         0.26–0.78  ореол расходится по кадру, всё быстрее
+         0.62–0.80  засвет: кадр заливает белым
+         0.62–0.74  корпус растворяется в свете, пока не вырос до предела:
                     дальше растровую картинку увеличивать незачем — свет
                     доводят градиенты, они рисуются несравнимо дешевле
          0.82–1.00  свет расходится, проступает первый экран
@@ -189,23 +193,19 @@
     gsap.set(slogan.concat([hint]), { opacity: 1, y: 0 });
 
     tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
-    tl.to(slogTop, { opacity: 0, y: -24, duration: .07, ease: 'power1.in' }, 0)
-      .to(slogBot, { opacity: 0, y: 24, duration: .07, ease: 'power1.in' }, 0)
-      .to(hint,   { opacity: 0, duration: .05, ease: 'power1.in' }, 0)
+    tl.to(slogTop, { opacity: 0, y: -24, duration: .12, ease: 'power1.in' }, 0)
+      .to(slogBot, { opacity: 0, y: 24, duration: .12, ease: 'power1.in' }, 0)
+      .to(hint,   { opacity: 0, duration: .09, ease: 'power1.in' }, 0)
       /* свет разгорается ровно: яркость растёт с постоянной скоростью */
       .to(on,     { opacity: 1, duration: .18 }, 0)
-      .to(glow,   { opacity: 1, duration: .70 }, 0)
-      /* наезд одной дугой с разгоном: свет расходится по кадру, а не только
-         по корпусу лампы */
-      .to(stage,  { scale: 2.8, duration: .74, ease: 'power1.in' }, 0)
-      .to(bloom,  { opacity: 1, duration: .66 }, .10)
-      .to(bloom,  { scale: 2.2, duration: .66, ease: 'power2.in' }, .10)
+      /* наезд одной дугой с разгоном — начинается, когда свет уже полный */
+      .to(stage,  { scale: 2.8, duration: .58, ease: 'power1.in' }, .18)
+      .to(glow,   { opacity: 1, duration: .54 }, .18)
+      .to(bloom,  { opacity: 1, duration: .52 }, .26)
+      .to(bloom,  { scale: 2.2, duration: .52, ease: 'power2.in' }, .26)
       /* засвет: белое заливает кадр раньше, чем корпус успевает исчезнуть */
-      .to(flash,  { opacity: 1, duration: .18, ease: 'power2.in' }, .60)
-      /* Корпус растворяется в свете ДО того, как кадр зальёт белым: дальше
-         увеличивать растровую картинку не нужно — свет доводят градиенты,
-         которые рисуются несравнимо дешевле. */
-      .to(stage,  { opacity: 0, duration: .12, ease: 'power1.in' }, .60)
+      .to(flash,  { opacity: 1, duration: .18, ease: 'power2.in' }, .62)
+      .to(stage,  { opacity: 0, duration: .12, ease: 'power1.in' }, .62)
       .to(flash,  { opacity: 1, duration: 0 }, 1);   // держим длительность шкалы равной 1
     }
 
@@ -221,7 +221,7 @@
       box.classList.toggle('is-moving', pos > .004);
       /* кадр залит белым — лампу и сияние снимаем с отрисовки совсем */
       box.classList.toggle('is-lit', pos > .20);
-      box.classList.toggle('is-blank', pos > .74);
+      box.classList.toggle('is-blank', pos > .76);
       html.classList.toggle('ready', open);
       if (open) lite(false);
       if (hdrEl) hdrEl.classList.toggle('hdr--ghost', !open);
@@ -253,9 +253,12 @@
          встаёт по верху кадра. Иначе конец шкалы и конец вступления расходятся
          на высоту шапки, и любое движение вверх у первого экрана возвращало
          обратно к лампе. */
-      const heroTop = () => { const h = $('#hero');
-        return h ? Math.max(1, Math.round(h.getBoundingClientRect().top + scrollY))
-                 : Math.max(1, box.offsetHeight - innerHeight); };
+      /* Шапка липкая и лежит поверх содержимого, поэтому дорожка должна
+         кончаться на её высоту раньше: иначе первая строка первого экрана
+         оказывается ровно под шапкой и её не видно. */
+      const heroTop = () => { const h = $('#hero'), pad = hdrEl ? hdrEl.offsetHeight : 0;
+        return h ? Math.max(1, Math.round(h.getBoundingClientRect().top + scrollY) - pad)
+                 : Math.max(1, box.offsetHeight - innerHeight - pad); };
       const measure = () => { const y = scrollY; scrollTo({ top: 0, behavior: 'instant' });
         LEN = heroTop(); scrollTo({ top: y, behavior: 'instant' });
         html.style.setProperty('--intro-len', LEN + 'px'); };   // одна запись, не на кадр
@@ -299,20 +302,25 @@
          отстаёт от позиции — это и читается как рывки. */
       /* Одно нажатие проводит весь путь: лампа, засвет и дальше прямо к первому
          экрану — без остановки на промежуточном кадре. */
-      /* Нажали — свет включается сразу, одним кадром, и только после этого
-         начинается наезд. Точка LIGHT — это место шкалы, где лампа уже горит
-         в полную силу, а приближения ещё почти нет. */
-      const LIGHT = .20;
+      /* Нажали — сперва только свет: лампа разгорается, надписи уходят,
+         размер кадра не меняется. И лишь потом, отдельной дугой, наезд.
+         Точка LIGHT — место шкалы, где свет уже полный, а наезда ещё нет. */
+      const LIGHT = .18;
+      const ROLL = { ease: 'power1.inOut', overwrite: true,
+        onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
+        onInterrupt() { ride = null; driving = false; } };
       const run = () => {
         const end = LEN;
         if (end - scrollY < 8) return;
         clearTimeout(settle); stopRide(); driving = true;
-        const from = Math.max(scrollY, Math.round(LEN * LIGHT));
-        scrollTo({ top: from, behavior: 'instant' }); at(from);
-        ride = gsap.to({ y: from }, { y: end, duration: 3.2, delay: .16, ease: 'power1.inOut', overwrite: true,
-          onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
-          onComplete() { ride = null; driving = false; at(scrollY); },
-          onInterrupt() { ride = null; driving = false; } });
+        const zoom = () => { ride = gsap.to({ y: scrollY }, Object.assign({}, ROLL,
+          { y: end, duration: 3.0, delay: .14,
+            onComplete() { ride = null; driving = false; at(scrollY); } })); };
+        const lit = Math.round(LEN * LIGHT);
+        if (scrollY < lit - 2) {
+          ride = gsap.to({ y: scrollY }, Object.assign({}, ROLL,
+            { y: lit, duration: .26, ease: 'power2.out', onComplete: zoom }));
+        } else zoom();
       };
       btn.addEventListener('click', run);
       $$('.intro__go', box).forEach(el => el.addEventListener('click', run));
@@ -335,7 +343,7 @@
       if (ty != null) { if (ty > y && pos < 1) e.preventDefault(); step((ty - y) * 1.6); } ty = y; }, { passive: false });
     const run = () => {
       if (pos > .98) return;
-      pos = Math.max(pos, .20); apply();          // свет сразу, наезд следом
+      pos = Math.max(pos, .18); apply();          // свет сразу, наезд следом
       gsap.to({ v: pos }, { v: 1, duration: 3.2, delay: .16, ease: 'power1.inOut', overwrite: true,
         onUpdate() { pos = this.targets()[0].v; apply(); },
         onComplete() { const h = $('#hero'); if (h) h.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }); };

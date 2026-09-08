@@ -132,13 +132,42 @@
     let liteOff = false;
     const lite = on => { if (liteOff) return; if (!on) liteOff = true;
       html.classList.toggle('lite', on); };
+    /* Возврат к обычной отрисовке — самый дорогой кадр всего вступления:
+       десять секций и три холста верстаются разом. Раньше это происходило
+       на самом выходе к первому экрану и читалось как заминка. Теперь
+       возвращаем по две секции за кадр — та же работа расходится на
+       несколько кадров.
+       При обычной прокрутке этого не делаем вовсе: content-visibility: auto
+       сам показывает то, что попало в кадр, и пропускает остальное — так
+       весь путь идёт без единого длинного кадра. Снимаем режим только по
+       нажатию ссылки на якорь: там прокрутка должна попасть точно в раздел,
+       а по заглушкам она промахивается. Один кадр на осознанном нажатии
+       не заметен. */
+    let unliting = false;
+    const unlite = () => {
+      if (liteOff || unliting) return;
+      unliting = true;
+      const els = $$('.sec').concat($$('.ftr'));
+      let i = 0;
+      const step = () => {
+        for (let n = 0; n < 2 && i < els.length; n++, i++) {
+          els[i].classList.add('lite-off');
+          void els[i].offsetHeight;      // считаем вёрстку здесь, а не когда она понадобится
+        }
+        if (i < els.length) requestAnimationFrame(step);
+        else { liteOff = true; html.classList.remove('lite'); }
+      };
+      step();
+    };
     addEventListener('click', e => { const a = e.target.closest && e.target.closest('a[href*="#"]');
-      if (a) lite(false); }, true);
+      if (a) { unlite(); lite(false); } }, true);
+    addEventListener('hashchange', () => { unlite(); lite(false); });
     const par   = $('#intro-par'),
           stage = $('.intro__stage', box),
           on    = $('.intro__on', box),
           hotim = $('.intro__hot', box),
           glow  = $('.intro__glow', box),
+          strk  = $('.intro__streak', box),
           bloom = $('.intro__bloom', box),
           flash = $('.intro__flash', box),
           hint  = $('.intro__hint', box),
@@ -155,6 +184,7 @@
          0.00–0.12  слоган и подсказка уходят
          0.00–0.18  лампа разгорается ровно, от погашенной до горящей
          0.18–0.62  свет продолжает расти: горящая перетекает в раскалённую
+         0.20–0.76  блик разгорается и расходится полосой поперёк кадра
          0.18–0.76  наезд 1→2.8 одной дугой, всё быстрее к концу
          0.18–0.72  сияние набирает силу ровно, без ступеней
          0.26–0.78  ореол расходится по кадру, всё быстрее
@@ -182,6 +212,8 @@
     /* Начальные значения ставит сам стиль; трогать их из скрипта нужно только
        на скриптовом пути. GSAP переписывает свойство translate в transform,
        а кадры анимации перебивают transform целиком — центровка бы поехала. */
+    [on, hotim].forEach(im => { if (im && im.decode) im.decode().catch(() => {}); });
+
     let tl = null;
     if (!SDA) {
     gsap.set(stage, { scale: 1, transformOrigin: '50% 50%' });
@@ -189,6 +221,7 @@
        яркость. Пока оно росло вместе с наездом, браузер каждый кадр
        перерисовывал градиент в несколько тысяч пикселей. */
     gsap.set(glow,  { xPercent: -50, yPercent: -50, opacity: 0 });
+    gsap.set(strk,  { xPercent: -50, yPercent: -50, scale: .55, opacity: 0 });
     gsap.set(bloom, { xPercent: -50, yPercent: -50, scale: .18, opacity: 0 });
     gsap.set(on,    { opacity: 0 });
     gsap.set(hotim, { opacity: 0 });
@@ -207,6 +240,9 @@
       /* наезд одной дугой с разгоном — начинается, когда свет уже полный */
       .to(stage,  { scale: 2.8, duration: .58, ease: 'power1.in' }, .18)
       .to(glow,   { opacity: 1, duration: .54 }, .18)
+      /* полоса блика: разгорается и расходится вместе с приближением */
+      .to(strk,   { opacity: 1, duration: .40 }, .20)
+      .to(strk,   { scale: 1.5, duration: .56, ease: 'power1.in' }, .20)
       .to(bloom,  { opacity: 1, duration: .52 }, .26)
       .to(bloom,  { scale: 2.2, duration: .52, ease: 'power2.in' }, .26)
       /* засвет: белое заливает кадр раньше, чем корпус успевает исчезнуть */
@@ -230,7 +266,6 @@
       box.classList.toggle('is-hot', pos > .66);
       box.classList.toggle('is-blank', pos > .76);
       html.classList.toggle('ready', open);
-      if (open) lite(false);
       if (hdrEl) hdrEl.classList.toggle('hdr--ghost', !open);
       box.style.pointerEvents = open ? 'none' : '';
       if (open && !closed) {
@@ -273,22 +308,37 @@
       /* Инерция: как только прокрутка замерла посреди вступления, доводим её
          сами — вниз до первого экрана, вверх обратно к лампе. Зависнуть на
          белом кадре нельзя. */
-      let prevY = 0, dir = 1, settle = 0, ride = null;
+      let prevY = 0, dir = 1, settle = 0, ride = null, touching = false, seen = false;
       function stopRide() { if (ride) { ride.kill(); ride = null; } driving = false; }
+      /* Доводка двигает прокрутку сама, поэтому после неё нужно заново
+         запомнить, откуда считать направление: иначе первое движение вверх
+         принимается за движение вниз и человека отбрасывает обратно. */
+      const rest = () => { prevY = scrollY; if (pos >= .985) seen = true; };
       function coast() {
         settle = 0;
         if (driving || closed) return;
         if (pos <= .015 || pos >= .985) return;
+        /* Вступление уже показывали — больше не ведём человека сами: пусть
+           листает свободно в обе стороны. Возвращаем вниз только маленький
+           откат у самого первого экрана: он чаще случайность. */
+        if (seen && pos <= .93) return;
         /* Вверх у самого первого экрана вступление не переигрываем: небольшой
            откат назад чаще случайность, чем желание вернуться к лампе. */
         const end = (dir >= 0 || pos > .93) ? LEN : 0;
+        const frac = Math.abs(end - scrollY) / LEN;
         driving = true;
-        ride = gsap.to({ y: scrollY }, { y: end, duration: Math.max(.55, Math.abs(end - scrollY) / LEN * 1.6),
-          ease: 'power2.out', overwrite: true,
+        ride = gsap.to({ y: scrollY }, { y: end, duration: Math.max(.5, frac * 3.0),
+          ease: frac > .3 ? 'power1.inOut' : 'power2.out', overwrite: true,
           onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
-          onComplete() { ride = null; driving = false; at(scrollY); },
-          onInterrupt() { ride = null; driving = false; } });
+          onComplete() { ride = null; driving = false; at(scrollY); rest(); },
+          onInterrupt() { ride = null; driving = false; rest(); } });
       }
+      /* Начало прокрутки вниз — тот же знак, что и нажатие на лампу: дальше
+         сценарий ведём сами. Крутанули на щелчок колеса или на пол-экрана —
+         разницы нет, доедет одинаково.
+         Под пальцем ждём, пока его отпустят: иначе не дать себя прокрутить.
+         Вверх тоже ждём — чтобы можно было спокойно вернуться к лампе, а не
+         быть отброшенным вниз на первом же движении. */
       const fromScroll = () => {
         raf = 0;
         if (driving) return;
@@ -296,13 +346,18 @@
         prevY = scrollY;
         at(scrollY);
         clearTimeout(settle);
-        if (pos > .015 && pos < .985) settle = setTimeout(coast, 100);
+        if (pos >= .985) { seen = true; return; }
+        /* Вернулись к лампе — снова ведём сценарий сами, как в первый раз. */
+        if (pos < .10) seen = false;
+        if (pos <= .015) return;
+        if (touching || dir < 0 || seen) { settle = setTimeout(coast, dir < 0 ? 130 : 60); return; }
+        coast();
       };
       addEventListener('scroll', () => { if (!raf && !driving) raf = requestAnimationFrame(fromScroll); }, { passive: true });
       addEventListener('resize', () => { measure(); at(scrollY); });
       /* палец на вступлении: отпустили — доводим */
-      box.addEventListener('touchstart', () => { clearTimeout(settle); stopRide(); }, { passive: true });
-      box.addEventListener('touchend', () => { clearTimeout(settle); settle = setTimeout(coast, 80); }, { passive: true });
+      box.addEventListener('touchstart', () => { touching = true; clearTimeout(settle); stopRide(); }, { passive: true });
+      box.addEventListener('touchend', () => { touching = false; clearTimeout(settle); settle = setTimeout(coast, 60); }, { passive: true });
       scrollTo(0, 0); measure(); at(0);
       /* Прокрутку по нажатию ведём сами: ставим положение и тут же перерисовываем
          в том же кадре. Иначе событие scroll разбирается через кадр и картина
@@ -315,14 +370,14 @@
       const LIGHT = .18;
       const ROLL = { ease: 'power1.inOut', overwrite: true,
         onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
-        onInterrupt() { ride = null; driving = false; } };
+        onInterrupt() { ride = null; driving = false; rest(); } };
       const run = () => {
         const end = LEN;
         if (end - scrollY < 8) return;
         clearTimeout(settle); stopRide(); driving = true;
         const zoom = () => { ride = gsap.to({ y: scrollY }, Object.assign({}, ROLL,
           { y: end, duration: 3.0, delay: .14,
-            onComplete() { ride = null; driving = false; at(scrollY); } })); };
+            onComplete() { ride = null; driving = false; at(scrollY); rest(); } })); };
         const lit = Math.round(LEN * LIGHT);
         if (scrollY < lit - 2) {
           ride = gsap.to({ y: scrollY }, Object.assign({}, ROLL,

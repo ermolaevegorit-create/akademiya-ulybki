@@ -118,7 +118,11 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .intro.is-lit .intro__off{visibility:hidden}
 /* после засвета лампу вообще не рисуем — она под белым и только жрёт кадры */
 .intro.is-blank .intro__stage,.intro.is-blank .intro__glow,.intro.is-blank .intro__bloom{visibility:hidden}
-.intro__on{position:absolute;inset:0;opacity:0;filter:none}
+.intro__on,.intro__hot{position:absolute;inset:0;opacity:0;filter:none}
+/* Раскалённое состояние — отдельная картинка с бликами на каждом светодиоде.
+   Свет во время наезда нарастает перетеканием растров, а не расчётом
+   градиентов: так он выглядит настоящим и почти ничего не стоит на кадре. */
+.intro.is-hot .intro__on{visibility:hidden}
 /* тихая жизнь до первого скролла: свет медленно дышит; при движении дыхание гаснет */
 .intro__aura{position:absolute;left:50%;top:50%;width:180%;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;
   background:radial-gradient(circle,rgba(255,253,247,.9) 0%,rgba(255,251,242,.62) 16%,rgba(255,250,238,.34) 30%,rgba(255,252,244,.12) 46%,rgba(255,255,255,0) 64%);
@@ -133,8 +137,8 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
    градиент шириной в несколько тысяч пикселей — это и была основная плата
    за вступление. Теперь размер у слоя постоянный, меняется только яркость:
    рост света берёт на себя ореол. */
-.intro__glow{position:absolute;left:50%;top:50%;width:133vmin;aspect-ratio:1;translate:-50% -50%;opacity:0;pointer-events:none;will-change:opacity;border-radius:50%;z-index:1;
-  background:radial-gradient(circle,rgba(255,255,255,.98) 0%,rgba(255,254,249,.92) 20%,rgba(255,253,246,.78) 34%,rgba(255,252,242,.52) 51%,rgba(255,252,240,.28) 67%,rgba(255,253,246,.10) 83%,rgba(255,255,255,0) 100%)}
+.intro__glow{position:absolute;left:50%;top:50%;width:118vmin;aspect-ratio:1;translate:-50% -50%;opacity:0;pointer-events:none;will-change:opacity;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(255,255,255,1) 0%,rgba(255,255,253,1) 15%,rgba(255,254,250,.88) 28%,rgba(255,253,246,.55) 43%,rgba(255,252,242,.26) 60%,rgba(255,253,246,.08) 79%,rgba(255,255,255,0) 100%)}
 /* Слоган в две строки: одна над прибором, вторая под ним, одним шрифтом и
    кеглем. Отступы считаем от центра кадра, чтобы обе строки держались
    на равном расстоянии от лампы при любой ширине экрана. */
@@ -388,7 +392,8 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 
 /* КАБИНЕТ */
 .equip--plain{padding-block:clamp(48px,6vw,84px)}
-.equip__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,28px)}
+/* колонок ровно столько, сколько карточек: сетка не оставляет пустого места */
+.equip__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:clamp(16px,2vw,28px)}
 .equip__grid figure{margin:0}
 .equip__grid img{aspect-ratio:4/5;object-fit:cover;width:100%}
 .equip__grid figcaption{margin-top:14px}
@@ -504,6 +509,7 @@ html.lite .ftr{content-visibility:auto;contain-intrinsic-size:auto 620px}
    скрипт один раз в переменную --intro-len. */
 @supports (animation-timeline: scroll()){
   html.sda .intro__on,
+  html.sda .intro__hot,
   html.sda .intro__stage,
   html.sda .intro__glow,
   html.sda .intro__bloom,
@@ -524,6 +530,7 @@ html.lite .ftr{content-visibility:auto;contain-intrinsic-size:auto 620px}
      cubic-bezier(.32,0,.67,0) — power2.in. */
   html.sda .intro__stage{animation-name:iZoom,iStageOut;transform-origin:50% 50%}
   html.sda .intro__on{animation-name:iOn}
+  html.sda .intro__hot{animation-name:iHot}
   html.sda .intro__glow{animation-name:iGlow}
   html.sda .intro__bloom{animation-name:iBloomFade,iBloomScale}
   html.sda .intro__flash{animation-name:iFlash}
@@ -533,6 +540,7 @@ html.lite .ftr{content-visibility:auto;contain-intrinsic-size:auto 620px}
   html.sda .intro.is-tall .intro__inner{animation-name:iVeil}
 
   @keyframes iOn{0%{opacity:0}18%,100%{opacity:1}}
+  @keyframes iHot{0%,18%{opacity:0}62%,100%{opacity:1}}
   @keyframes iZoom{
     0%,18%{transform:scale(1);animation-timing-function:cubic-bezier(.11,0,.5,0)}
     76%,100%{transform:scale(2.8)}

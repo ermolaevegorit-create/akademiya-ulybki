@@ -137,6 +137,7 @@
     const par   = $('#intro-par'),
           stage = $('.intro__stage', box),
           on    = $('.intro__on', box),
+          hotim = $('.intro__hot', box),
           glow  = $('.intro__glow', box),
           bloom = $('.intro__bloom', box),
           flash = $('.intro__flash', box),
@@ -152,7 +153,8 @@
        перевести шкалу в эту точку: свет вспыхивает, надписи уходят, а размер
        кадра при этом не меняется ни на пиксель.
          0.00–0.12  слоган и подсказка уходят
-         0.00–0.18  лампа разгорается ровно, от погашенной до полной
+         0.00–0.18  лампа разгорается ровно, от погашенной до горящей
+         0.18–0.62  свет продолжает расти: горящая перетекает в раскалённую
          0.18–0.76  наезд 1→2.8 одной дугой, всё быстрее к концу
          0.18–0.72  сияние набирает силу ровно, без ступеней
          0.26–0.78  ореол расходится по кадру, всё быстрее
@@ -189,6 +191,7 @@
     gsap.set(glow,  { xPercent: -50, yPercent: -50, opacity: 0 });
     gsap.set(bloom, { xPercent: -50, yPercent: -50, scale: .18, opacity: 0 });
     gsap.set(on,    { opacity: 0 });
+    gsap.set(hotim, { opacity: 0 });
     gsap.set(flash, { opacity: 0 });
     gsap.set(slogan.concat([hint]), { opacity: 1, y: 0 });
 
@@ -198,6 +201,9 @@
       .to(hint,   { opacity: 0, duration: .09, ease: 'power1.in' }, 0)
       /* свет разгорается ровно: яркость растёт с постоянной скоростью */
       .to(on,     { opacity: 1, duration: .18 }, 0)
+      /* дальше свет продолжает набирать силу: лампа перетекает в раскалённую
+         копию с бликами на каждом светодиоде */
+      .to(hotim,  { opacity: 1, duration: .44 }, .18)
       /* наезд одной дугой с разгоном — начинается, когда свет уже полный */
       .to(stage,  { scale: 2.8, duration: .58, ease: 'power1.in' }, .18)
       .to(glow,   { opacity: 1, duration: .54 }, .18)
@@ -221,6 +227,7 @@
       box.classList.toggle('is-moving', pos > .004);
       /* кадр залит белым — лампу и сияние снимаем с отрисовки совсем */
       box.classList.toggle('is-lit', pos > .20);
+      box.classList.toggle('is-hot', pos > .66);
       box.classList.toggle('is-blank', pos > .76);
       html.classList.toggle('ready', open);
       if (open) lite(false);
@@ -234,7 +241,7 @@
     }
 
     /* лампа едва заметно ведёт за курсором */
-    if (finePointer && !reduced && !SDA) {
+    if (finePointer && !reduced) {
       const qx = gsap.quickTo(par, 'x', { duration: 1.2, ease: 'power2.out' }),
             qy = gsap.quickTo(par, 'y', { duration: 1.2, ease: 'power2.out' });
       box.addEventListener('pointermove', e => {

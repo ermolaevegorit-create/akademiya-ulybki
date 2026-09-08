@@ -120,6 +120,20 @@
      ведём колесом и жестом. */
   (function intro() {
     const box = $('#intro'); if (!box) return;
+    /* Завесу гасим на липком слое, а не на всей секции: у слоя есть свой
+       уровень наложения, и первый экран уходит под него целиком. Если гасить
+       секцию, она сама становится контекстом наложения и низ кадра начинает
+       проступать поверх завесы — свет сходит неровно. */
+    const veil = $('.intro__inner', box) || box;
+    /* Пока идёт вступление, остальная страница снята с отрисовки: браузеру
+       не приходится верстать десять секций и три холста на первом же кадре.
+       Снимаем этот режим навсегда, как только вступление открыто или человек
+       нажал ссылку на якорь — иначе прокрутка к разделу промахнётся мимо. */
+    let liteOff = false;
+    const lite = on => { if (liteOff) return; if (!on) liteOff = true;
+      html.classList.toggle('lite', on); };
+    addEventListener('click', e => { const a = e.target.closest && e.target.closest('a[href*="#"]');
+      if (a) lite(false); }, true);
     const par   = $('#intro-par'),
           stage = $('.intro__stage', box),
           on    = $('.intro__on', box),
@@ -140,6 +154,23 @@
          0.70–0.79  кадр залит светом
          0.80–1.00  свет расходится, проступает первый экран
        Лампа увеличивается вокруг собственного центра и никуда не смещается.      */
+    const saneViewport = innerHeight >= 320 && innerHeight <= 1700;
+    const tall = saneViewport && document.documentElement.scrollHeight - innerHeight > 60;
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+    /* Если браузер умеет привязывать анимацию к прокрутке сам, всю визуальную
+       часть ведёт CSS: скрипт остаётся только для состояний, инерции и нажатия.
+       Иначе собираем прежний таймлайн и ведём кадры вручную. Дорожка у CSS —
+       прокрутка страницы, поэтому в варианте без прокрутки (артефакт в рамке)
+       путь только скриптовый. */
+    const SDA = tall && CSS.supports('animation-timeline', 'scroll()') && !reduced;
+    if (SDA) html.classList.add('sda');
+
+    /* Начальные значения ставит сам стиль; трогать их из скрипта нужно только
+       на скриптовом пути. GSAP переписывает свойство translate в transform,
+       а кадры анимации перебивают transform целиком — центровка бы поехала. */
+    let tl = null;
+    if (!SDA) {
     gsap.set(stage, { scale: 1, transformOrigin: '50% 50%' });
     /* Ореол лежит внутри лампы, поэтому его собственный масштаб перемножался
        с масштабом наезда — к концу выходила поверхность в десятки тысяч
@@ -151,7 +182,7 @@
     gsap.set(flash, { opacity: 0 });
     gsap.set(slogan.concat([hint]), { opacity: 1, y: 0 });
 
-    const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
+    tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
     tl.to(on,     { opacity: 1, duration: .10, ease: 'power1.inOut' }, 0)
       .to(glow,   { opacity: .32, duration: .10, ease: 'power1.inOut' }, 0)
       .to(slogTop, { opacity: 0, y: -24, duration: .085, ease: 'power1.in' }, 0)
@@ -171,23 +202,23 @@
       .to(bloom,  { scale: 2.2, duration: .10, ease: 'power2.in' }, .70)
       .to(flash,  { opacity: 1, duration: .085, ease: 'power2.in' }, .70)
       .to(flash,  { opacity: 1, duration: 0 }, 1);   // держим длительность шкалы равной 1
-
-    const saneViewport = innerHeight >= 320 && innerHeight <= 1700;
-    const tall = saneViewport && document.documentElement.scrollHeight - innerHeight > 60;
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    }
 
     let pos = 0, closed = false;
     function apply() {
-      tl.progress(pos);
-      /* белый не держим отдельным экраном: как только кадр залит, он сразу
-         расходится и под ним проступает первый экран */
-      box.style.opacity = pos > .80 ? String(Math.max(0, 1 - (pos - .80) / .18)) : '1';
+      if (!SDA) {
+        tl.progress(pos);
+        /* белый не держим отдельным экраном: как только кадр залит, он сразу
+           расходится и под ним проступает первый экран */
+        veil.style.opacity = pos > .80 ? String(Math.max(0, 1 - (pos - .80) / .18)) : '1';
+      }
       const open = pos > .985;
       box.classList.toggle('is-moving', pos > .004);
       /* кадр залит белым — лампу и сияние снимаем с отрисовки совсем */
       box.classList.toggle('is-lit', pos > .14);
       box.classList.toggle('is-blank', pos > .74);
       html.classList.toggle('ready', open);
+      if (open) lite(false);
       if (hdrEl) hdrEl.classList.toggle('hdr--ghost', !open);
       box.style.pointerEvents = open ? 'none' : '';
       if (open && !closed) {
@@ -198,7 +229,7 @@
     }
 
     /* лампа едва заметно ведёт за курсором */
-    if (finePointer && !reduced) {
+    if (finePointer && !reduced && !SDA) {
       const qx = gsap.quickTo(par, 'x', { duration: 1.2, ease: 'power2.out' }),
             qy = gsap.quickTo(par, 'y', { duration: 1.2, ease: 'power2.out' });
       box.addEventListener('pointermove', e => {
@@ -211,6 +242,7 @@
 
     if (tall) {                       /* обычная страница: шкалу ведёт скролл, назад тоже */
       box.classList.add('is-tall');
+      lite(true);
       let raf = 0, driving = false, LEN = 1;
       /* Единица шкалы — ровно то положение прокрутки, при котором первый экран
          встаёт по верху кадра. Иначе конец шкалы и конец вступления расходятся
@@ -220,7 +252,8 @@
         return h ? Math.max(1, Math.round(h.getBoundingClientRect().top + scrollY))
                  : Math.max(1, box.offsetHeight - innerHeight); };
       const measure = () => { const y = scrollY; scrollTo({ top: 0, behavior: 'instant' });
-        LEN = heroTop(); scrollTo({ top: y, behavior: 'instant' }); };
+        LEN = heroTop(); scrollTo({ top: y, behavior: 'instant' });
+        html.style.setProperty('--intro-len', LEN + 'px'); };   // одна запись, не на кадр
       const at = y => { pos = Math.min(1, Math.max(0, y / LEN)); apply(); };
       /* Инерция: как только прокрутка замерла посреди вступления, доводим её
          сами — вниз до первого экрана, вверх обратно к лампе. Зависнуть на
@@ -335,6 +368,7 @@
     }
     const GREY = ['#C7C3BC', '#B5B1AA', '#D9D6CF', '#A9A5A0'];
     return (pt, n, burst, palette) => {
+      if (!canvas.width) size();                 // секция могла быть не размечена при загрузке
       const gr = canvas.getBoundingClientRect(), pal = palette || GREY;
       for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, sp = burst ? 2 + Math.random() * 5 : 1 + Math.random() * 2.6;
         parts.push({ x: (pt.x - gr.left) * dpr, y: (pt.y - gr.top) * dpr, vx: Math.cos(a) * sp * dpr, vy: (-Math.abs(Math.sin(a)) * sp - 1) * dpr, s: (1.5 + Math.random() * 3) * dpr, life: 1, c: pal[Math.random() * pal.length | 0], rot: Math.random() * 6 }); }
@@ -375,7 +409,9 @@
     let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!open) reset(); }, 200); });
 
     /* камень зарастает, пока его не трогают */
-    new IntersectionObserver(es => es.forEach(e => visible = e.isIntersecting), { threshold: .15 }).observe(stage);
+    new IntersectionObserver(es => es.forEach(e => { visible = e.isIntersecting;
+      if (visible && !stone.width) reset();      // размеры появились только сейчас
+    }), { threshold: .15 }).observe(stage);
     setInterval(() => {
       if (open || !visible || idle < 12) { idle++; return; }   // ~2,6 с покоя — и камень медленно нарастает
       c.globalCompositeOperation = 'destination-over'; c.globalAlpha = .015; c.drawImage(tex, 0, 0);
@@ -467,9 +503,16 @@
     const PINK = ['#EFA0C6', '#E981BA', '#F7B9D8', '#D96FA8'];
 
     /* ---- размеры и маски ---- */
+    /* Пока секция не размечена, размеры неизвестны. Поэтому маски помечаем
+       готовыми только после загрузки, а ожидающих будим списком — иначе повторный
+       вызов срабатывает раньше времени и точки замера остаются пустыми. */
+    let masksReady = false, masksWait = [];
     function loadMasks(cb) {
-      if (imgFull) { cb && cb(); return; }
-      let n = 0; const ok = () => { if (++n === 2) cb && cb(); };
+      if (masksReady) { cb && cb(); return; }
+      if (cb) masksWait.push(cb);
+      if (imgFull) return;                       // уже грузим
+      let n = 0; const ok = () => { if (++n === 2) { masksReady = true;
+        const q = masksWait; masksWait = []; q.forEach(f => f()); } };
       imgEdge = new Image(); imgEdge.crossOrigin = 'anonymous'; imgEdge.onload = ok; imgEdge.onerror = ok;
       imgFull = new Image(); imgFull.crossOrigin = 'anonymous'; imgFull.onload = ok; imgFull.onerror = ok;
       imgEdge.src = asset('assets/cut/tooth-edge.webp');
@@ -784,6 +827,7 @@
     /* ---- появление и старт ---- */
     gsap.set(TOOLS.map(t => t.el), { y: 24, opacity: 0 });
     const io2 = new IntersectionObserver(es => { es.forEach(e => { if (!e.isIntersecting) return; io2.disconnect();
+      loadMasks(() => { sizeCanvases(); setStage(stage); });
       gsap.to(TOOLS.map(t => t.el), { y: 0, opacity: 1, duration: .8, ease: 'power3.out', stagger: .1 }); }); }, { threshold: .2 });
     io2.observe(stageEl);
 

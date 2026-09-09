@@ -302,37 +302,32 @@
       /* Инерция: как только прокрутка замерла посреди вступления, доводим её
          сами — вниз до первого экрана, вверх обратно к лампе. Зависнуть на
          белом кадре нельзя. */
-      let prevY = 0, dir = 1, settle = 0, ride = null, touching = false, seen = false;
+      let prevY = 0, dir = 1, settle = 0, ride = null, touching = false;
       function stopRide() { if (ride) { ride.kill(); ride = null; } driving = false; }
       /* Доводка двигает прокрутку сама, поэтому после неё нужно заново
          запомнить, откуда считать направление: иначе первое движение вверх
-         принимается за движение вниз и человека отбрасывает обратно. */
-      const rest = () => { prevY = scrollY; if (pos >= .985) seen = true; };
+         принимается за движение вниз. */
+      const rest = () => { prevY = scrollY; };
+      /* Единственный случай, когда мы вмешиваемся в прокрутку: человек
+         остановился на залитом светом участке. Там смотреть не на что —
+         кадр белый, и застрять в нём неприятно. Везде остальное прокрутка
+         идёт как обычно, кадр в кадр за пальцем или колесом: попытка
+         подхватывать движение и доводить сценарий за человека читалась
+         как сбой. Назад тоже не мешаем — идут осознанно. */
+      const WHITE = .60;
       function coast() {
         settle = 0;
         if (driving || closed) return;
-        if (pos <= .015 || pos >= .985) return;
-        /* Вступление уже показывали — больше не ведём человека сами: пусть
-           листает свободно в обе стороны. Возвращаем вниз только маленький
-           откат у самого первого экрана: он чаще случайность. */
-        if (seen && pos <= .93) return;
-        /* Вверх у самого первого экрана вступление не переигрываем: небольшой
-           откат назад чаще случайность, чем желание вернуться к лампе. */
-        const end = (dir >= 0 || pos > .93) ? LEN : 0;
+        if (pos <= WHITE || pos >= .985 || dir < 0) return;
+        const end = LEN;
         const frac = Math.abs(end - scrollY) / LEN;
         driving = true;
-        ride = gsap.to({ y: scrollY }, { y: end, duration: Math.max(.5, frac * 3.0),
-          ease: frac > .3 ? 'power1.inOut' : 'power2.out', overwrite: true,
+        ride = gsap.to({ y: scrollY }, { y: end, duration: Math.max(.45, frac * 2.2),
+          ease: 'power2.out', overwrite: true,
           onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
           onComplete() { ride = null; driving = false; at(scrollY); rest(); },
           onInterrupt() { ride = null; driving = false; rest(); } });
       }
-      /* Начало прокрутки вниз — тот же знак, что и нажатие на лампу: дальше
-         сценарий ведём сами. Крутанули на щелчок колеса или на пол-экрана —
-         разницы нет, доедет одинаково.
-         Под пальцем ждём, пока его отпустят: иначе не дать себя прокрутить.
-         Вверх тоже ждём — чтобы можно было спокойно вернуться к лампе, а не
-         быть отброшенным вниз на первом же движении. */
       const fromScroll = () => {
         raf = 0;
         if (driving) return;
@@ -340,18 +335,13 @@
         prevY = scrollY;
         at(scrollY);
         clearTimeout(settle);
-        if (pos >= .985) { seen = true; return; }
-        /* Вернулись к лампе — снова ведём сценарий сами, как в первый раз. */
-        if (pos < .10) seen = false;
-        if (pos <= .015) return;
-        if (touching || dir < 0 || seen) { settle = setTimeout(coast, dir < 0 ? 130 : 60); return; }
-        coast();
+        if (pos > WHITE && pos < .985) settle = setTimeout(coast, 120);
       };
       addEventListener('scroll', () => { if (!raf && !driving) raf = requestAnimationFrame(fromScroll); }, { passive: true });
       addEventListener('resize', () => { measure(); at(scrollY); });
       /* палец на вступлении: отпустили — доводим */
       box.addEventListener('touchstart', () => { touching = true; clearTimeout(settle); stopRide(); }, { passive: true });
-      box.addEventListener('touchend', () => { touching = false; clearTimeout(settle); settle = setTimeout(coast, 60); }, { passive: true });
+      box.addEventListener('touchend', () => { touching = false; clearTimeout(settle); settle = setTimeout(coast, 80); }, { passive: true });
       scrollTo(0, 0); measure(); at(0);
       /* Прокрутку по нажатию ведём сами: ставим положение и тут же перерисовываем
          в том же кадре. Иначе событие scroll разбирается через кадр и картина

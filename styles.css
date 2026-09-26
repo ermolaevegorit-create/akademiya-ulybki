@@ -600,7 +600,8 @@ html.vi-noimg .vi-btn svg,html.vi-noimg .hdr__tel-i{display:inline!important}
 .crumb{margin:0 0 14px;font-size:var(--fs-2)}
 .crumb a{color:var(--mute);text-decoration:none;border-bottom:1px solid transparent}
 .crumb a:hover{color:var(--ink);border-bottom-color:var(--hair)}
-.crumb--foot{margin:40px 0 0;padding-top:18px;border-top:1px solid var(--hair)}
+.crumb--foot{margin:40px 0 0;padding-top:18px;border-top:1px solid var(--hair);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+.crumb--foot a{min-height:44px;display:inline-flex;align-items:center}
 /* Внешняя ссылка помечена стрелкой: она уводит с сайта и открывается
    в новой вкладке, об этом лучше предупредить до нажатия. */
 .docs__t--ext::after{content:"↗";margin-left:6px;font-size:.85em;color:var(--mute);vertical-align:baseline}

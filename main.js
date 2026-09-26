@@ -5,6 +5,15 @@
   const $$ = (s, r) => [].slice.call((r || document).querySelectorAll(s));
   const html = document.documentElement;
   html.classList.add('js');                       // класс ставим скриптом: разметка может прийти без него
+  /* Страница открывается сверху. Браузер по умолчанию возвращает человека
+     туда, где он был в прошлый раз на этом адресе, и длинный документ
+     открывался с середины — как будто его уже листали. Якорь в ссылке
+     по-прежнему работает: его обрабатывает сам браузер. */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  if (!location.hash) addEventListener('pageshow', () => scrollTo(0, 0));
+  addEventListener('DOMContentLoaded', () => {  // браузер сбрасывает настройку на разборе разметки
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  });
   // Версия для слабовидящих подразумевает покой: без вступления, без параллакса,
   // игры сразу в конечном состоянии — ровно то же, что и при системной просьбе
   // убрать анимацию.

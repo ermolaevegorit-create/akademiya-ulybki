@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
-Disallow: /*?
+Disallow: /*?utm_
+Disallow: /*?yclid
+Disallow: /*?gclid
 Sitemap: https://akademiya-ulybki.ru/sitemap.xml
 Host: akademiya-ulybki.ru

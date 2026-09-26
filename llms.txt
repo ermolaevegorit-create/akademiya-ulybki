@@ -11,6 +11,7 @@
 - [Цены](https://akademiya-ulybki.ru/prices.html): полный прейскурант по направлениям
 - [Вопросы и ответы](https://akademiya-ulybki.ru/faq.html): ответы врача на частые вопросы пациентов
 - [Сведения о клинике, лицензия и права пациента](https://akademiya-ulybki.ru/info.html)
+- [Документы: лицензия, договоры, права пациента](https://akademiya-ulybki.ru/docs.html)
 - [Политика обработки персональных данных](https://akademiya-ulybki.ru/privacy.html)
 
 ## Пояснения

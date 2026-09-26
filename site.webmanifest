@@ -1,0 +1,35 @@
+{
+  "name": "Академия улыбки — стоматология в Сочи",
+  "short_name": "Академия улыбки",
+  "description": "Стоматологическая клиника Александры Белоусовой. Сочи, ул. Виноградная, 55/1.",
+  "lang": "ru-RU",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "assets/web/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/web/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/web/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

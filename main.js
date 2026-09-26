@@ -5,7 +5,10 @@
   const $$ = (s, r) => [].slice.call((r || document).querySelectorAll(s));
   const html = document.documentElement;
   html.classList.add('js');                       // класс ставим скриптом: разметка может прийти без него
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Версия для слабовидящих подразумевает покой: без вступления, без параллакса,
+  // игры сразу в конечном состоянии — ровно то же, что и при системной просьбе
+  // убрать анимацию.
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches || html.classList.contains('vi');
   const finePointer = matchMedia('(hover:hover) and (pointer:fine)').matches;
   const track = (ev, data) => { (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: ev }, data || {})); };
   const hasGsap = !!(window.gsap && window.ScrollTrigger && window.Draggable);
@@ -96,6 +99,60 @@
     const push = window.dataLayer = window.dataLayer || [];
     const orig = push.push.bind(push);
     push.push = a => { if (window.ym && METRIKA && a && a.event) try { ym(METRIKA, 'reachGoal', a.event); } catch (e) {} return orig(a); };
+  })();
+
+
+  /* ---------- версия для слабовидящих ----------
+     Выбор хранится в браузере и применяется скриптом в <head> до отрисовки,
+     чтобы страница не показалась сначала в обычном виде. Здесь — управление. */
+  (function vision() {
+    const KEY = 'au-vi';
+    const btn = $('#vi-toggle'), panel = $('#vi-panel');
+    if (!btn || !panel) return;
+    const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+    const save = s => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} };
+    let st = read();
+
+    function paint(s) {
+      const c = html.classList;
+      c.toggle('vi', !!s.on);
+      ['vi-2', 'vi-3'].forEach(k => c.remove(k));
+      if (s.on && s.size > 1) c.add('vi-' + s.size);
+      ['vi-dark', 'vi-sepia'].forEach(k => c.remove(k));
+      if (s.on && s.scheme && s.scheme !== 'light') c.add('vi-' + s.scheme);
+      c.toggle('vi-noimg', !!(s.on && s.noimg));
+      panel.hidden = !s.on;
+      btn.setAttribute('aria-pressed', s.on ? 'true' : 'false');
+      $$('[data-vi]', panel).forEach(b => {
+        const p = b.dataset.vi.split(':'), k = p[0], v = p[1];
+        const cur = k === 'size' ? String(s.size || 1)
+                  : k === 'scheme' ? (s.scheme || 'light')
+                  : k === 'noimg' ? (s.noimg ? '1' : '0') : null;
+        if (cur !== null) b.setAttribute('aria-pressed', cur === v ? 'true' : 'false');
+      });
+    }
+
+    // включение и выключение перезагружают страницу: вступление и игры
+    // настраиваются один раз при загрузке и на лету не переключаются
+    btn.addEventListener('click', () => {
+      st = read(); st.on = !st.on;
+      if (st.on && !st.size) st.size = 2;
+      save(st); location.reload();
+    });
+
+    panel.addEventListener('click', e => {
+      const b = e.target.closest ? e.target.closest('[data-vi]') : null;
+      if (!b) return;
+      const p = b.dataset.vi.split(':'), k = p[0], v = p[1];
+      st = read();
+      if (k === 'off') { st.on = false; save(st); location.reload(); return; }
+      if (k === 'size') st.size = +v;
+      if (k === 'scheme') st.scheme = v;
+      if (k === 'noimg') st.noimg = v === '1';
+      save(st); paint(st);
+    });
+
+    paint(st);
   })();
 
   if (!$('#intro')) { html.classList.add('ready'); if (!hasGsap || reduced) html.classList.replace('js', 'no-js'); return; }   // внутренние страницы
@@ -269,16 +326,20 @@
       if (!open) closed = false;
     }
 
-    /* лампа едва заметно ведёт за курсором */
+    /* лампа ведёт за курсором. Размах — полная амплитуда от края до края
+       экрана, то есть смещение вдвое меньше: 72 → ±36 по горизонтали.
+       Меньшие значения на глаз неотличимы от неподвижной картинки. */
     if (finePointer && !reduced) {
-      const qx = gsap.quickTo(par, 'x', { duration: 1.2, ease: 'power2.out' }),
-            qy = gsap.quickTo(par, 'y', { duration: 1.2, ease: 'power2.out' });
-      box.addEventListener('pointermove', e => {
+      const qx = gsap.quickTo(par, 'x', { duration: .9, ease: 'power2.out' }),
+            qy = gsap.quickTo(par, 'y', { duration: .9, ease: 'power2.out' });
+      /* слушаем окно, а не само вступление: шапка лежит поверх кадра и
+         перехватывала события — у верхней кромки экрана лампа замирала */
+      addEventListener('pointermove', e => {
         if (closed || pos > .2) return;
         const k = Math.max(0, 1 - pos * 5);
-        qx((e.clientX / innerWidth - .5) * 24 * k); qy((e.clientY / innerHeight - .5) * 15 * k);
-      });
-      box.addEventListener('pointerleave', () => { qx(0); qy(0); });
+        qx((e.clientX / innerWidth - .5) * 72 * k); qy((e.clientY / innerHeight - .5) * 44 * k);
+      }, { passive: true });
+      document.addEventListener('pointerleave', () => { qx(0); qy(0); });
     }
 
     if (tall) {                       /* обычная страница: шкалу ведёт скролл, назад тоже */

@@ -595,6 +595,17 @@ html.vi-noimg .vi-btn svg,html.vi-noimg .hdr__tel-i{display:inline!important}
 .docs__s{justify-self:end;font-size:var(--fs-1);letter-spacing:.06em;text-transform:uppercase;
   color:var(--mute);background:var(--tint);border:1px solid var(--hair-2);border-radius:2px;padding:4px 8px;white-space:nowrap}
 .docs__note{margin:40px 0 0;padding:18px 20px;background:var(--tint);border-left:2px solid var(--hair);font-size:var(--fs-2);color:var(--ink-2)}
+/* Путь назад в раздел. Документ открывается из «Документов», и без этой
+   строки вернуться можно только на главную или кнопкой браузера. */
+.crumb{margin:0 0 14px;font-size:var(--fs-2)}
+.crumb a{color:var(--mute);text-decoration:none;border-bottom:1px solid transparent}
+.crumb a:hover{color:var(--ink);border-bottom-color:var(--hair)}
+.crumb--foot{margin:40px 0 0;padding-top:18px;border-top:1px solid var(--hair)}
+/* Внешняя ссылка помечена стрелкой: она уводит с сайта и открывается
+   в новой вкладке, об этом лучше предупредить до нажатия. */
+.docs__t--ext::after{content:"↗";margin-left:6px;font-size:.85em;color:var(--mute);vertical-align:baseline}
+.docs__s--form{border-color:var(--teal);color:var(--teal)}
+.docs__s--ask{border-color:var(--hair);color:var(--mute)}
 @media(max-width:640px){
   .docs__l li{grid-template-columns:minmax(0,1fr)}
   .docs__s{justify-self:start}

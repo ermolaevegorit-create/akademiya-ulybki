@@ -164,11 +164,14 @@
     paint(st);
   })();
 
-  if (!$('#intro')) { html.classList.add('ready'); if (!hasGsap || reduced) html.classList.replace('js', 'no-js'); return; }   // внутренние страницы
+  if (!$('#intro')) { html.classList.add('ready'); if (!hasGsap || reduced) html.classList.add('still'); return; }   // внутренние страницы
 
   /* статичная версия: всё показано, игры в конечном состоянии */
   if (!hasGsap || reduced) {
-    html.classList.replace('js', 'no-js'); html.classList.add('ready');
+    /* Статичный режим — это не «скрипта нет»: раньше он подменял класс js
+       на no-js, а правило .no-js .cookie прятало баннер согласия. В режиме
+       для слабовидящих человек переставал видеть выбор по cookie. */
+    html.classList.add('still'); html.classList.add('ready');
     const ib = $('#intro'); if (ib) ib.remove();
     $('.offer').classList.add('is-open'); $('.fill').classList.add('is-done'); $('#promo').hidden = false;
     $('#tray-stage').classList.add('is-clean'); $('#tray-cta').hidden = false;

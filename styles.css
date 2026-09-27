@@ -822,6 +822,7 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   html.sda .intro__hint,
   html.sda .hero__txt,
   html.sda .hero__ph,
+  html.sda #hdr,
   html.sda .intro.is-tall .intro__inner{
     animation-timeline:scroll(root block);
     animation-range:0 var(--intro-len,2700px);
@@ -848,6 +849,11 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
      навстречу и приходит в своё положение ровно тогда, когда свет сходит.
      Текст и фотография идут с разной амплитудой: так у кадра есть глубина,
      а переход читается как одно продолжающееся движение, а не как склейка. */
+  /* Шапка проявляется той же кривой и в том же окне, что и завеса. Раньше
+     она переключалась скачком: если прокрутка останавливалась посреди
+     перехода, на экране оставалась резкая непрозрачная шапка над почти
+     белой страницей — и это читалось как поломка, а не как переход. */
+  html.sda #hdr{animation-name:iHdr}
   html.sda .hero__txt{animation-name:iRise}
   html.sda .hero__ph{animation-name:iRiseSoft}
 
@@ -881,6 +887,10 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   @keyframes iSlogBot{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.4,0,.25,1)}11%,100%{opacity:0;transform:translateY(26px)}}
   @keyframes iHint{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.3,1)}8%,100%{opacity:0}}
   @keyframes iVeil{0%,66%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.35,1)}90%,100%{opacity:0}}
+  @keyframes iHdr{
+    0%,66%{background-color:rgba(255,255,255,0);animation-timing-function:cubic-bezier(.4,0,.35,1)}
+    90%,100%{background-color:rgba(255,255,255,.92)}
+  }
   /* Подъём первого экрана начинается ещё под светом и идёт ровным ходом всю
      видимую часть перехода, а тормозит только в самом конце. Так движение не
      выдыхается к моменту, когда завеса сходит. */

@@ -89,9 +89,15 @@
     function decide(v, remember) {
       if (remember) write(v);
       bar.hidden = true; document.body.classList.remove('has-cookie');
+      html.style.setProperty('--cookie-h', '0px');
       if (v === 'all') startMetrika();
     }
-    function show() { bar.hidden = false; document.body.classList.add('has-cookie'); }
+    /* В режиме для слабовидящих баннер растянут во всю ширину внизу экрана:
+       карточка поверх текста там читается как наложение. Чтобы полоса не
+       закрывала последние строки, страница получает отступ в её высоту. */
+    const pad = () => { if (!html.classList.contains('vi')) return;
+      html.style.setProperty('--cookie-h', (bar.hidden ? 0 : bar.offsetHeight + 8) + 'px'); };
+    function show() { bar.hidden = false; document.body.classList.add('has-cookie'); pad(); }
 
     const saved = (read() || '').split('|')[0];
     /* поверх вступления окно не показываем — ждём, пока откроется содержимое */
@@ -103,6 +109,7 @@
     $('#cookie-yes').addEventListener('click', () => { decide('all', true); track('consent_all'); });
     $('#cookie-no').addEventListener('click', () => { decide('need', true); track('consent_min'); });
     const st = $('#cookie-settings'); if (st) st.addEventListener('click', e => { e.preventDefault(); show(); });
+    addEventListener('resize', pad, { passive: true });
 
     /* события отправляем и в Метрику, когда она разрешена */
     const push = window.dataLayer = window.dataLayer || [];

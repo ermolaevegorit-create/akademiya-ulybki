@@ -475,24 +475,6 @@
     apply();
   })();
 
-  /* ---------- карусель с приёма ---------- */
-  (function shots() {
-    const box = $('#shots'); if (!box) return;
-    const imgs = $$('.shots__track img', box), dots = $('.shots__dots', box);
-    let i = 0;
-    imgs.forEach((_, k) => {
-      const d = document.createElement('button'); d.type = 'button'; d.setAttribute('role', 'tab');
-      d.setAttribute('aria-label', 'Фото ' + (k + 1)); d.setAttribute('aria-selected', k === 0);
-      d.addEventListener('click', () => show(k)); dots.appendChild(d);
-    });
-    function show(k) {
-      i = (k + imgs.length) % imgs.length;
-      imgs.forEach((im, n) => im.classList.toggle('is-cur', n === i));
-      $$('button', dots).forEach((d, n) => d.setAttribute('aria-selected', n === i));
-    }
-    $$('.shots__nav', box).forEach(b => b.addEventListener('click', () => show(i + (+b.dataset.dir))));
-  })();
-
   /* ---------- крошки (общий помощник) ---------- */
   function makeParticles(canvas, stageEl) {
     const ctx = canvas.getContext('2d'); let parts = [], raf = 0;

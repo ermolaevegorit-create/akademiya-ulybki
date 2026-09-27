@@ -371,22 +371,11 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .doc__ava{width:clamp(84px,9vw,116px);height:auto;border-radius:50%;flex:none;background:var(--tint)}
 .doc__head .eyebrow{margin-bottom:8px}
 .doc__ph{margin:0;position:relative}
-.shots__track{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--tint)}
-.shots__track img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 25%;opacity:0;transition:opacity .7s ease}
-.shots__track img.is-cur{opacity:1}
-.shots__ui{display:flex;align-items:center;gap:14px;margin-top:12px}
-.shots__nav{width:34px;height:34px;flex:none;border:1px solid var(--hair);background:transparent;border-radius:50%;cursor:pointer;position:relative;padding:0}
-.shots__nav::before{content:"";position:absolute;left:52%;top:50%;width:7px;height:7px;border-left:1.4px solid var(--ink-2);border-bottom:1.4px solid var(--ink-2);translate:-50% -50%;rotate:45deg}
-.shots__nav--next::before{left:48%;rotate:-135deg}
-.shots__nav:hover{border-color:var(--ink)}
-.shots__dots{display:flex;gap:2px;margin-right:auto}
+.doc__ph--one img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 25%;background:var(--tint)}
 /* Цель нажатия — 24×24, сама точка внутри рисуется псевдоэлементом.
    Видимые 7 пикселей оставляем, но попасть в них теперь можно пальцем. */
-.shots__dots button{width:24px;height:24px;padding:0;border:0;background:none;cursor:pointer;
   display:grid;place-items:center;border-radius:50%}
-.shots__dots button::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--hair);
   transition:background .3s,transform .3s}
-.shots__dots button[aria-selected=true]::before{background:var(--ink);transform:scale(1.45)}
 .doc__ph figcaption{margin-top:10px;font-size:var(--fs-2);color:var(--mute);line-height:1.5}
 .creds{margin:24px 0 0;border-top:1px solid var(--ink)}
 .creds div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--hair-2)}
@@ -577,10 +566,8 @@ html.vi .intro{display:none!important}
 /* Игры — это мелкие цели, перетаскивание и реакция на движение мыши.
    В режиме для слабовидящих они не помогают, а мешают: убираем целиком. */
 html.vi #plomba,html.vi #sterilno,html.vi #stone,html.vi .offer__crumbs,
-html.vi #drill-hint,html.vi .shots__ui{display:none!important}
+html.vi #drill-hint{display:none!important}
 html.vi *,html.vi *::before,html.vi *::after{animation:none!important;transition:none!important}
-html.vi .shots__dots button::before{width:20px;height:20px;border:2px solid var(--ink);background:var(--bg)}
-html.vi .shots__dots button[aria-selected=true]::before{background:var(--ink)}
 html.vi :focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 html.vi .tag{color:var(--ink);border-color:var(--ink)}
 /* Поверхности, у которых белый цвет вписан в стили числом: в схеме

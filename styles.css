@@ -372,10 +372,6 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .doc__head .eyebrow{margin-bottom:8px}
 .doc__ph{margin:0;position:relative}
 .doc__ph--one img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 25%;background:var(--tint)}
-/* Цель нажатия — 24×24, сама точка внутри рисуется псевдоэлементом.
-   Видимые 7 пикселей оставляем, но попасть в них теперь можно пальцем. */
-  display:grid;place-items:center;border-radius:50%}
-  transition:background .3s,transform .3s}
 .doc__ph figcaption{margin-top:10px;font-size:var(--fs-2);color:var(--mute);line-height:1.5}
 .creds{margin:24px 0 0;border-top:1px solid var(--ink)}
 .creds div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--hair-2)}
@@ -805,30 +801,49 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   html.sda .hero__txt{animation-name:iRise}
   html.sda .hero__ph{animation-name:iRiseSoft}
 
-  @keyframes iOn{0%{opacity:0}18%,100%{opacity:1}}
-  @keyframes iHot{0%,18%{opacity:0}62%,100%{opacity:1}}
+  /* Скорость нигде не обрывается. Раньше почти каждая дорожка разгонялась
+     до предела и в свою последнюю точку влетала на полном ходу, после чего
+     мгновенно замирала: разрыв по скорости глаз читает как угол. Теперь у
+     каждого движения три части — разгон, ровный ход и торможение, — и на
+     стыках скорости совпадают: кривые подобраны так, чтобы наклон в конце
+     одного отрезка равнялся наклону в начале следующего.
+     Наезд и засвет заканчиваются на 66 %, ровно там, где начинает сходить
+     завеса: белой паузы между ними не остаётся. */
+  @keyframes iOn{0%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}18%,100%{opacity:1}}
+  @keyframes iHot{0%,18%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}48%,100%{opacity:1}}
   @keyframes iZoom{
-    0%,18%{transform:scale(1);animation-timing-function:cubic-bezier(.11,0,.5,0)}
-    76%,100%{transform:scale(2.8)}
+    0%,18%{transform:scale(1);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    44%{transform:scale(1.755);animation-timing-function:linear}
+    58%{transform:scale(2.568);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
+    66%,100%{transform:scale(2.8)}
   }
-  @keyframes iStageOut{0%,62%{opacity:1;animation-timing-function:cubic-bezier(.11,0,.5,0)}74%,100%{opacity:0}}
-  @keyframes iGlow{0%,18%{opacity:0}72%,100%{opacity:1}}
-  @keyframes iBloomFade{0%,26%{opacity:0}78%,100%{opacity:1}}
+  @keyframes iStageOut{0%,58%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.3,1)}66%,100%{opacity:0}}
+  @keyframes iGlow{0%,18%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.35,1)}58%,100%{opacity:1}}
+  @keyframes iBloomFade{0%,26%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.35,1)}66%,100%{opacity:1}}
   @keyframes iBloomScale{
-    0%,26%{transform:scale(.18);animation-timing-function:cubic-bezier(.32,0,.67,0)}
-    78%,100%{transform:scale(2.2)}
+    0%,26%{transform:scale(.18);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    46%{transform:scale(.957);animation-timing-function:linear}
+    58%{transform:scale(1.889);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
+    66%,100%{transform:scale(2.2)}
   }
-  @keyframes iFlash{0%,60%{opacity:0;animation-timing-function:cubic-bezier(.32,0,.67,0)}70%,100%{opacity:1}}
-  @keyframes iSlogTop{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.11,0,.5,0)}12%,100%{opacity:0;transform:translateY(-24px)}}
-  @keyframes iSlogBot{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.11,0,.5,0)}12%,100%{opacity:0;transform:translateY(24px)}}
-  @keyframes iHint{0%{opacity:1;animation-timing-function:cubic-bezier(.11,0,.5,0)}9%,100%{opacity:0}}
-  @keyframes iVeil{0%,70%{opacity:1;animation-timing-function:cubic-bezier(.45,.05,.3,1)}88%,100%{opacity:0}}
+  @keyframes iFlash{0%,52%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}66%,100%{opacity:1}}
+  @keyframes iSlogTop{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.4,0,.25,1)}13%,100%{opacity:0;transform:translateY(-26px)}}
+  @keyframes iSlogBot{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.4,0,.25,1)}13%,100%{opacity:0;transform:translateY(26px)}}
+  @keyframes iHint{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.3,1)}10%,100%{opacity:0}}
+  @keyframes iVeil{0%,66%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.35,1)}90%,100%{opacity:0}}
+  /* Подъём первого экрана начинается ещё под светом и идёт ровным ходом всю
+     видимую часть перехода, а тормозит только в самом конце. Так движение не
+     выдыхается к моменту, когда завеса сходит. */
   @keyframes iRise{
-    0%,66%{transform:translateY(78px);animation-timing-function:cubic-bezier(.22,.5,.32,1)}
+    0%,54%{transform:translateY(86px);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    66%{transform:translateY(69px);animation-timing-function:linear}
+    82%{transform:translateY(25px);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
     100%{transform:translateY(0)}
   }
   @keyframes iRiseSoft{
-    0%,66%{transform:translateY(36px);animation-timing-function:cubic-bezier(.22,.5,.32,1)}
+    0%,54%{transform:translateY(40px);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    66%{transform:translateY(32px);animation-timing-function:linear}
+    82%{transform:translateY(12px);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
     100%{transform:translateY(0)}
   }
 }

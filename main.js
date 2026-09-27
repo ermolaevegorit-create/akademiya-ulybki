@@ -302,28 +302,44 @@
     gsap.set(slogan.concat([hint]), { opacity: 1, y: 0 });
 
     tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
-    tl.to(slogTop, { opacity: 0, y: -24, duration: .12, ease: 'power1.in' }, 0)
-      .to(slogBot, { opacity: 0, y: 24, duration: .12, ease: 'power1.in' }, 0)
-      .to(hint,   { opacity: 0, duration: .09, ease: 'power1.in' }, 0)
-      /* свет разгорается ровно: яркость растёт с постоянной скоростью */
-      .to(on,     { opacity: 1, duration: .18 }, 0)
-      /* дальше свет продолжает набирать силу: лампа перетекает в раскалённую
-         копию с бликами на каждом светодиоде */
-      .to(hotim,  { opacity: 1, duration: .44 }, .18)
-      /* наезд одной дугой с разгоном — начинается, когда свет уже полный */
-      .to(stage,  { scale: 2.8, duration: .58, ease: 'power1.in' }, .18)
-      .to(glow,   { opacity: 1, duration: .54 }, .18)
-      .to(bloom,  { opacity: 1, duration: .52 }, .26)
-      .to(bloom,  { scale: 2.2, duration: .52, ease: 'power2.in' }, .26)
-      /* засвет: белое заливает кадр раньше, чем корпус успевает исчезнуть */
-      .to(flash,  { opacity: 1, duration: .08, ease: 'power2.in' }, .62)
-      .to(stage,  { opacity: 0, duration: .08, ease: 'power1.in' }, .62)
+    /* Скорость нигде не обрывается: у каждого движения разгон, ровный ход и
+       торможение, а на стыках скорости совпадают — плавности подобраны так,
+       чтобы наклон в конце одного отрезка равнялся наклону в начале
+       следующего. Раньше почти всё влетало в свою последнюю точку на полном
+       ходу и мгновенно замирало: разрыв по скорости глаз читает как угол. */
+    tl.to(slogTop, { opacity: 0, y: -26, duration: .13, ease: 'power1.inOut' }, 0)
+      .to(slogBot, { opacity: 0, y: 26, duration: .13, ease: 'power1.inOut' }, 0)
+      .to(hint,   { opacity: 0, duration: .10, ease: 'power1.inOut' }, 0)
+      .to(on,     { opacity: 1, duration: .18, ease: 'power1.inOut' }, 0)
+      /* Перетекание в раскалённую копию заканчивается на половине пути:
+         дальше горящая снимается с отрисовки и наезд ведёт одна картинка
+         вместо двух — самая дорогая часть кадра дешевеет вдвое. */
+      .to(hotim,  { opacity: 1, duration: .30, ease: 'power1.inOut' }, .18)
+      /* наезд: разгон, ровный ход, мягкая остановка ровно там, где кадр
+         залит светом и начинает сходить завеса */
+      .to(stage,  { scale: 1.755, duration: .26, ease: 'power1.in' }, .18)
+      .to(stage,  { scale: 2.568, duration: .14, ease: 'none' }, .44)
+      .to(stage,  { scale: 2.800, duration: .08, ease: 'power1.out' }, .58)
+      .to(glow,   { opacity: 1, duration: .40, ease: 'power1.inOut' }, .18)
+      .to(bloom,  { opacity: 1, duration: .40, ease: 'power1.inOut' }, .26)
+      .to(bloom,  { scale: .957, duration: .20, ease: 'power1.in' }, .26)
+      .to(bloom,  { scale: 1.889, duration: .12, ease: 'none' }, .46)
+      .to(bloom,  { scale: 2.200, duration: .08, ease: 'power1.out' }, .58)
+      /* засвет приходит в полную силу плавно и без удара */
+      .to(flash,  { opacity: 1, duration: .14, ease: 'power1.inOut' }, .52)
+      .to(stage,  { opacity: 0, duration: .08, ease: 'power1.inOut' }, .58)
       .to(flash,  { opacity: 1, duration: 0 }, 1);   // держим длительность шкалы равной 1
-    /* Тот же подъём первого экрана, что ведёт браузер на основном пути:
-       пока свет сходит, содержимое поднимается ему навстречу. */
+    /* Подъём первого экрана начинается ещё под светом и идёт ровным ходом всю
+       видимую часть перехода, а тормозит только в самом конце: так движение
+       не выдыхается к моменту, когда завеса сходит. */
     const hTxt = $('.hero__txt'), hPh = $('.hero__ph');
-    if (hTxt) tl.fromTo(hTxt, { y: 78 }, { y: 0, duration: .34, ease: 'power2.out' }, .66);
-    if (hPh)  tl.fromTo(hPh,  { y: 36 }, { y: 0, duration: .34, ease: 'power2.out' }, .66);
+    const rise = (el, a1, a2, a3) => {
+      tl.fromTo(el, { y: a1 }, { y: a2, duration: .12, ease: 'power1.in' }, .54)
+        .to(el, { y: a3, duration: .16, ease: 'none' }, .66)
+        .to(el, { y: 0,  duration: .18, ease: 'power1.out' }, .82);
+    };
+    if (hTxt) rise(hTxt, 86, 69, 25);
+    if (hPh)  rise(hPh,  40, 32, 12);
     }
 
     let pos = 0, closed = false;
@@ -333,21 +349,23 @@
         /* белый не держим отдельным экраном: как только кадр залит, он сразу
            расходится и под ним проступает первый экран. Сход длиннее самого
            засвета — за это время первый экран успевает подняться на место. */
-        veil.style.opacity = pos > .70 ? String(Math.max(0, 1 - (pos - .70) / .18)) : '1';
+        if (pos <= .66) veil.style.opacity = '1';
+        else { const t = Math.min(1, (pos - .66) / .24);
+               veil.style.opacity = String(1 - t * t * (3 - 2 * t)); }   // та же S-образная кривая, что в стилях
       }
       const open = pos > .985;
       box.classList.toggle('is-moving', pos > .004);
       /* кадр залит белым — лампу и сияние снимаем с отрисовки совсем */
       box.classList.toggle('is-lit', pos > .20);
-      box.classList.toggle('is-hot', pos > .66);
-      box.classList.toggle('is-blank', pos > .70);
+      box.classList.toggle('is-hot', pos > .50);
+      box.classList.toggle('is-blank', pos > .66);
       html.classList.toggle('ready', open);
       /* Шапка лежит поверх кадра вступления и в переходе не участвовала:
          пока страница была ещё на четыре пятых белой, шапка уже стояла
          резкая и непрозрачная — два слоя в разных состояниях и читались
          как шов. Меняем её не на выходе, а в тот момент, когда кадр залит
          светом: на белом подмена фона не видна вовсе. */
-      if (hdrEl) hdrEl.classList.toggle('hdr--ghost', pos < .70);
+      if (hdrEl) hdrEl.classList.toggle('hdr--ghost', pos < .66);
       box.style.pointerEvents = open ? 'none' : '';
       if (open && !closed) {
         closed = true; track('intro_done');

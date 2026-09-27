@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=ca6be2af">
+<link rel="stylesheet" href="styles.css?v=1af7f2f7">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": ["Dentist", "MedicalClinic"], "name": "Стоматологическая клиника «Академия улыбки»", "legalName": "ООО «Академия улыбки»", "telephone": "+79897512851", "url": "https://akademiya-ulybki.ru/", "address": {"@type": "PostalAddress", "streetAddress": "ул. Виноградная, д. 55/1, пом. 22, 2-й этаж", "addressLocality": "Сочи", "addressRegion": "Краснодарский край", "postalCode": "354008", "addressCountry": "RU"}, "geo": {"@type": "GeoCoordinates", "latitude": 43.608995, "longitude": 39.720852}, "hasMap": "https://yandex.ru/maps/org/akademiya_ulybki/196221666219/", "foundingDate": "2026", "employee": {"@type": "Physician", "name": "Белоусова Александра Сергеевна", "jobTitle": "Врач стоматолог-терапевт, хирург, имплантолог", "alumniOf": "Новосибирский государственный медицинский университет"}, "hasCredential": {"@type": "EducationalOccupationalCredential", "credentialCategory": "license", "name": "Лицензия Л041-01126-23/05841444", "dateCreated": "2026-08-03", "recognizedBy": {"@type": "GovernmentOrganization", "name": "Министерство здравоохранения Краснодарского края"}}, "identifier": [{"@type": "PropertyValue", "propertyID": "ИНН", "value": "2366057010"}, {"@type": "PropertyValue", "propertyID": "ОГРН", "value": "1262300000038"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Как проходит первый визит?", "acceptedAnswer": {"@type": "Answer", "text": "Первичный приём длится около часа. Мы разговариваем о том, что беспокоит и чего вы ждёте, осматриваем полость рта, делаем фотопротокол и, если нужно, даём направление на снимок. В конце вы получаете письменный план лечения с этапами и стоимостью. Никаких процедур «заодно» в первый визит не делается — только по вашему решению."}}, {"@type": "Question", "name": "Как часто нужна профессиональная чистка?", "acceptedAnswer": {"@type": "Answer", "text": "Большинству взрослых — раз в шесть месяцев. При заболеваниях дёсен, брекетах, имплантатах или курении — раз в три‑четыре месяца. Интервал врач назначает индивидуально после осмотра."}}, {"@type": "Question", "name": "Что нельзя делать после чистки?", "acceptedAnswer": {"@type": "Answer", "text": "Два‑три часа не есть и не пить ничего, кроме воды. Сутки — без красящих продуктов: кофе, чай, красное вино, свёкла, соевый соус, ягоды. Сутки — без курения. Эмаль после чистки более восприимчива к пигментам."}}, {"@type": "Question", "name": "Больно ли лечить зубы?", "acceptedAnswer": {"@type": "Answer", "text": "Лечение проходит под местной анестезией. Современные анестетики действуют через несколько минут и полностью убирают чувствительность на время процедуры. Если вы боитесь самого укола, скажите — место инъекции предварительно обезболивается гелем."}}, {"@type": "Question", "name": "Обязательно ли удалять зубы мудрости?", "acceptedAnswer": {"@type": "Answer", "text": "Нет. Удаляют те, что растут неправильно, упираются в соседний зуб, регулярно воспаляются или не поддаются лечению. Здоровый, прорезавшийся и доступный для чистки зуб мудрости можно оставить."}}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Академия улыбки", "url": "https://akademiya-ulybki.ru/", "inLanguage": "ru-RU", "publisher": {"@type": "Organization", "name": "ООО «Академия улыбки»"}}</script>
@@ -262,6 +262,46 @@
   </div>
 </section>
 
+<!-- ПЕРЕБИВКА: после врача -->
+<section class="sec lfband" aria-label="Записаться на приём">
+  <div class="wrap lfband__in rv">
+    <form class="lf" id="lf-doc" novalidate>
+      <div class="lf__head">
+        <p class="eyebrow">Запись</p>
+        <h3 class="lf__t">Записаться к Александре Сергеевне</h3>
+        <p class="lf__p">Оставьте имя и телефон — подберём время под ваш график. Первичная консультация с осмотром и письменным планом лечения — 1 000 ₽.</p>
+      </div>
+      <div class="lf__grid">
+        <label class="lf__f">
+          <span class="lf__l">Как вас зовут</span>
+          <input class="lf__i" type="text" name="name" id="lf-doc-name" autocomplete="given-name"
+                 required minlength="2" maxlength="60" placeholder="Имя">
+        </label>
+        <label class="lf__f">
+          <span class="lf__l">Телефон</span>
+          <input class="lf__i" type="tel" name="tel" id="lf-doc-tel" autocomplete="tel"
+                 required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
+        </label>
+      </div>
+      <fieldset class="lf__when">
+        <legend class="lf__l">Когда удобно принять звонок</legend>
+        <span class="lf__chips">
+          <label class="lf__chip"><input type="radio" name="when" value="в любое время" checked><span>В любое время</span></label>
+          <label class="lf__chip"><input type="radio" name="when" value="до 12:00"><span>До 12:00</span></label>
+          <label class="lf__chip"><input type="radio" name="when" value="после 18:00"><span>После 18:00</span></label>
+        </span>
+      </fieldset>
+      <label class="lf__ok">
+        <input type="checkbox" name="ok" id="lf-doc-ok" required>
+        <span>Согласен на обработку имени и телефона для ответа на обращение — <a href="privacy.html" target="_blank" rel="noopener">политика обработки персональных данных</a></span>
+      </label>
+      <p class="lf__err" id="lf-doc-err" role="alert" hidden></p>
+      <button class="btn btn--fill lf__go" type="submit" data-track="lead_lf-doc">Записаться на приём</button>
+      <p class="fine lf__fine">Ответим в рабочее время. Можно и просто позвонить: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a></p>
+    </form>
+  </div>
+</section>
+
 <!-- ОТЗЫВЫ -->
 <section class="sec revs" id="otzyvy">
   <div class="wrap">
@@ -328,6 +368,46 @@
   </div>
 </section>
 
+<!-- ПЕРЕБИВКА: после вопросов -->
+<section class="sec lfband lfband--alt" aria-label="Задать вопрос">
+  <div class="wrap lfband__in rv">
+    <form class="lf" id="lf-faq" novalidate>
+      <div class="lf__head">
+        <p class="eyebrow">Остались вопросы</p>
+        <h3 class="lf__t">Спросите — ответит врач, а не администратор</h3>
+        <p class="lf__p">Оставьте имя и телефон. Если вопрос о лечении, Александра Сергеевна перезвонит сама.</p>
+      </div>
+      <div class="lf__grid">
+        <label class="lf__f">
+          <span class="lf__l">Как вас зовут</span>
+          <input class="lf__i" type="text" name="name" id="lf-faq-name" autocomplete="given-name"
+                 required minlength="2" maxlength="60" placeholder="Имя">
+        </label>
+        <label class="lf__f">
+          <span class="lf__l">Телефон</span>
+          <input class="lf__i" type="tel" name="tel" id="lf-faq-tel" autocomplete="tel"
+                 required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
+        </label>
+      </div>
+      <fieldset class="lf__when">
+        <legend class="lf__l">Когда удобно принять звонок</legend>
+        <span class="lf__chips">
+          <label class="lf__chip"><input type="radio" name="when" value="в любое время" checked><span>В любое время</span></label>
+          <label class="lf__chip"><input type="radio" name="when" value="до 12:00"><span>До 12:00</span></label>
+          <label class="lf__chip"><input type="radio" name="when" value="после 18:00"><span>После 18:00</span></label>
+        </span>
+      </fieldset>
+      <label class="lf__ok">
+        <input type="checkbox" name="ok" id="lf-faq-ok" required>
+        <span>Согласен на обработку имени и телефона для ответа на обращение — <a href="privacy.html" target="_blank" rel="noopener">политика обработки персональных данных</a></span>
+      </label>
+      <p class="lf__err" id="lf-faq-err" role="alert" hidden></p>
+      <button class="btn btn--fill lf__go" type="submit" data-track="lead_lf-faq">Жду звонка</button>
+      <p class="fine lf__fine">Ответим в рабочее время. Можно и просто позвонить: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a></p>
+    </form>
+  </div>
+</section>
+
 <!-- КОНТАКТЫ -->
 <section class="sec contact" id="kontakty">
   <div class="wrap contact__in">
@@ -348,6 +428,48 @@
     </div>
   </div>
 </section>
+
+<!-- ВСПЛЫВАЮЩАЯ ЗАЯВКА: только на главной -->
+<div class="lfpop" id="lfpop" hidden>
+  <div class="lfpop__back" data-lf-close></div>
+  <div class="lfpop__box" role="dialog" aria-modal="true" aria-labelledby="lf-pop-t">
+    <button class="lfpop__x" type="button" aria-label="Закрыть" data-lf-close></button>
+    <form class="lf" id="lf-pop" novalidate>
+      <div class="lf__head">
+        <p class="eyebrow">Прежде чем уйти</p>
+        <h3 class="lf__t">Посмотрим и скажем честно, что с зубом</h3>
+        <p class="lf__p">Оставьте имя и телефон — перезвоним и подберём время. Если лечение не нужно, так и скажем.</p>
+      </div>
+      <div class="lf__grid">
+        <label class="lf__f">
+          <span class="lf__l">Как вас зовут</span>
+          <input class="lf__i" type="text" name="name" id="lf-pop-name" autocomplete="given-name"
+                 required minlength="2" maxlength="60" placeholder="Имя">
+        </label>
+        <label class="lf__f">
+          <span class="lf__l">Телефон</span>
+          <input class="lf__i" type="tel" name="tel" id="lf-pop-tel" autocomplete="tel"
+                 required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
+        </label>
+      </div>
+      <fieldset class="lf__when">
+        <legend class="lf__l">Когда удобно принять звонок</legend>
+        <span class="lf__chips">
+          <label class="lf__chip"><input type="radio" name="when" value="в любое время" checked><span>В любое время</span></label>
+          <label class="lf__chip"><input type="radio" name="when" value="до 12:00"><span>До 12:00</span></label>
+          <label class="lf__chip"><input type="radio" name="when" value="после 18:00"><span>После 18:00</span></label>
+        </span>
+      </fieldset>
+      <label class="lf__ok">
+        <input type="checkbox" name="ok" id="lf-pop-ok" required>
+        <span>Согласен на обработку имени и телефона для ответа на обращение — <a href="privacy.html" target="_blank" rel="noopener">политика обработки персональных данных</a></span>
+      </label>
+      <p class="lf__err" id="lf-pop-err" role="alert" hidden></p>
+      <button class="btn btn--fill lf__go" type="submit" data-track="lead_lf-pop">Записаться</button>
+      <p class="fine lf__fine">Ответим в рабочее время. Можно и просто позвонить: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a></p>
+    </form>
+  </div>
+</div>
 </main>
 <footer class="ftr">
   <div class="wrap ftr__in">
@@ -377,6 +499,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=3823f09b"></script>
+<script src="main.js?v=a00115a0"></script>
 </body>
 </html>

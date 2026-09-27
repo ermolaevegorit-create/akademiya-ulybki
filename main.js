@@ -171,6 +171,134 @@
     paint(st);
   })();
 
+  /* ---------- ЗАЯВКА ----------
+     Пока сайт лежит на GitHub Pages, отправлять заявку некуда: он умеет
+     только отдавать готовые файлы. Поэтому форма собирает сообщение и
+     открывает WhatsApp клиники с готовым текстом — человек сам нажимает
+     «отправить». Так на сайте не появляется ни одного места, где чужие
+     имя и телефон хотя бы на секунду где-то лежат.
+     Как появится обработчик на сервере, впишите его адрес в FORM_ENDPOINT —
+     форма начнёт отправлять заявку напрямую, разметка не изменится. */
+  const FORM_ENDPOINT = '';
+
+  (function leadForms() {
+    const forms = $$('.lf'); if (!forms.length) return;
+    const WA = '79897512851';
+
+    /* Телефон принимаем в любом виде, но проверяем, что цифр достаточно:
+       строгая маска отпугивает сильнее, чем помогает. */
+    const digits = v => (v.match(/\d/g) || []).length;
+
+    function fail(el, msg, box) {
+      el.setAttribute('aria-invalid', 'true');
+      box.textContent = msg; box.hidden = false;
+      el.focus();
+      return false;
+    }
+
+    function send(f) {
+      const name = f.querySelector('[name=name]'), tel = f.querySelector('[name=tel]'),
+            ok = f.querySelector('[name=ok]'), box = f.querySelector('.lf__err'),
+            when = f.querySelector('[name=when]:checked');
+      [name, tel].forEach(el => el.removeAttribute('aria-invalid'));
+      box.hidden = true;
+
+      if (name.value.trim().length < 2) return fail(name, 'Напишите, как к вам обращаться.', box);
+      if (digits(tel.value) < 10) return fail(tel, 'Проверьте номер: нужно не меньше десяти цифр.', box);
+      if (!ok.checked) { box.textContent = 'Без согласия на обработку данных мы не сможем перезвонить.';
+        box.hidden = false; ok.focus(); return false; }
+
+      const text = 'Здравствуйте! Меня зовут ' + name.value.trim()
+        + '. Хочу записаться на приём. Телефон: ' + tel.value.trim()
+        + '. Звонить ' + (when ? when.value : 'в любое время') + '.';
+
+      if (FORM_ENDPOINT) {
+        fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.value.trim(), tel: tel.value.trim(),
+                                 when: when ? when.value : '', page: location.pathname }) })
+          .then(r => { if (!r.ok) throw 0; done(f); })
+          .catch(() => { box.textContent = 'Не получилось отправить. Позвоните, пожалуйста, по телефону.';
+                         box.hidden = false; });
+      } else {
+        open('https://wa.me/' + WA + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+        done(f);
+      }
+      track('lead_send');
+      return true;
+    }
+
+    function done(f) {
+      f.classList.add('is-sent');
+      const head = $('.lf__head', f);
+      head.innerHTML = '<p class="eyebrow">Готово</p>'
+        + '<h3 class="lf__t">Спасибо, заявка у нас</h3>'
+        + '<p class="lf__done">Перезвоним в рабочее время. Если нужно срочно — '
+        + '<a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a>.</p>';
+      try { localStorage.setItem('au-lead', '1'); } catch (e) {}
+      if (pop && !pop.hidden) setTimeout(closePop, 2600);
+    }
+
+    forms.forEach(f => f.addEventListener('submit', e => { e.preventDefault(); send(f); }));
+
+    /* ---------- всплывающее окно ----------
+       Показываем один раз и только тому, кто уже читал страницу: после блока
+       о враче и не раньше двадцати пяти секунд, либо когда курсор уходит за
+       верхнюю кромку окна. Закрытое окно не возвращается две недели, а после
+       отправленной заявки — не возвращается вовсе. */
+    const pop = $('#lfpop'); if (!pop) return;
+    let shown = false, lastFocus = null;
+
+    const seen = () => { try {
+      if (localStorage.getItem('au-lead')) return true;
+      const t = +localStorage.getItem('au-lead-pop') || 0;
+      return t && Date.now() - t < 14 * 864e5;
+    } catch (e) { return false; } };
+
+    function openPop() {
+      if (shown || seen() || html.classList.contains('vi')) return;
+      shown = true; lastFocus = document.activeElement;
+      pop.hidden = false;
+      const first = $('#lf-pop-name', pop); if (first) setTimeout(() => first.focus(), 340);
+      track('lead_pop_open');
+    }
+    function closePop() {
+      if (pop.hidden) return;
+      pop.hidden = true;
+      try { localStorage.setItem('au-lead-pop', String(Date.now())); } catch (e) {}
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    $$('[data-lf-close]', pop).forEach(el => el.addEventListener('click', closePop));
+    addEventListener('keydown', e => {
+      if (pop.hidden) return;
+      if (e.key === 'Escape') { closePop(); return; }
+      if (e.key !== 'Tab') return;
+      /* фокус не должен уходить из окна: за ним человек не видит, где он */
+      const f = $$('a[href],button,input,select,textarea', pop).filter(el => !el.disabled && el.offsetParent);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+
+    if (seen()) return;
+    const start = Date.now();
+    const doc = $('#vrach');
+    const watch = () => {
+      if (shown) return;
+      if (Date.now() - start < 25000) return;
+      if (!html.classList.contains('ready')) return;
+      if (doc && doc.getBoundingClientRect().top > 0) return;   // блок о враче ещё не прочитан
+      openPop();
+    };
+    addEventListener('scroll', watch, { passive: true });
+    setTimeout(watch, 25500);
+    /* уход курсора за верхнюю кромку — человек собрался закрыть вкладку */
+    if (finePointer) document.addEventListener('mouseout', e => {
+      if (!e.relatedTarget && e.clientY <= 0 && html.classList.contains('ready')
+          && Date.now() - start > 12000) openPop();
+    });
+  })();
+
   if (!$('#intro')) { html.classList.add('ready'); if (!hasGsap || reduced) html.classList.add('still'); return; }   // внутренние страницы
 
   /* статичная версия: всё показано, игры в конечном состоянии */
@@ -1131,6 +1259,7 @@
         if (!(nearTray(el) && snap(el))) { kick(); check(); }
       } });
   })();
+
 
   addEventListener('load', () => ScrollTrigger.refresh());
 })();

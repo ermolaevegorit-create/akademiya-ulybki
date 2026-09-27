@@ -307,24 +307,26 @@
        чтобы наклон в конце одного отрезка равнялся наклону в начале
        следующего. Раньше почти всё влетало в свою последнюю точку на полном
        ходу и мгновенно замирало: разрыв по скорости глаз читает как угол. */
-    tl.to(slogTop, { opacity: 0, y: -26, duration: .13, ease: 'power1.inOut' }, 0)
-      .to(slogBot, { opacity: 0, y: 26, duration: .13, ease: 'power1.inOut' }, 0)
-      .to(hint,   { opacity: 0, duration: .10, ease: 'power1.inOut' }, 0)
-      .to(on,     { opacity: 1, duration: .18, ease: 'power1.inOut' }, 0)
+    tl.to(slogTop, { opacity: 0, y: -26, duration: .11, ease: 'power1.inOut' }, 0)
+      .to(slogBot, { opacity: 0, y: 26, duration: .11, ease: 'power1.inOut' }, 0)
+      .to(hint,   { opacity: 0, duration: .08, ease: 'power1.inOut' }, 0)
+      .to(on,     { opacity: 1, duration: .14, ease: 'power1.inOut' }, 0)
       /* Перетекание в раскалённую копию заканчивается на половине пути:
          дальше горящая снимается с отрисовки и наезд ведёт одна картинка
          вместо двух — самая дорогая часть кадра дешевеет вдвое. */
-      .to(hotim,  { opacity: 1, duration: .30, ease: 'power1.inOut' }, .18)
-      /* наезд: разгон, ровный ход, мягкая остановка ровно там, где кадр
-         залит светом и начинает сходить завеса */
-      .to(stage,  { scale: 1.755, duration: .26, ease: 'power1.in' }, .18)
-      .to(stage,  { scale: 2.568, duration: .14, ease: 'none' }, .44)
-      .to(stage,  { scale: 2.800, duration: .08, ease: 'power1.out' }, .58)
-      .to(glow,   { opacity: 1, duration: .40, ease: 'power1.inOut' }, .18)
-      .to(bloom,  { opacity: 1, duration: .40, ease: 'power1.inOut' }, .26)
-      .to(bloom,  { scale: .957, duration: .20, ease: 'power1.in' }, .26)
-      .to(bloom,  { scale: 1.889, duration: .12, ease: 'none' }, .46)
-      .to(bloom,  { scale: 2.200, duration: .08, ease: 'power1.out' }, .58)
+      .to(hotim,  { opacity: 1, duration: .38, ease: 'power1.inOut' }, .06)
+      /* Наезд начинается почти сразу, а не после того, как лампа разгорится.
+         Прежняя пауза в 18 % шкалы — это на телефоне почти три сотни пикселей
+         прокрутки, на которых кадр не двигался вовсе, и читалась она как
+         задержка отклика. Теперь свет и движение идут вместе. */
+      .to(stage,  { scale: 1.353, duration: .20, ease: 'power1.in' }, 0)
+      .to(stage,  { scale: 2.624, duration: .36, ease: 'none' }, .20)
+      .to(stage,  { scale: 2.800, duration: .10, ease: 'power1.out' }, .56)
+      .to(glow,   { opacity: 1, duration: .58, ease: 'power1.inOut' }, 0)
+      .to(bloom,  { opacity: 1, duration: .56, ease: 'power1.inOut' }, .10)
+      .to(bloom,  { scale: .556, duration: .16, ease: 'power1.in' }, .10)
+      .to(bloom,  { scale: 1.965, duration: .30, ease: 'none' }, .26)
+      .to(bloom,  { scale: 2.200, duration: .10, ease: 'power1.out' }, .56)
       /* засвет приходит в полную силу плавно и без удара */
       .to(flash,  { opacity: 1, duration: .14, ease: 'power1.inOut' }, .52)
       .to(stage,  { opacity: 0, duration: .08, ease: 'power1.inOut' }, .58)
@@ -356,8 +358,8 @@
       const open = pos > .985;
       box.classList.toggle('is-moving', pos > .004);
       /* кадр залит белым — лампу и сияние снимаем с отрисовки совсем */
-      box.classList.toggle('is-lit', pos > .20);
-      box.classList.toggle('is-hot', pos > .50);
+      box.classList.toggle('is-lit', pos > .16);
+      box.classList.toggle('is-hot', pos > .46);
       box.classList.toggle('is-blank', pos > .66);
       html.classList.toggle('ready', open);
       /* Шапка лежит поверх кадра вступления и в переходе не участвовала:
@@ -436,22 +438,19 @@
       /* Нажали — сперва только свет: лампа разгорается, надписи уходят,
          размер кадра не меняется. И лишь потом, отдельной дугой, наезд.
          Точка LIGHT — место шкалы, где свет уже полный, а наезда ещё нет. */
-      const LIGHT = .18;
-      const ROLL = { ease: 'power1.inOut', overwrite: true,
-        onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
-        onInterrupt() { ride = null; driving = false; rest(); } };
+      /* Нажатие ведёт одной дугой от текущего места до первого экрана.
+         Ни задержки перед стартом, ни остановки на «свет уже полный»:
+         человек нажал — кадр трогается в том же кадре отрисовки. */
       const run = () => {
         const end = LEN;
         if (end - scrollY < 8) return;
         stopRide(); driving = true;
-        const zoom = () => { ride = gsap.to({ y: scrollY }, Object.assign({}, ROLL,
-          { y: end, duration: 3.0, delay: .14,
-            onComplete() { ride = null; driving = false; at(scrollY); rest(); } })); };
-        const lit = Math.round(LEN * LIGHT);
-        if (scrollY < lit - 2) {
-          ride = gsap.to({ y: scrollY }, Object.assign({}, ROLL,
-            { y: lit, duration: .26, ease: 'power2.out', onComplete: zoom }));
-        } else zoom();
+        const frac = (end - scrollY) / LEN;
+        ride = gsap.to({ y: scrollY }, { y: end, duration: Math.max(1.1, 2.6 * frac),
+          ease: 'power1.inOut', overwrite: true,
+          onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
+          onComplete() { ride = null; driving = false; at(scrollY); rest(); },
+          onInterrupt() { ride = null; driving = false; rest(); } });
       };
       btn.addEventListener('click', run);
       $$('.intro__go', box).forEach(el => el.addEventListener('click', run));
@@ -1091,21 +1090,21 @@
        тап по лотку кладёт на свободное место. Пальцем это заметно надёжнее,
        чем волочить мелкий предмет по экрану. */
     if (touchTray) {
-      let picked = null;
-      const lift = (el, up) => { el.__m.up = up; el.classList.toggle('is-pick', up); kick(); };
-      function place() {
-        if (!picked) return;
-        const el = picked; picked = null; lift(el, false);
-        if (!snap(el)) check();
-      }
+      /* Одно нажатие вместо двух. Прежняя механика — «возьми в руку, потом
+         нажми на лоток» — требовала попасть дважды, причём первый раз по
+         предмету шириной в несколько пикселей. Теперь нажатие на инструмент
+         сразу укладывает его в ближайшее свободное место, а повторное
+         нажатие по уложенному возвращает его обратно. Ошибиться нечем. */
       tools.forEach(el => el.addEventListener('click', e => {
         e.preventDefault(); e.stopPropagation();
-        if (picked) { place(); return; }   // что-то в руке — любой следующий тап кладёт
-        delete el.dataset.slot;
-        picked = el; el.classList.remove('wiggle'); lift(el, true);
+        const m = el.__m;
+        el.classList.remove('wiggle');
+        live = true;
+        if (el.dataset.slot !== undefined) {          // уже в лотке — забираем
+          delete el.dataset.slot; m.bx = 0; m.by = 0; dirty = true; kick();
+        } else if (!snap(el)) { check(); }            // свободных мест нет
       }));
-      stage.addEventListener('click', place);
-      hint.textContent = 'Нажмите на инструмент, потом на лоток — начнётся многоступенчатая стерилизация.';
+      hint.textContent = 'Нажимайте на инструменты — они лягут в лоток, и начнётся многоступенчатая стерилизация.';
     }
     if (!touchTray) Draggable.create(tools, { type: 'x,y', bounds: stage, zIndexBoost: false, minimumMovement: 3,
       onPress() {

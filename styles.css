@@ -118,10 +118,10 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 @media(max-width:960px){
   .nav{position:fixed;left:0;right:0;top:var(--hdr);flex-direction:column;gap:0;background:#fff;border-bottom:1px solid var(--hair);padding:8px var(--gut) 20px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:.25s}
   body.nav-open .nav{opacity:1;visibility:visible;transform:none}
-  .nav a{padding:14px 0;border-bottom:1px solid var(--hair-2);font-size:17px}
+  .nav a{padding:12px 0;border-bottom:1px solid var(--hair-2);font-size:17px}
   .nav a::after{display:none}
   .burger{margin-left:0;display:flex}
-  .nav a.nav__tel{display:inline-flex;font-weight:500;color:var(--ink)}
+  .nav .nav__quick{display:block;padding-top:4px}
   .nav{max-height:calc(100svh - var(--hdr));overflow:auto}
   .brand__t i{display:none}
 }
@@ -136,6 +136,9 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
    кадр: пока засвет расходится, содержимое уже стоит на своём месте и
    проступает сквозь него. Пустого белого кадра между ними не остаётся. */
 .intro.is-tall{height:290svh;margin-bottom:-100svh;overscroll-behavior:auto}
+/* На телефоне дорожка короче: полтора экрана прокрутки вместо двух.
+   Пальцем длинный путь утомляет быстрее, чем колесом. */
+@media(max-width:700px){.intro.is-tall{height:235svh}}
 .intro__inner{height:100%;background:#F7F8F9}
 .intro.is-tall .intro__inner{height:100svh}
 .js .intro{display:block}
@@ -161,6 +164,13 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
    Свет во время наезда нарастает перетеканием растров, а не расчётом
    градиентов: так он выглядит настоящим и почти ничего не стоит на кадре. */
 .intro.is-hot .intro__on{visibility:hidden}
+/* На телефоне раскалённая копия не рисуется вовсе: две большие картинки,
+   которые одновременно увеличиваются, — самая дорогая часть кадра, а
+   блики на светодиодах на экране в ладонь всё равно не различить. */
+@media(max-width:700px){
+  .intro__hot{display:none!important}
+  .intro.is-hot .intro__on{visibility:visible}
+}
 /* тихая жизнь до первого скролла: свет медленно дышит; при движении дыхание гаснет */
 .intro__aura{position:absolute;left:50%;top:50%;width:180%;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;
   background:radial-gradient(closest-side circle,rgba(255,253,247,.9) 0%,rgba(255,251,242,.62) 16%,rgba(255,250,238,.34) 30%,rgba(255,252,244,.12) 46%,rgba(255,255,255,0) 64%);
@@ -401,7 +411,20 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .tray__stage.is-uv .tray__rect{fill:#F3EFFF}
 .tool{position:absolute;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transform-origin:50% 60%;will-change:transform}
 /* область захвата чуть шире самого инструмента — тонкий бор иначе не поймать */
-.tool::after{content:"";position:absolute;inset:-12px}
+/* Цель нажатия — не тонкая полоска металла, а круг в середине инструмента,
+   не меньше 56 px. У бора видимая ширина на телефоне — пять пикселей:
+   попасть по нему пальцем без этого круга невозможно. */
+.tool::after{content:"";position:absolute;left:50%;top:52%;translate:-50% -50%;
+  width:max(calc(100% + 28px),56px);height:max(calc(100% + 28px),56px);border-radius:50%}
+/* На телефоне круг ещё и видно: иначе неясно, куда целиться. */
+@media(hover:none){
+  .tool{touch-action:manipulation}
+  .tool::before{content:"";position:absolute;left:50%;top:52%;translate:-50% -50%;
+    width:54px;height:54px;border-radius:50%;border:1px solid var(--hair-2);
+    background:rgba(27,61,150,.05);transition:background var(--t-fast),border-color var(--t-fast)}
+  .tool[data-slot]::before{opacity:0}
+  .tray__stage.is-uv .tool::before,.tray__stage.is-clean .tool::before{opacity:0}
+}
 .tool img{filter:drop-shadow(0 6px 8px rgba(20,22,26,.16));transition:filter .6s}
 .tool.is-drag{cursor:grabbing;z-index:5}
 /* инструмент взят в руку тапом: приподнят и подсвечен */
@@ -437,6 +460,33 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .equip__grid b{display:block;font-weight:500;font-size:var(--fs-3)}
 .equip__grid span{display:block;font-size:var(--fs-2);color:var(--mute);margin-top:4px;line-height:1.5}
 @media(max-width:900px){.equip__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+
+/* ЭКСКУРСИЯ ПО КЛИНИКЕ */
+.tour__in{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,72px);align-items:center}
+.tour__ph{margin:0}
+.tour__ph img{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;background:var(--tint)}
+.tour__txt h2{margin-top:6px}
+.tour__txt .lead{margin-top:16px}
+.tour__txt .btn{margin-top:10px}
+.tour__txt .fine{margin-top:14px}
+@media(max-width:900px){.tour__in{grid-template-columns:minmax(0,1fr);gap:24px}}
+
+/* Адрес и мессенджеры в выпадающем меню: только на телефоне, где меню
+   раскрывается списком. На широком экране шапка остаётся строкой ссылок. */
+.nav__quick{display:none}
+.nav__addr{display:block;font-size:var(--fs-2);color:var(--mute);line-height:1.5;
+  text-decoration:none;border-bottom:1px solid var(--hair-2);padding-bottom:12px}
+.nav__addr:hover{color:var(--ink)}
+.nav__chs{display:flex;flex-wrap:wrap;gap:8px;padding:12px 0 16px;
+  border-bottom:1px solid var(--ink);margin-bottom:4px}
+.nav__ch{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;
+  border:1px solid var(--hair);border-radius:2px;text-decoration:none;color:var(--ink);
+  font-size:var(--fs-2);font-weight:500;transition:border-color var(--t-fast),color var(--t-fast)}
+.nav__ch:hover{border-color:currentColor}
+.nav__ch--tel{color:var(--ink)}
+.nav__ch--wa{color:#0B7B43}
+.nav__ch--max{color:#5B2FD6}
+.nav__ch--tg{color:#1A7FAE}
 
 /* ВОПРОСЫ */
 .faqt__in{display:grid;grid-template-columns:5fr 7fr;gap:clamp(32px,5vw,88px);align-items:start}
@@ -612,7 +662,7 @@ html.vi .nav{position:fixed;left:0;right:0;top:var(--hdr);flex-direction:column;
 html.vi body.nav-open .nav{opacity:1;visibility:visible}
 html.vi .nav a{padding:14px 0;border-bottom:1px solid var(--hair-2);font-size:var(--fs-3)}
 html.vi .nav a::after{display:none}
-html.vi .nav a.nav__tel{display:inline-flex;font-weight:500;color:var(--ink)}
+html.vi .nav .nav__quick{display:block;padding-top:4px}
 html.vi .hdr__tel{width:44px;height:44px;justify-content:center;border:1px solid var(--hair);
   border-radius:2px;padding:0;margin-left:auto}
 html.vi .hdr__tel span{display:none}
@@ -809,27 +859,27 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
      одного отрезка равнялся наклону в начале следующего.
      Наезд и засвет заканчиваются на 66 %, ровно там, где начинает сходить
      завеса: белой паузы между ними не остаётся. */
-  @keyframes iOn{0%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}18%,100%{opacity:1}}
-  @keyframes iHot{0%,18%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}48%,100%{opacity:1}}
+  @keyframes iOn{0%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}14%,100%{opacity:1}}
+  @keyframes iHot{0%,6%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}44%,100%{opacity:1}}
   @keyframes iZoom{
-    0%,18%{transform:scale(1);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
-    44%{transform:scale(1.755);animation-timing-function:linear}
-    58%{transform:scale(2.568);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
+    0%{transform:scale(1);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    20%{transform:scale(1.353);animation-timing-function:linear}
+    56%{transform:scale(2.624);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
     66%,100%{transform:scale(2.8)}
   }
   @keyframes iStageOut{0%,58%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.3,1)}66%,100%{opacity:0}}
-  @keyframes iGlow{0%,18%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.35,1)}58%,100%{opacity:1}}
-  @keyframes iBloomFade{0%,26%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.35,1)}66%,100%{opacity:1}}
+  @keyframes iGlow{0%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.35,1)}58%,100%{opacity:1}}
+  @keyframes iBloomFade{0%,10%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.35,1)}66%,100%{opacity:1}}
   @keyframes iBloomScale{
-    0%,26%{transform:scale(.18);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
-    46%{transform:scale(.957);animation-timing-function:linear}
-    58%{transform:scale(1.889);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
+    0%,10%{transform:scale(.18);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    26%{transform:scale(.556);animation-timing-function:linear}
+    56%{transform:scale(1.965);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
     66%,100%{transform:scale(2.2)}
   }
   @keyframes iFlash{0%,52%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}66%,100%{opacity:1}}
-  @keyframes iSlogTop{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.4,0,.25,1)}13%,100%{opacity:0;transform:translateY(-26px)}}
-  @keyframes iSlogBot{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.4,0,.25,1)}13%,100%{opacity:0;transform:translateY(26px)}}
-  @keyframes iHint{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.3,1)}10%,100%{opacity:0}}
+  @keyframes iSlogTop{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.4,0,.25,1)}11%,100%{opacity:0;transform:translateY(-26px)}}
+  @keyframes iSlogBot{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.4,0,.25,1)}11%,100%{opacity:0;transform:translateY(26px)}}
+  @keyframes iHint{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.3,1)}8%,100%{opacity:0}}
   @keyframes iVeil{0%,66%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.35,1)}90%,100%{opacity:0}}
   /* Подъём первого экрана начинается ещё под светом и идёт ровным ходом всю
      видимую часть перехода, а тормозит только в самом конце. Так движение не

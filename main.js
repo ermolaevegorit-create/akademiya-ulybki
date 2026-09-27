@@ -316,9 +316,14 @@
       .to(bloom,  { opacity: 1, duration: .52 }, .26)
       .to(bloom,  { scale: 2.2, duration: .52, ease: 'power2.in' }, .26)
       /* засвет: белое заливает кадр раньше, чем корпус успевает исчезнуть */
-      .to(flash,  { opacity: 1, duration: .18, ease: 'power2.in' }, .62)
-      .to(stage,  { opacity: 0, duration: .12, ease: 'power1.in' }, .62)
+      .to(flash,  { opacity: 1, duration: .08, ease: 'power2.in' }, .62)
+      .to(stage,  { opacity: 0, duration: .08, ease: 'power1.in' }, .62)
       .to(flash,  { opacity: 1, duration: 0 }, 1);   // держим длительность шкалы равной 1
+    /* Тот же подъём первого экрана, что ведёт браузер на основном пути:
+       пока свет сходит, содержимое поднимается ему навстречу. */
+    const hTxt = $('.hero__txt'), hPh = $('.hero__ph');
+    if (hTxt) tl.fromTo(hTxt, { y: 78 }, { y: 0, duration: .34, ease: 'power2.out' }, .66);
+    if (hPh)  tl.fromTo(hPh,  { y: 36 }, { y: 0, duration: .34, ease: 'power2.out' }, .66);
     }
 
     let pos = 0, closed = false;
@@ -326,17 +331,23 @@
       if (!SDA) {
         tl.progress(pos);
         /* белый не держим отдельным экраном: как только кадр залит, он сразу
-           расходится и под ним проступает первый экран */
-        veil.style.opacity = pos > .82 ? String(Math.max(0, 1 - (pos - .82) / .18)) : '1';
+           расходится и под ним проступает первый экран. Сход длиннее самого
+           засвета — за это время первый экран успевает подняться на место. */
+        veil.style.opacity = pos > .70 ? String(Math.max(0, 1 - (pos - .70) / .18)) : '1';
       }
       const open = pos > .985;
       box.classList.toggle('is-moving', pos > .004);
       /* кадр залит белым — лампу и сияние снимаем с отрисовки совсем */
       box.classList.toggle('is-lit', pos > .20);
       box.classList.toggle('is-hot', pos > .66);
-      box.classList.toggle('is-blank', pos > .76);
+      box.classList.toggle('is-blank', pos > .70);
       html.classList.toggle('ready', open);
-      if (hdrEl) hdrEl.classList.toggle('hdr--ghost', !open);
+      /* Шапка лежит поверх кадра вступления и в переходе не участвовала:
+         пока страница была ещё на четыре пятых белой, шапка уже стояла
+         резкая и непрозрачная — два слоя в разных состояниях и читались
+         как шов. Меняем её не на выходе, а в тот момент, когда кадр залит
+         светом: на белом подмена фона не видна вовсе. */
+      if (hdrEl) hdrEl.classList.toggle('hdr--ghost', pos < .70);
       box.style.pointerEvents = open ? 'none' : '';
       if (open && !closed) {
         closed = true; track('intro_done');
@@ -382,46 +393,22 @@
       /* Инерция: как только прокрутка замерла посреди вступления, доводим её
          сами — вниз до первого экрана, вверх обратно к лампе. Зависнуть на
          белом кадре нельзя. */
-      let prevY = 0, dir = 1, settle = 0, ride = null, touching = false;
+      let ride = null;
       function stopRide() { if (ride) { ride.kill(); ride = null; } driving = false; }
-      /* Доводка двигает прокрутку сама, поэтому после неё нужно заново
-         запомнить, откуда считать направление: иначе первое движение вверх
-         принимается за движение вниз. */
-      const rest = () => { prevY = scrollY; };
-      /* Единственный случай, когда мы вмешиваемся в прокрутку: человек
-         остановился на залитом светом участке. Там смотреть не на что —
-         кадр белый, и застрять в нём неприятно. Везде остальное прокрутка
-         идёт как обычно, кадр в кадр за пальцем или колесом: попытка
-         подхватывать движение и доводить сценарий за человека читалась
-         как сбой. Назад тоже не мешаем — идут осознанно. */
-      const WHITE = .60;
-      function coast() {
-        settle = 0;
-        if (driving || closed) return;
-        if (pos <= WHITE || pos >= .985 || dir < 0) return;
-        const end = LEN;
-        const frac = Math.abs(end - scrollY) / LEN;
-        driving = true;
-        ride = gsap.to({ y: scrollY }, { y: end, duration: Math.max(.45, frac * 2.2),
-          ease: 'power2.out', overwrite: true,
-          onUpdate() { const y = this.targets()[0].y; scrollTo({ top: y, behavior: 'instant' }); at(y); },
-          onComplete() { ride = null; driving = false; at(scrollY); rest(); },
-          onInterrupt() { ride = null; driving = false; rest(); } });
-      }
-      const fromScroll = () => {
-        raf = 0;
-        if (driving) return;
-        if (scrollY !== prevY) dir = scrollY > prevY ? 1 : -1;
-        prevY = scrollY;
-        at(scrollY);
-        clearTimeout(settle);
-        if (pos > WHITE && pos < .985) settle = setTimeout(coast, 120);
-      };
+      const rest = () => {};
+      /* В прокрутку мы не вмешиваемся вовсе. Раньше, если человек
+         останавливался во второй половине вступления, скрипт перехватывал
+         прокрутку и сам дотягивал страницу до первого экрана. Срабатывало
+         это не всегда — зависело от того, как посчиталось направление
+         движения, — и непредсказуемость читалась как сбой сильнее, чем
+         любой стык. Теперь кадр идёт ровно за пальцем и колесом в обе
+         стороны, а довести сценарий одним движением можно нажатием на
+         лампу или на «Прокрутите вниз». */
+      const fromScroll = () => { raf = 0; if (driving) return; at(scrollY); };
       addEventListener('scroll', () => { if (!raf && !driving) raf = requestAnimationFrame(fromScroll); }, { passive: true });
       addEventListener('resize', () => { measure(); at(scrollY); });
-      /* палец на вступлении: отпустили — доводим */
-      box.addEventListener('touchstart', () => { touching = true; clearTimeout(settle); stopRide(); }, { passive: true });
-      box.addEventListener('touchend', () => { touching = false; clearTimeout(settle); settle = setTimeout(coast, 80); }, { passive: true });
+      /* палец на вступлении отменяет начатую по нажатию проводку */
+      box.addEventListener('touchstart', stopRide, { passive: true });
       scrollTo(0, 0); measure(); at(0);
       /* Прокрутку по нажатию ведём сами: ставим положение и тут же перерисовываем
          в том же кадре. Иначе событие scroll разбирается через кадр и картина
@@ -438,7 +425,7 @@
       const run = () => {
         const end = LEN;
         if (end - scrollY < 8) return;
-        clearTimeout(settle); stopRide(); driving = true;
+        stopRide(); driving = true;
         const zoom = () => { ride = gsap.to({ y: scrollY }, Object.assign({}, ROLL,
           { y: end, duration: 3.0, delay: .14,
             onComplete() { ride = null; driving = false; at(scrollY); rest(); } })); };

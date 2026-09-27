@@ -774,6 +774,8 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   html.sda .intro__flash,
   html.sda .intro__slogan,
   html.sda .intro__hint,
+  html.sda .hero__txt,
+  html.sda .hero__ph,
   html.sda .intro.is-tall .intro__inner{
     animation-timeline:scroll(root block);
     animation-range:0 var(--intro-len,2700px);
@@ -796,6 +798,12 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   html.sda .intro__slogan--under{animation-name:iSlogBot}
   html.sda .intro__hint{animation-name:iHint}
   html.sda .intro.is-tall .intro__inner{animation-name:iVeil}
+  /* Первый экран не просто проявляется из белого — он поднимается ему
+     навстречу и приходит в своё положение ровно тогда, когда свет сходит.
+     Текст и фотография идут с разной амплитудой: так у кадра есть глубина,
+     а переход читается как одно продолжающееся движение, а не как склейка. */
+  html.sda .hero__txt{animation-name:iRise}
+  html.sda .hero__ph{animation-name:iRiseSoft}
 
   @keyframes iOn{0%{opacity:0}18%,100%{opacity:1}}
   @keyframes iHot{0%,18%{opacity:0}62%,100%{opacity:1}}
@@ -810,9 +818,17 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
     0%,26%{transform:scale(.18);animation-timing-function:cubic-bezier(.32,0,.67,0)}
     78%,100%{transform:scale(2.2)}
   }
-  @keyframes iFlash{0%,62%{opacity:0;animation-timing-function:cubic-bezier(.32,0,.67,0)}80%,100%{opacity:1}}
+  @keyframes iFlash{0%,60%{opacity:0;animation-timing-function:cubic-bezier(.32,0,.67,0)}70%,100%{opacity:1}}
   @keyframes iSlogTop{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.11,0,.5,0)}12%,100%{opacity:0;transform:translateY(-24px)}}
   @keyframes iSlogBot{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.11,0,.5,0)}12%,100%{opacity:0;transform:translateY(24px)}}
   @keyframes iHint{0%{opacity:1;animation-timing-function:cubic-bezier(.11,0,.5,0)}9%,100%{opacity:0}}
-  @keyframes iVeil{0%,82%{opacity:1}100%{opacity:0}}
+  @keyframes iVeil{0%,70%{opacity:1;animation-timing-function:cubic-bezier(.45,.05,.3,1)}88%,100%{opacity:0}}
+  @keyframes iRise{
+    0%,66%{transform:translateY(78px);animation-timing-function:cubic-bezier(.22,.5,.32,1)}
+    100%{transform:translateY(0)}
+  }
+  @keyframes iRiseSoft{
+    0%,66%{transform:translateY(36px);animation-timing-function:cubic-bezier(.22,.5,.32,1)}
+    100%{transform:translateY(0)}
+  }
 }

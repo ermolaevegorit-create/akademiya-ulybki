@@ -77,16 +77,36 @@
     $$(`details[name="${d.getAttribute('name')}"]`).forEach(o => { if (o !== d && o.open) o.open = false; });
   }));
 
-  /* карта: подмена фотографией, если iframe не загрузился */
-  (function mapFallback() {
+  /* Карта по нажатию.
+
+     Раньше рамка Яндекса грузилась при открытии страницы: каждый посетитель,
+     даже не дойдя до контактов, отдавал свой IP третьему лицу. Для сайта
+     медицинской организации это передача персональных данных, о которой
+     человека никто не спросил. Плюс рамку режут блокировщики, и на её месте
+     оставался пустой серый прямоугольник.
+
+     Теперь на месте карты сразу стоит фотография входа с адресом, а карта
+     подключается только если человек её попросил. */
+  (function mapOnDemand() {
     const map = $('#map'); if (!map) return;
-    const fr = $('.map__frame', map); if (!fr) return;
-    let loaded = false; fr.addEventListener('load', () => { loaded = true; });
-    setTimeout(() => { if (loaded) return;
-      fr.remove(); map.classList.add('is-fallback');
-      map.insertAdjacentHTML('beforeend', `<img class="map__ph" src="${asset('assets/photo/facade.jpg')}" alt="Вход в клинику"><p class="map__note">Сочи, ул. Виноградная, 55/1 — вход с улицы, второй этаж.</p>`);
-    }, 6000);
+    const btn = $('#map-go', map); if (!btn) return;
+    btn.addEventListener('click', () => {
+      const src = btn.getAttribute('data-map-src'); if (!src) return;
+      const fr = document.createElement('iframe');
+      fr.className = 'map__frame';
+      fr.src = src;
+      fr.title = 'Карта: Виноградная, 55/1';
+      fr.loading = 'lazy';
+      fr.allowFullscreen = true;
+      fr.referrerPolicy = 'no-referrer';
+      fr.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups');
+      map.appendChild(fr);
+      map.classList.add('is-live');
+      btn.remove();
+      track('map_open');
+    });
   })();
+
 
   /* ---------- согласие на cookie и статистика ----------
      Технические cookie работают всегда; счётчик подключается только после «Принять всё».
@@ -1199,6 +1219,9 @@
       return cx > .13 && cx < .87 && cy > .5 && cy < .98; };
     function check() {
       const all = tools.every(inTray);
+      /* Как только в лоток лёг первый инструмент, надпись «Лоток» не нужна:
+         цель уже понятна, а поверх инструментов она мешает. */
+      stage.classList.toggle('is-started', tools.some(inTray));
       if (all && !stage.classList.contains('is-uv') && !stage.classList.contains('is-clean')) {
         stage.classList.add('is-uv'); done.textContent = 'Многоступенчатая стерилизация';
         hint.classList.add('is-touched'); gsap.to(hint, { opacity: 0, duration: .5 });

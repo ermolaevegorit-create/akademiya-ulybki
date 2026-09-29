@@ -32,7 +32,7 @@
 
 :root{
   --bg:#FFFFFF; --ink:#14161A; --ink-2:#4B5058; --mute:#5F646D;
-  --hair:rgba(20,22,26,.14); --hair-2:rgba(20,22,26,.07); --tint:#F5F6F8;
+  --hair:rgba(20,22,26,.14); --hair-2:rgba(20,22,26,.07); --tint:#F5F6F8; --band:#F5F6F8;
   --navy:#1B3D96; --navy-d:#15307A; --teal:#2F7E86; --uv:#7A4DFF; --err:#B3261E;
   --serif:"Prata",Georgia,"Times New Roman",serif;
   --sans:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -80,13 +80,17 @@ p{margin:0 0 1em}
    один бесконечный белый лист. Разница тона всего около четырёх процентов:
    достаточно, чтобы глаз увидел границу, и мало, чтобы это лезло в глаза.
 --------------------------------------------------------------------------- */
-.sec--band{background:var(--tint);
-  border-top:1px solid var(--hair-2);border-bottom:1px solid var(--hair-2)}
+.sec--band{background:var(--band);
+  border-top:1px solid var(--hair-2);border-bottom:1px solid var(--hair-2);
+  /* Внутри полосы «светлая плашка» — это уже не серый, а белый: иначе лоток
+     в игре, подложка карты и рамка под фото сливаются с самой полосой и
+     пропадают. Переопределяем токен один раз здесь, и всё, что им
+     пользуется, встаёт на место само. */
+  --tint:var(--bg)}
 /* Две полосы подряд слились бы в одну длинную: смежную границу убираем,
    чтобы между ними не было двойной линии. */
 .sec--band + .sec--band{border-top:0}
-/* Картинки внутри полосы стоят на белом — так они не сливаются с подложкой. */
-.sec--band img,.sec--band .slab,.sec--band .tour__ph{background:var(--bg)}
+
 
 /* На большом мониторе колонку немного расширяем. Строка текста от этого не
    удлиняется — абзацы и без того ограничены по числу знаков, — а сетки
@@ -423,14 +427,29 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 @media(max-width:760px){.revs__grid{grid-template-columns:minmax(0,1fr)}}
 
 /* ИГРА: ЛОТОК И УЛЬТРАФИОЛЕТ */
-.tray__stage{position:relative;max-width:680px;margin:0 auto;aspect-ratio:800/330}
+/* Сцена была 680 px посреди полосы во всю ширину экрана — набор инструментов
+   читался как горстка предметов, потерянная в пустом поле. Расширяем: всё
+   внутри расставлено в процентах, поэтому игра от этого не меняется. */
+.tray__stage{position:relative;max-width:min(880px,100%);margin:0 auto;aspect-ratio:800/330}
+/* Надпись в лотке. Пустой прямоугольник с тонкой рамкой сам по себе не
+   читается как цель: непонятно, это рисунок или место, куда что-то кладут.
+   Слово снимает вопрос и уходит, как только первый инструмент лёг. */
+.tray__label{position:absolute;left:50%;top:72.6%;translate:-50% -50%;margin:0;
+  font-size:var(--fs-2);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);
+  pointer-events:none;transition:opacity .45s ease}
+.tray__stage.is-started .tray__label,
+.tray__stage.is-uv .tray__label,
+.tray__stage.is-clean .tray__label{opacity:0}
 /* рисунок лотка не должен перехватывать нажатия: его овалы лежали поверх
    инструментов и часть из них было невозможно подхватить */
 .tray__svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .tray__rect{fill:var(--tint);stroke:var(--hair);stroke-width:1.5;transition:fill .8s}
 .tray__rim{fill:none;stroke:var(--hair-2);stroke-width:1}
-.tray__tube{stroke:#C9CBD0;transition:stroke .8s}
-.tray__wire{stroke:#C9CBD0}
+/* Трубка ультрафиолетовой лампы. Пока свет не включён, это просто линия,
+   пересекающая инструменты, и читается она как царапина на картинке.
+   Делаем её вполсилы; когда лампа загорится, она и так станет заметной. */
+.tray__tube{stroke:#DCDEE2;transition:stroke .8s}
+.tray__wire{stroke:#DCDEE2}
 .tray__halo,.tray__wash{opacity:0;transition:opacity 1.1s ease}
 .tray__stage.is-uv .tray__tube{stroke:#C7B2FF}
 .tray__stage.is-uv .tray__halo,.tray__stage.is-uv .tray__wash{opacity:1;transition:opacity .6s ease}
@@ -650,7 +669,30 @@ html.vi .lfband{background:var(--bg);border-color:var(--ink)}
 .map{position:relative;margin-top:clamp(28px,4vw,48px);aspect-ratio:16/9;background:var(--tint);border:1px solid var(--hair-2);overflow:hidden}
 .map__frame{position:absolute;inset:0;width:100%;height:100%;border:0;filter:grayscale(.15)}
 .map__ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.map.is-fallback + .contact__photo,.contact__in .rv:has(+ .map.is-fallback) .contact__photo{display:none}
+/* Пока карта не открыта, на её месте стоит фотография входа. Тогда маленькое
+   фото в колонке рядом с реквизитами — то же самое дважды: прячем его и
+   отдаём реквизитам всю ширину. Как только человек открыл карту, маленькое
+   фото возвращается: фотография входа ему теперь нужна отдельно. */
+.contact__top:has(+ .map:not(.is-live)) .contact__photo{display:none}
+.contact__top:has(+ .map:not(.is-live)){grid-template-columns:minmax(0,1fr)}
+/* Кадр вертикальный, а место под карту широкое: при обрезке по центру дверь
+   уходит за нижний край и остаётся стена с окнами. Смещаем кадрирование вниз
+   — в рамке оказываются вывеска и вход, то есть то, что человек ищет
+   глазами, когда подходит к дому. */
+.map:not(.is-live){aspect-ratio:3/2}
+.map__ph{object-position:50% 70%}
+.map.is-live .map__ph,.map.is-live .map__note{display:none}
+/* Кнопка лежит на фотографии, а не под ней: место одно, а действие понятное. */
+.map__go{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:2;
+  min-height:48px;padding:12px 22px;border:1px solid var(--hair);border-radius:2px;
+  background:rgba(255,255,255,.94);color:var(--ink);font:inherit;font-size:var(--fs-2);
+  font-weight:500;cursor:pointer;box-shadow:0 6px 20px rgba(20,22,26,.14);
+  transition:background var(--t-fast),transform var(--t-fast)}
+.map__go:hover{background:#fff;transform:translate(-50%,-50%) scale(1.02)}
+.map__go:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+/* Без скрипта карту не подключить — и кнопки, которая ничего не делает, быть
+   не должно: остаётся фотография с адресом, этого достаточно. */
+.no-js .map__go{display:none}
 .map__note{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:rgba(255,255,255,.9);font-size:var(--fs-2);margin:0}
 .contact__in h2{margin-bottom:8px}
 .contact__photo{margin:0;max-width:300px}
@@ -728,17 +770,17 @@ html.vi{
   --fs-7:calc(32px*var(--vi-k)); --fs-8:calc(36px*var(--vi-k));
   --sec:clamp(40px,6vw,72px);
   --bg:#FFFFFF; --ink:#000000; --ink-2:#121212; --mute:#2B2B2B;
-  --hair:rgba(0,0,0,.45); --hair-2:rgba(0,0,0,.22); --tint:#F1F1F1;
+  --hair:rgba(0,0,0,.45); --hair-2:rgba(0,0,0,.22); --tint:#F1F1F1; --band:#F1F1F1;
   --navy:#00308F; --navy-d:#001F5C; --teal:#0A5057; --uv:#48108F; --err:#8E0000;
 }
 html.vi.vi-dark{
   --bg:#000000; --ink:#FFFFFF; --ink-2:#F2F2F2; --mute:#D9D9D9;
-  --hair:rgba(255,255,255,.5); --hair-2:rgba(255,255,255,.26); --tint:#141414;
+  --hair:rgba(255,255,255,.5); --hair-2:rgba(255,255,255,.26); --tint:#141414; --band:#141414;
   --navy:#8CBCFF; --navy-d:#B6D4FF; --teal:#6FD0D9; --uv:#CBA8FF; --err:#FF9E94;
 }
 html.vi.vi-sepia{
   --bg:#F7F3D8; --ink:#33280B; --ink-2:#3D3010; --mute:#524217;
-  --hair:rgba(51,40,11,.45); --hair-2:rgba(51,40,11,.22); --tint:#EDE6BF;
+  --hair:rgba(51,40,11,.45); --hair-2:rgba(51,40,11,.22); --tint:#EDE6BF; --band:#EDE6BF;
   --navy:#123C86; --navy-d:#0C2A60; --teal:#0A4F47; --uv:#4E2490; --err:#8A1A00;
 }
 html.vi body{font-size:var(--fs-3);line-height:1.8;letter-spacing:.01em}

@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=1af7f2f7">
+<link rel="stylesheet" href="styles.css?v=0524f980">
 
 </head>
 <body>
@@ -112,6 +112,68 @@
   </div>
 </footer>
 
+<div class="lfpop" id="lfpop" hidden>
+  <div class="lfpop__back" data-lf-close></div>
+  <div class="lfpop__box" role="dialog" aria-modal="true" aria-labelledby="lf-pop-t">
+    <button class="lfpop__x" type="button" aria-label="Закрыть" data-lf-close></button>
+    <form class="lf lf--compact" id="lf-pop" novalidate>
+      <div class="lf__head">
+        <p class="eyebrow">Прежде чем уйти</p>
+        <h3 class="lf__t">Перезвоним и подберём время</h3>
+        <p class="lf__p">Имя и телефон — остальное спросим при звонке.</p>
+      </div>
+      <div class="lf__grid">
+        <label class="lf__f">
+          <span class="lf__l">Как вас зовут</span>
+          <input class="lf__i" type="text" name="name" id="lf-pop-name" autocomplete="given-name"
+                 required minlength="2" maxlength="60" placeholder="Имя">
+        </label>
+        <label class="lf__f">
+          <span class="lf__l">Телефон</span>
+          <input class="lf__i" type="tel" name="tel" id="lf-pop-tel" autocomplete="tel"
+                 required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
+        </label>
+      </div>
+      <!-- Во всплывающем окне этот блок скрыт стилем (.lf--compact): там нужно
+           спросить минимум, иначе окно занимает весь экран телефона. Поле не
+           удалено, а скрыто — значение «в любое время» всё равно уходит в
+           заявку, и разметка форм остаётся одна и та же. -->
+      <fieldset class="lf__when">
+        <legend class="lf__l">Когда удобно принять звонок</legend>
+        <span class="lf__chips">
+          <label class="lf__chip"><input type="radio" name="when" value="в любое время" checked><span>В любое время</span></label>
+          <label class="lf__chip"><input type="radio" name="when" value="до 12:00"><span>До 12:00</span></label>
+          <label class="lf__chip"><input type="radio" name="when" value="после 18:00"><span>После 18:00</span></label>
+        </span>
+      </fieldset>
+      <label class="lf__ok">
+        <input type="checkbox" name="ok" id="lf-pop-ok" required>
+        <span>Согласен на обработку имени и телефона для ответа на обращение — <a href="privacy.html" target="_blank" rel="noopener">политика обработки персональных данных</a></span>
+      </label>
+      <p class="lf__err" id="lf-pop-err" role="alert" hidden></p>
+      <button class="btn btn--fill lf__go" type="submit" data-track="lead_lf-pop">Записаться</button>
+      <p class="fine lf__fine">Ответим в рабочее время. Можно и просто позвонить: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a></p>
+    </form>
+  </div>
+</div>
+
+<!-- ВЫЗОВ АССИСТЕНТА
+     Круглая кнопка в углу: одно нажатие — и открывается та же форма записи,
+     что в блоках страницы. Нужна потому, что решение записаться приходит не
+     там, где стоит форма, а в любом месте страницы, и возвращаться к ней
+     человек чаще всего не станет.
+     Пульсация мягкая и конечная: несколько волн и тишина — иначе через
+     минуту это раздражает, а не привлекает.
+     Лицо ассистента появится здесь, когда будет письменное согласие на
+     публикацию и снимок анфас; пока — знак. -->
+<button class="fab" id="fab" type="button" aria-label="Записаться на приём">
+  <span class="fab__ring" aria-hidden="true"></span>
+  <span class="fab__ph" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4c-1.2 0-2.4-.2-3.5-.7L3 21l1.8-5.2A8.2 8.2 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/><circle cx="9" cy="11.5" r=".9" fill="currentColor" stroke="none"/><circle cx="12.5" cy="11.5" r=".9" fill="currentColor" stroke="none"/><circle cx="16" cy="11.5" r=".9" fill="currentColor" stroke="none"/></svg>
+  </span>
+  <span class="fab__t">Записаться</span>
+</button>
+
 <div class="cookie" id="cookie" hidden role="dialog" aria-modal="false" aria-labelledby="cookie-t">
   <p class="cookie__t" id="cookie-t"><b>Cookie и статистика</b></p>
   <p class="cookie__d">Технические cookie нужны для работы сайта. С вашего согласия включим Яндекс.Метрику — обезличенную статистику, чтобы делать сайт удобнее. <a href="privacy.html">Подробнее</a>.</p>
@@ -125,6 +187,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=a00115a0"></script>
+<script src="main.js?v=ee1bed92"></script>
 </body>
 </html>

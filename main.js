@@ -25,6 +25,27 @@
   const ASSETS = window.__ASSETS || {};           // подстановка путей для single-file сборки
   const asset = p => ASSETS[p] || p;
 
+  /* Настоящее изменение размера окна, а не спрятавшаяся адресная строка.
+
+     На телефоне браузер убирает и возвращает адресную строку прямо во время
+     прокрутки: ширина та же, высота скачет на 60–120 px, и событие resize
+     прилетает десятки раз за одну прокрутку. Всё, что на него навешано —
+     пересчёты, перевыделение полотен canvas, замеры дорожек, — выполняется в
+     тот самый момент, когда человек ведёт страницу пальцем. Отсюда и рывки.
+
+     Настоящим считаем только то, где изменилась ширина или высота скакнула
+     больше чем на четверть экрана: поворот, разделённый экран, окно на
+     рабочем столе. Всё прочее пропускаем, а оставшееся ещё и придерживаем,
+     чтобы за серию событий пересчитать один раз. */
+  function onRealResize(fn, delay) {
+    let w = innerWidth, h = innerHeight, t = 0;
+    addEventListener('resize', () => {
+      if (innerWidth === w && Math.abs(innerHeight - h) <= innerHeight * .25) return;
+      w = innerWidth; h = innerHeight;
+      clearTimeout(t); t = setTimeout(fn, delay || 150);
+    }, { passive: true });
+  }
+
   /* ---------- шапка, меню, активный раздел ---------- */
   const hdr = $('#hdr');
   addEventListener('scroll', () => hdr.classList.toggle('stuck', scrollY > 8), { passive: true });
@@ -63,7 +84,7 @@
     let loaded = false; fr.addEventListener('load', () => { loaded = true; });
     setTimeout(() => { if (loaded) return;
       fr.remove(); map.classList.add('is-fallback');
-      map.insertAdjacentHTML('beforeend', `<img class="map__ph bw" src="${asset('assets/photo/facade.jpg')}" alt="Вход в клинику"><p class="map__note">Сочи, ул. Виноградная, 55/1 — вход с улицы, второй этаж.</p>`);
+      map.insertAdjacentHTML('beforeend', `<img class="map__ph" src="${asset('assets/photo/facade.jpg')}" alt="Вход в клинику"><p class="map__note">Сочи, ул. Виноградная, 55/1 — вход с улицы, второй этаж.</p>`);
     }, 6000);
   })();
 
@@ -254,8 +275,16 @@
       return t && Date.now() - t < 14 * 864e5;
     } catch (e) { return false; } };
 
-    function openPop() {
-      if (shown || seen() || html.classList.contains('vi')) return;
+    /* force — окно открыто нажатием, а не само. Нажатие выполняем всегда:
+       человек попросил форму, и «вы это окно уже видели» тут не ответ. */
+    function openPop(force) {
+      if (!force && (shown || seen() || html.classList.contains('vi'))) return;
+      /* Пока висит полоса о cookie, окно не открываем само: на телефоне оба
+         приходят снизу и налезают друг на друга, а человек получает два
+         требования сразу. Сперва пусть ответит на первое — окно подождёт
+         следующего повода (прокрутки или ухода курсора). */
+      const bar = $('#cookie');
+      if (!force && bar && !bar.hidden) return;
       shown = true; lastFocus = document.activeElement;
       pop.hidden = false;
       const first = $('#lf-pop-name', pop); if (first) setTimeout(() => first.focus(), 340);
@@ -280,14 +309,55 @@
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
 
-    if (seen()) return;
-    const start = Date.now();
+    /* ---------- кнопка вызова в углу ----------
+       Есть на каждой странице: решение записаться приходит не там, где стоит
+       форма. Появляется не сразу — сначала человек должен что-то прочитать,
+       иначе это просто баннер поверх ещё не увиденной страницы. */
+    (function fab() {
+      const b = $('#fab'); if (!b) return;
+      b.addEventListener('click', () => {
+        track('fab_click');
+        /* В покое и в версии для слабовидящих всплывающего окна нет вовсе —
+           там ведём к форме, которая уже стоит на странице, а если её нет
+           (внутренние страницы), к контактам. */
+        if (html.classList.contains('still') || html.classList.contains('vi')) {
+          const t = $('.lfband .lf') || $('#kontakty') || $('.ftr');
+          if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                   const f = $('input', t); if (f) setTimeout(() => f.focus(), 500); }
+          return;
+        }
+        openPop(true);
+      });
+      /* Порог показа — один экран прокрутки после того, как страница открыта.
+         На главной «открыта» означает, что вступление закончилось. */
+      const bar = $('#cookie');
+      /* Кнопка показана, когда выполнено всё сразу: страница открыта, человек
+         прокрутил хотя бы половину экрана и полоса о cookie не висит. Полоса
+         стоит в том же углу и приходит с задержкой — если проверить один раз
+         и забыть, она накроет кнопку. Поэтому не «показать однажды», а
+         держать в согласии с обстановкой: состояние пересчитывается. */
+      let armed = false;
+      const sync = () => {
+        if (html.classList.contains('ready') && scrollY >= innerHeight * .6) armed = true;
+        const busy = bar && !bar.hidden;
+        b.classList.toggle('is-on', armed && !busy);
+      };
+      addEventListener('scroll', sync, { passive: true });
+      setInterval(sync, 700);
+      setTimeout(sync, 3000);
+    })();
+
+    /* Само окно приходит только на главной: там есть что прочитать до него —
+       направления, первый визит, врач. На внутренних страницах человек пришёл
+       за конкретным (цены, документы), и перебивать его нечем. */
     const doc = $('#vrach');
+    if (!doc || seen()) return;
+    const start = Date.now();
     const watch = () => {
       if (shown) return;
       if (Date.now() - start < 25000) return;
       if (!html.classList.contains('ready')) return;
-      if (doc && doc.getBoundingClientRect().top > 0) return;   // блок о враче ещё не прочитан
+      if (doc.getBoundingClientRect().top > 0) return;   // блок о враче ещё не прочитан
       openPop();
     };
     addEventListener('scroll', watch, { passive: true });
@@ -543,8 +613,15 @@
       const heroTop = () => { const h = $('#hero'), pad = hdrEl ? hdrEl.offsetHeight : 0;
         return h ? Math.max(1, Math.round(h.getBoundingClientRect().top + scrollY) - pad)
                  : Math.max(1, box.offsetHeight - innerHeight - pad); };
-      const measure = () => { const y = scrollY; scrollTo({ top: 0, behavior: 'instant' });
-        LEN = heroTop(); scrollTo({ top: y, behavior: 'instant' });
+      /* Длину дорожки считаем, не трогая прокрутку. Раньше здесь страница
+         прыгала в ноль и обратно: scrollTo(0) → замер → scrollTo(назад).
+         На телефоне это и было причиной рывков. Браузер на мобильном прячет
+         и показывает адресную строку прямо во время прокрутки, от этого
+         срабатывает resize, а resize дёргал этот замер — то есть палец ведёт
+         страницу вниз, а скрипт в этот момент швыряет её в начало и возвращает.
+         Замер в прокрутке не нуждается: getBoundingClientRect().top + scrollY
+         даёт положение в документе, одинаковое при любой прокрутке. */
+      const measure = () => { LEN = heroTop();
         html.style.setProperty('--intro-len', LEN + 'px'); };   // одна запись, не на кадр
       const at = y => { pos = Math.min(1, Math.max(0, y / LEN)); apply(); };
       /* Инерция: как только прокрутка замерла посреди вступления, доводим её
@@ -563,7 +640,15 @@
          лампу или на «Прокрутите вниз». */
       const fromScroll = () => { raf = 0; if (driving) return; at(scrollY); };
       addEventListener('scroll', () => { if (!raf && !driving) raf = requestAnimationFrame(fromScroll); }, { passive: true });
-      addEventListener('resize', () => { measure(); at(scrollY); });
+      /* На телефоне resize — это чаще всего не поворот экрана, а спрятавшаяся
+         адресная строка: ширина та же, высота скакнула на 60–120 px, и так
+         десятки раз за одну прокрутку. Пересчитывать дорожку на каждый такой
+         скачок значит менять шкалу под пальцем — кадр дёргается. Высота кадра
+         задана в svh, то есть от неподвижной части экрана, и от адресной
+         строки не зависит вовсе; значит и пересчитывать нечего.
+         Реагируем только на настоящее изменение: другая ширина или скачок
+         высоты больше четверти экрана (поворот, разделённый экран). */
+      onRealResize(() => { measure(); at(scrollY); }, 120);
       /* палец на вступлении отменяет начатую по нажатию проводку */
       box.addEventListener('touchstart', stopRide, { passive: true });
       scrollTo(0, 0); measure(); at(0);
@@ -627,7 +712,7 @@
   function makeParticles(canvas, stageEl) {
     const ctx = canvas.getContext('2d'); let parts = [], raf = 0;
     const size = () => { const r = stageEl.getBoundingClientRect(); canvas.width = Math.round(r.width * 1.2 * dpr); canvas.height = Math.round(r.height * dpr); };
-    size(); addEventListener('resize', size);
+    size(); onRealResize(size, 180);
     function tick() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       parts = parts.filter(p => p.life > 0);
@@ -675,7 +760,7 @@
       ops = 0; last = null;
     }
     reset();
-    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!open) reset(); }, 200); });
+    onRealResize(() => { if (!open) reset(); }, 200);
 
     /* камень зарастает, пока его не трогают */
     new IntersectionObserver(es => es.forEach(e => { visible = e.isIntersecting;
@@ -1100,7 +1185,7 @@
       gsap.to(TOOLS.map(t => t.el), { y: 0, opacity: 1, duration: .8, ease: 'power3.out', stagger: .1 }); }); }, { threshold: .2 });
     io2.observe(stageEl);
 
-    let rt2; addEventListener('resize', () => { clearTimeout(rt2); rt2 = setTimeout(sizeCanvases, 180); });
+    onRealResize(sizeCanvases, 180);
     reset();
   })();
 

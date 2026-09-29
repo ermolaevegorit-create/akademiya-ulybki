@@ -66,6 +66,32 @@ p{margin:0 0 1em}
 .wrap{max-width:var(--wrap);margin:0 auto;padding-inline:var(--gut)}
 .sec{position:relative;padding-block:var(--sec);scroll-margin-top:var(--hdr)}
 [id]{scroll-margin-top:calc(var(--hdr) + 16px)}
+
+/* ---------------------------------------------------------------------------
+   ЗОНИРОВАНИЕ
+
+   Текстовая колонка ограничена 1240 px — так и должно быть, длинная строка
+   нечитаема. Но на широком мониторе это давало узкую ленту посреди белого
+   листа, и поля по бокам выглядели не воздухом, а незавёрстанным местом.
+
+   Лечится не шириной колонки, а фоном: через одну секции получают подложку
+   во всю ширину экрана. Поле по бокам перестаёт быть пустым — оно становится
+   частью полосы, а страница читается как последовательность блоков, а не как
+   один бесконечный белый лист. Разница тона всего около четырёх процентов:
+   достаточно, чтобы глаз увидел границу, и мало, чтобы это лезло в глаза.
+--------------------------------------------------------------------------- */
+.sec--band{background:var(--tint);
+  border-top:1px solid var(--hair-2);border-bottom:1px solid var(--hair-2)}
+/* Две полосы подряд слились бы в одну длинную: смежную границу убираем,
+   чтобы между ними не было двойной линии. */
+.sec--band + .sec--band{border-top:0}
+/* Картинки внутри полосы стоят на белом — так они не сливаются с подложкой. */
+.sec--band img,.sec--band .slab,.sec--band .tour__ph{background:var(--bg)}
+
+/* На большом мониторе колонку немного расширяем. Строка текста от этого не
+   удлиняется — абзацы и без того ограничены по числу знаков, — а сетки
+   картинок и плиток перестают жаться к середине. */
+@media(min-width:1600px){:root{--wrap:1360px}}
 .sec__head{max-width:720px;margin-bottom:clamp(40px,5vw,64px)}
 .sec__head--c{margin-inline:auto;text-align:center}
 .sec__head--c .sec__note{margin-inline:auto}
@@ -538,13 +564,13 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
   padding:clamp(16px,4vw,40px);padding-bottom:max(env(safe-area-inset-bottom,0px),16px)}
 .lfpop[hidden]{display:none}
 .lfpop__back{position:absolute;inset:0;background:rgba(20,22,26,.45);backdrop-filter:blur(2px);
-  animation:lfin .35s ease both}
+  animation:lfin .45s ease both}
 .lfpop__box{position:relative;width:100%;max-width:520px;max-height:100%;overflow:auto;
   background:var(--bg);border:1px solid var(--hair);border-radius:2px;
   padding:clamp(24px,4vw,36px);box-shadow:0 24px 60px rgba(20,22,26,.18);
-  animation:lfup .4s cubic-bezier(.2,.7,.2,1) both}
+  animation:lfup .52s cubic-bezier(.22,.61,.36,1) both}
 @keyframes lfin{from{opacity:0}to{opacity:1}}
-@keyframes lfup{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes lfup{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 .lfpop__x{position:absolute;right:10px;top:10px;width:44px;height:44px;border:0;background:none;
   cursor:pointer;border-radius:2px;color:var(--ink-2)}
 .lfpop__x::before,.lfpop__x::after{content:"";position:absolute;left:50%;top:50%;width:16px;height:1.4px;
@@ -553,6 +579,39 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .lfpop__x:hover{color:var(--ink)}
 .lfpop .lf{max-width:none}
 .lfpop .lf__t{font-size:var(--fs-5)}
+
+/* ---------------------------------------------------------------------------
+   ВСПЛЫВАЮЩЕЕ ОКНО: КОРОТКОЕ И БЕЗ НАЖИМА
+
+   Окно занимало 94 % высоты телефона, а кнопка отправки оказывалась за нижним
+   краем: человек видел не предложение, а перекрытый экран, и первое движение
+   руки — искать крестик. Сокращаем спрос до имени и телефона (время звонка
+   всё равно уточняют при звонке) и убираем лишний воздух внутри.
+--------------------------------------------------------------------------- */
+.lf--compact .lf__when{display:none}
+.lf--compact .lf__p{margin-top:8px;font-size:var(--fs-3)}
+.lf--compact .lf__head{margin-bottom:18px}
+.lfpop .lf__t{line-height:1.2}
+.lfpop .lf__fine{margin-top:12px}
+
+@media(max-width:620px){
+  /* На телефоне окно приходит снизу — оттуда, где лежит большой палец, и
+     никогда не закрывает экран целиком: высота по содержимому, не больше
+     четырёх пятых экрана. Это лист, который можно смахнуть, а не заслон. */
+  .lfpop{align-items:flex-end;padding:0}
+  .lfpop__box{max-width:none;max-height:86svh;border-radius:14px 14px 0 0;border-bottom:0;
+    padding:22px 18px calc(18px + env(safe-area-inset-bottom,0px));
+    animation-name:lfsheet;animation-duration:.42s}
+  /* полоска-ручка: подсказывает, что лист можно закрыть, и отделяет его от страницы */
+  .lfpop__box::before{content:"";position:absolute;left:50%;top:8px;translate:-50% 0;
+    width:38px;height:4px;border-radius:2px;background:var(--hair)}
+  .lfpop__box > .lf{margin-top:8px}
+  .lfpop .lf__t{font-size:var(--fs-5)}
+  .lfpop__x{right:4px;top:6px}
+}
+/* Лист выезжает снизу и тормозит без отскока: кривая без «перелёта» за
+   конечную точку — резкое появление на телефоне читается как ошибка. */
+@keyframes lfsheet{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:none}}
 
 /* В статичном режиме и без скрипта всплывающего окна нет: отправлять заявку
    нечем, а окно, которое нельзя закрыть скриптом, — ловушка. */
@@ -580,14 +639,22 @@ html.vi .lfband{background:var(--bg);border-color:var(--ink)}
 /* Карта идёт под текстом, а не рядом: адрес, телефон и часы читают
    сверху вниз, и карта оказывается там, где она нужна — в конце. */
 .contact__in{display:block}
-.contact__in > .rv:not(.map){max-width:70ch}   /* ограничиваем строку текста, но не карту */
+/* Реквизиты и фото входа — рядом, а не друг под другом: раньше слева стояла
+   узкая колонка, а справа оставалось пустое поле во весь экран. Фото держим
+   справа и не даём ему расти шире 300 px — это опознавательный кадр, а не
+   иллюстрация во всю страницу. */
+.contact__top{display:grid;grid-template-columns:minmax(0,1fr) 300px;
+  gap:clamp(28px,5vw,72px);align-items:start}
+.contact__info{max-width:70ch}
+@media(max-width:860px){.contact__top{grid-template-columns:minmax(0,1fr)}}
 .map{position:relative;margin-top:clamp(28px,4vw,48px);aspect-ratio:16/9;background:var(--tint);border:1px solid var(--hair-2);overflow:hidden}
 .map__frame{position:absolute;inset:0;width:100%;height:100%;border:0;filter:grayscale(.15)}
 .map__ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .map.is-fallback + .contact__photo,.contact__in .rv:has(+ .map.is-fallback) .contact__photo{display:none}
 .map__note{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:rgba(255,255,255,.9);font-size:var(--fs-2);margin:0}
 .contact__in h2{margin-bottom:8px}
-.contact__photo{margin:28px 0 0;max-width:300px}
+.contact__photo{margin:0;max-width:300px}
+@media(max-width:860px){.contact__photo{margin-top:28px}}
 .contact__photo img{aspect-ratio:4/5;object-fit:cover;width:100%}
 .contact__photo figcaption{margin-top:10px;font-size:var(--fs-2);color:var(--mute)}
 @media(max-width:860px){.contact__in{grid-template-columns:minmax(0,1fr)}}
@@ -849,7 +916,7 @@ html.vi-noimg .vi-btn svg,html.vi-noimg .hdr__tel-i{display:inline!important}
 
 /* СОГЛАСИЕ НА COOKIE */
 .cookie{position:fixed;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));
-  z-index:120;max-width:460px;margin-inline:auto;background:#fff;border:1px solid var(--ink);padding:16px 18px 18px;
+  z-index:130;max-width:460px;margin-inline:auto;background:#fff;border:1px solid var(--ink);padding:16px 18px 18px;
   box-shadow:0 22px 50px rgba(20,22,26,.16);animation:cookieIn .5s ease both}
 @keyframes cookieIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .cookie__t{margin:0 0 6px;font-size:var(--fs-2)}
@@ -964,6 +1031,16 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
     0%,66%{background-color:rgba(255,255,255,0);animation-timing-function:cubic-bezier(.4,0,.35,1)}
     90%,100%{background-color:rgba(255,255,255,.92)}
   }
+  /* На телефоне шапку к прокрутке не привязываем. Цвет подложки — свойство
+     отрисовочное: видеокарта его не интерполирует, и каждый кадр перехода
+     браузер заново закрашивает липкую полосу поверх едущего содержимого.
+     Именно это и выглядит наклейкой, отстающей на кадр.
+     Замена равноценна на глаз: скрипт снимает класс hdr--ghost в тот момент,
+     когда кадр уже залит белым, и подложка проявляется одним переходом на
+     450 мс. Под белым светом подмену всё равно не видно. */
+  @media(hover:none),(max-width:960px){
+    html.sda #hdr{animation-name:none}
+  }
   /* Подъём первого экрана начинается ещё под светом и идёт ровным ходом всю
      видимую часть перехода, а тормозит только в самом конце. Так движение не
      выдыхается к моменту, когда завеса сходит. */
@@ -980,3 +1057,95 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
     100%{transform:translateY(0)}
   }
 }
+
+/* ---------------------------------------------------------------------------
+   ШАПКА НА СЕНСОРНЫХ ЭКРАНАХ
+
+   Во встроенном браузере Telegram шапка при прокрутке вела себя как наклейка:
+   содержимое едет, а панель догоняет его через кадр. Причина — размытие
+   подложки. backdrop-filter заставляет браузер каждый кадр заново взять
+   картинку под шапкой, размыть её и наложить; в обычном браузере это делает
+   видеокарта, а во встроенном webview такой слой часто отрисовывается
+   отдельно и с опозданием на кадр. Видно это именно на прокрутке — как
+   отклеившийся стикер.
+
+   На телефоне размытие и не нужно: подложка и так почти непрозрачная (92 %),
+   разницы на глаз никакой. Делаем её сплошной, размытие убираем — и шапке
+   больше нечего пересчитывать, она едет вместе со страницей.
+--------------------------------------------------------------------------- */
+@media(hover:none),(max-width:960px){
+  .hdr{background:var(--bg);backdrop-filter:none}
+  .hdr--ghost{background:rgba(255,255,255,0)}
+  .hdr--ghost:hover,.hdr--ghost:focus-within{background:rgba(255,255,255,.86);backdrop-filter:none}
+}
+
+/* ---------------------------------------------------------------------------
+   КНОПКА ВЫЗОВА: ЗАПИСАТЬСЯ
+
+   Решение записаться приходит не там, где стоит форма. Человек читает про
+   первый визит, про стерилизацию, смотрит цены — и в любой из этих моментов
+   может решиться; возвращаться за формой вверх или вниз он не станет.
+   Поэтому запись всегда под рукой, в углу, одним нажатием.
+
+   Мера здесь важнее заметности. Кнопка не загораживает текст, не выезжает
+   сама, не мигает бесконечно и не показывается, пока человек не прочёл хотя
+   бы экран. Пульсация — несколько волн, потом тишина: задача привлечь взгляд
+   один раз, а не тянуть за рукав.
+--------------------------------------------------------------------------- */
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right));
+  bottom:max(16px,env(safe-area-inset-bottom));z-index:110;
+  display:inline-flex;align-items:center;gap:0;
+  height:56px;padding:0;border:0;border-radius:28px;cursor:pointer;
+  background:var(--navy);color:#fff;
+  box-shadow:0 10px 28px rgba(27,61,150,.28),0 2px 6px rgba(20,22,26,.14);
+  -webkit-tap-highlight-color:transparent;
+  /* появляется не сразу: класс ставит скрипт, когда страницу начали читать */
+  opacity:0;visibility:hidden;transform:translateY(12px) scale(.9);
+  transition:opacity .45s var(--ease),transform .45s var(--ease),visibility 0s .45s,
+             gap .3s var(--ease),padding .3s var(--ease),background var(--t-fast)}
+.fab.is-on{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.fab__ph{position:relative;z-index:2;display:grid;place-items:center;
+  width:56px;height:56px;border-radius:50%;flex:none}
+.fab__ph svg{width:22px;height:22px}
+/* Место под лицо ассистента: когда будет согласие и снимок анфас, сюда встанет
+   <img class="fab__img">, а знак уйдёт. Размер и форма уже те же. */
+.fab__img{width:56px;height:56px;border-radius:50%;object-fit:cover;object-position:50% 25%}
+.fab__t{max-width:0;overflow:hidden;white-space:nowrap;font-size:15px;font-weight:500;
+  opacity:0;transition:max-width .3s var(--ease),opacity .25s var(--ease)}
+@media(hover:hover){
+  .fab:hover{background:var(--navy-d);padding-right:20px}
+  .fab:hover .fab__t{max-width:140px;opacity:1}
+}
+.fab:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+/* Волна: расходится от кнопки и гаснет. Три раза с большим перерывом —
+   этого хватает, чтобы глаз зацепился, и мало, чтобы надоесть. */
+.fab__ring{position:absolute;inset:0;border-radius:inherit;z-index:1;
+  border:2px solid var(--navy);opacity:0;pointer-events:none}
+.fab.is-on .fab__ring{animation:fabRing 3.4s ease-out 3}
+@keyframes fabRing{
+  0%{transform:scale(1);opacity:.5}
+  22%{transform:scale(1.45);opacity:0}
+  100%{transform:scale(1.45);opacity:0}
+}
+/* На телефоне кнопка не должна перекрывать нижнюю строку текста: подвал
+   получает запас снизу ровно на её высоту. */
+@media(max-width:620px){
+  .ftr__legal{padding-bottom:76px}
+  .fab{height:52px}
+  .fab__ph{width:52px;height:52px}
+}
+/* Покой есть покой: ни волн, ни выезда. Кнопка просто стоит на месте. */
+@media(prefers-reduced-motion:reduce){
+  .fab{transition:none}
+  .fab.is-on .fab__ring{animation:none}
+}
+/* Версия для слабовидящих: квадратная, контрастная, без волн и без всплывающего
+   окна — там кнопка ведёт прямо к форме записи на странице. */
+html.vi .fab{background:var(--ink);color:var(--bg);border:2px solid var(--ink);border-radius:2px;height:auto;
+  padding:10px 16px;box-shadow:none}
+html.vi .fab__ph{display:none}
+html.vi .fab__t{max-width:none;opacity:1;overflow:visible;font-size:1em}
+html.vi .fab__ring{display:none}
+/* Без скрипта отправлять заявку нечем — кнопки нет. */
+.no-js .fab{display:none}

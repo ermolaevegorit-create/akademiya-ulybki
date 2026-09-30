@@ -131,7 +131,27 @@ p{margin:0 0 1em}
 .brand__t b{font-family:var(--serif);font-weight:400;font-size:19px;color:var(--navy)}
 .brand__t i{font-style:normal;font-size:11px;letter-spacing:.02em;color:var(--mute);margin-top:3px}
 .nav{display:flex;gap:clamp(10px,1.6vw,26px);margin-left:auto}
-@media(max-width:960px){.nav{margin-left:0}}
+@media(max-width:1260px){.nav{margin-left:0}}
+/* ---------------------------------------------------------------------------
+   ШАПКА НА НОУТБУКЕ
+
+   Содержимое шапки — логотип с подписью, восемь разделов, телефон и две
+   кнопки — не помещалось в колонку 1240 px. Измерено: на 1440 не хватало
+   174 пикселей, на 1280 — 141. Лишнее уезжало за правый край, и первой
+   уезжала кнопка «Для слабовидящих». Меню при этом не сворачивалось в
+   бутерброд: порог стоял на 960 px, то есть сильно ниже.
+
+   Сворачивать меню в бутерброд на ноутбуке не хочется — навигация ухудшится
+   для всех. Поэтому ужимаем то, что можно ужать без потери смысла: подпись
+   под названием клиники (она есть в подвале и на каждой странице в тексте) и
+   промежутки, раздутые процентами от ширины экрана.
+--------------------------------------------------------------------------- */
+@media(max-width:1800px){
+  .hdr .brand__t i{display:none}
+  .hdr__in{gap:16px}
+  .nav{gap:14px}
+  .nav a{font-size:14.5px}
+}
 .nav a{font-size:15px;color:var(--ink-2);position:relative;padding:12px 0;min-height:44px;display:inline-flex;align-items:center;white-space:nowrap}
 .nav a::after{content:"";position:absolute;left:0;right:100%;bottom:8px;height:1px;background:var(--ink);transition:right var(--t-fast)}
 .nav a:hover::after,.nav a.is-cur::after,.nav a.is-active::after{right:0}
@@ -145,7 +165,10 @@ p{margin:0 0 1em}
 body.nav-open .burger span{background:transparent}
 body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .burger span::after{top:0;transform:rotate(-45deg)}
 @media(max-width:1180px){.hdr__tel span{display:none}.hdr__tel-i{display:block}.hdr__tel{width:44px;height:44px;justify-content:center;border:1px solid var(--hair);border-radius:2px;padding:0;margin-left:auto}}
-@media(max-width:960px){
+/* Порог бутерброда поднят с 960 до 1100 px. Между ними полное меню в
+   строку уже не помещалось: восемь разделов, телефон и две кнопки требовали
+   1050 px при доступных 1024, и правый край уезжал за экран. */
+@media(max-width:1260px){
   .nav{position:fixed;left:0;right:0;top:var(--hdr);flex-direction:column;gap:0;background:#fff;border-bottom:1px solid var(--hair);padding:8px var(--gut) 20px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:.25s}
   body.nav-open .nav{opacity:1;visibility:visible;transform:none}
   .nav a{padding:12px 0;border-bottom:1px solid var(--hair-2);font-size:17px}
@@ -776,8 +799,14 @@ html.vi .lfband{background:var(--bg);border-color:var(--ink)}
   transition:border-color var(--t-fast),color var(--t-fast)}
 .vi-btn:hover{border-color:var(--navy);color:var(--navy)}
 .vi-btn__t{white-space:nowrap}
-@media(max-width:1080px){.vi-btn__t{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-  .vi-btn{padding:7px 8px}}
+/* Подпись у кнопки сворачивается заметно раньше. Раньше порог стоял на
+   1080 px, и на обычном ноутбуке — 1280, 1440, 1600 — шапка не помещалась:
+   кнопка «Для слабовидящих» уезжала за правый край экрана и была попросту
+   недоступна. Для кнопки, которая существует ради доступности, это худшая
+   из возможных поломок. Значок остаётся, подпись читает программа чтения
+   с экрана, место экономится полторы сотни пикселей. */
+@media(max-width:1800px){.vi-btn__t{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .vi-btn{padding:0;width:40px;height:40px;justify-content:center}}
 
 .vip{background:var(--tint);border-bottom:1px solid var(--hair)}
 .vip__in{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px;padding-block:14px}
@@ -1124,7 +1153,7 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
      Замена равноценна на глаз: скрипт снимает класс hdr--ghost в тот момент,
      когда кадр уже залит белым, и подложка проявляется одним переходом на
      450 мс. Под белым светом подмену всё равно не видно. */
-  @media(hover:none),(max-width:960px){
+  @media(hover:none),(max-width:1260px){
     html.sda #hdr{animation-name:none}
   }
   /* Подъём первого экрана начинается ещё под светом и идёт ровным ходом всю
@@ -1159,7 +1188,7 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
    разницы на глаз никакой. Делаем её сплошной, размытие убираем — и шапке
    больше нечего пересчитывать, она едет вместе со страницей.
 --------------------------------------------------------------------------- */
-@media(hover:none),(max-width:960px){
+@media(hover:none),(max-width:1260px){
   .hdr{background:var(--bg);backdrop-filter:none}
   .hdr--ghost{background:rgba(255,255,255,0)}
   .hdr--ghost:hover,.hdr--ghost:focus-within{background:rgba(255,255,255,.86);backdrop-filter:none}
@@ -1262,3 +1291,61 @@ html.vi .fab__ring{display:none}
 .hint--quiet .offer__skip{color:var(--mute);font-size:var(--fs-2)}
 .hint--quiet .offer__skip:hover{color:var(--ink)}
 .offer.is-open .hint--quiet{opacity:0;pointer-events:none}
+
+/* ---------------------------------------------------------------------------
+   ВЫКЛЮЧАТЕЛЬ ЗВУКА
+
+   Звук на сайте есть только в играх, но человек должен уметь его убрать,
+   не дослушав. Кнопка стоит в шапке рядом с версией для слабовидящих, а не
+   прячется в подвале: выключатель, который надо искать, — это не выключатель.
+--------------------------------------------------------------------------- */
+.sfx-btn{display:inline-flex;align-items:center;justify-content:center;
+  width:40px;height:40px;flex:none;margin-left:10px;padding:0;
+  border:1px solid var(--hair);border-radius:2px;background:transparent;
+  color:var(--ink-2);cursor:pointer;transition:color var(--t-fast),border-color var(--t-fast)}
+.sfx-btn:hover{color:var(--ink);border-color:var(--hair)}
+.sfx-btn:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+/* Перечёркнутый динамик — когда звук выключен; волны — когда включён. */
+.sfx-off{opacity:0;transition:opacity var(--t-fast)}
+.sfx-wave{opacity:1;transition:opacity var(--t-fast)}
+.sfx-btn[aria-pressed="false"] .sfx-off{opacity:1}
+.sfx-btn[aria-pressed="false"] .sfx-wave{opacity:0}
+.sfx-btn[aria-pressed="false"]{color:var(--mute)}
+/* Текст только для читалок: рядом уже есть понятный значок. */
+.vis-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-width:1260px){.sfx-btn{margin-left:auto}}
+.no-js .sfx-btn{display:none}
+
+/* На узком экране две круглые кнопки и телефон вместе с названием клиники
+   перестают помещаться в строку: не хватало полусотни пикселей, и содержимое
+   шапки вылезало за правый край. Ужимаем сами кнопки и промежутки. */
+@media(max-width:620px){
+  .hdr__in{gap:10px}
+  .sfx-btn,.vi-btn{width:36px;height:36px;margin-left:0}
+  .sfx-btn{margin-left:auto}
+  .brand__t b{font-size:17px}
+}
+
+/* Шапка шире текстовой колонки. Колонка ограничена ради длины строки, а в
+   шапке строк нет — там логотип, разделы, телефон и кнопки. На большом
+   мониторе они в 1360 px не помещались и вылезали в поля. */
+@media(min-width:1800px){.hdr .wrap{max-width:1600px}}
+/* Совсем узкие экраны: ещё немного ужимаем промежутки. */
+@media(max-width:400px){
+  .hdr__in{gap:8px}
+  .brand{gap:8px}
+  .brand__t b{font-size:16px}
+}
+/* 320 px — самый узкий экран, который ещё встречается. Там место есть только
+   на название, телефон и три значка: подпись под логотипом уходит. */
+@media(max-width:340px){
+  .brand img{width:28px;height:24px}
+  .brand__t b{font-size:15px}
+  .sfx-btn,.vi-btn,.burger{width:32px;height:32px;flex:none}
+  .hdr__in{gap:6px}
+  /* название сжимается и при нехватке места обрезается многоточием:
+     на 320 px иначе не помещается ни при каких промежутках */
+  .brand{gap:6px;min-width:0;flex-shrink:1}
+  .brand__t{min-width:0}
+  .brand__t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}

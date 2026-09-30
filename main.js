@@ -25,6 +25,129 @@
   const ASSETS = window.__ASSETS || {};           // подстановка путей для single-file сборки
   const asset = p => ASSETS[p] || p;
 
+  /* ---------------------------------------------------------------------
+     ЗВУК
+
+     Звуки синтезируются прямо в браузере. Готовых файлов нет намеренно: это
+     лишние запросы, лишний вес, лицензии на семплы — и разрешение media-src в
+     политике безопасности, которого сейчас нет и не нужно. Несколько
+     осцилляторов и короткая огибающая дают ровно то, что требуется.
+
+     Где звук есть и где его нет. Звук — это отклик на игру: подхватить
+     инструмент, положить его в лоток, стереть камень, зажечь лампу. По
+     ссылкам меню и по кнопке «позвонить» не звучит ничего: человек, который
+     ищет телефон клиники, не должен получать в ответ щелчок.
+
+     Громкость намеренно низкая, каждый звук короче трети секунды и ни один не
+     повторяется чаще, чем успевает затихнуть предыдущий. Выключатель — в
+     шапке, выбор запоминается. В версии для слабовидящих и в режиме покоя
+     звука нет вовсе: там задача противоположная.
+
+     Контекст создаётся только после первого действия человека — до него
+     браузер всё равно запретит воспроизведение, и это правильно.
+  --------------------------------------------------------------------- */
+  const sfx = (function () {
+    const KEY = 'au-sfx';
+    let ctx = null, master = null, on = true, last = 0;
+    try { on = localStorage.getItem(KEY) !== '0'; } catch (e) {}
+
+    const quiet = () => html.classList.contains('vi') || html.classList.contains('still');
+
+    function ready() {
+      if (quiet() || !on) return null;
+      if (!ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        try { ctx = new AC(); } catch (e) { return null; }
+        master = ctx.createGain();
+        master.gain.value = .11;               // тихо: звук сопровождает, а не объявляет
+        master.connect(ctx.destination);
+      }
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      return ctx;
+    }
+
+    /* Одна нота: частота, длительность, форма волны и как громко.
+       Огибающая с мягкой атакой — резкий старт слышен как щелчок динамика. */
+    function note(f0, f1, dur, type, vol, delay) {
+      const c = ctx, t = c.currentTime + (delay || 0);
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(f0, t);
+      if (f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol, t + Math.min(.012, dur * .25));
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g); g.connect(master);
+      o.start(t); o.stop(t + dur + .02);
+    }
+
+    /* Шум через полосовой фильтр — из него получается всё «неметаллическое»:
+       скрип по камню, шорох, выдох лампы. */
+    function noise(dur, freq, q, vol, delay) {
+      const c = ctx, t = c.currentTime + (delay || 0);
+      const n = Math.max(1, Math.floor(c.sampleRate * dur));
+      const buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+      const src = c.createBufferSource(); src.buffer = buf;
+      const bp = c.createBiquadFilter(); bp.type = 'bandpass';
+      bp.frequency.value = freq; bp.Q.value = q || 1;
+      const g = c.createGain();
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      src.connect(bp); bp.connect(g); g.connect(master);
+      src.start(t); src.stop(t + dur + .02);
+    }
+
+    /* Характер звука повторяет характер действия: взять — короткий светлый
+       щелчок, положить — тише и ниже, с металлическим призвуком, готово —
+       три ноты вверх. */
+    const VOICES = {
+      pick:   () => { note(1460, 1180, .05, 'triangle', .5); },
+      place:  () => { note(680, 520, .11, 'triangle', .45); note(1020, 940, .16, 'sine', .22, .01); },
+      scrape: () => { noise(.045, 1900, 1.2, .30); },
+      tap:    () => { note(900, 820, .045, 'sine', .40); },
+      reveal: () => { note(523, 523, .16, 'sine', .40); note(784, 784, .30, 'sine', .34, .1); },
+      done:   () => { note(659, 659, .12, 'sine', .38); note(880, 880, .12, 'sine', .34, .09);
+                      note(1319, 1319, .30, 'sine', .28, .18); },
+      uv:     () => { noise(.55, 520, .8, .18); note(180, 300, .55, 'sine', .20); },
+      lamp:   () => { note(220, 180, .10, 'sine', .45); noise(.30, 900, .7, .14, .03); },
+      sent:   () => { note(587, 587, .12, 'sine', .40); note(880, 880, .28, 'sine', .34, .1); },
+      nope:   () => { note(300, 260, .09, 'triangle', .34); note(240, 210, .12, 'triangle', .30, .11); },
+    };
+
+    /* Скрип по камню приходит десятками событий в секунду. Без ограничителя
+       это сплошное жужжание, а не отклик, поэтому одинаковые звуки чаще
+       определённого шага не повторяем. */
+    const GAP = { scrape: 70, pick: 40, tap: 60 };
+
+    function play(name) {
+      if (!VOICES[name] || !ready()) return;
+      const now = performance.now(), gap = GAP[name] || 0;
+      if (gap && now - last < gap) return;
+      last = now;
+      try { VOICES[name](); } catch (e) {}
+    }
+
+    function set(v) {
+      on = !!v;
+      try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) {}
+      const b = $('#sfx-toggle');
+      if (b) { b.setAttribute('aria-pressed', String(on));
+               b.title = on ? 'Выключить звук' : 'Включить звук'; }
+      if (on) play('tap');
+    }
+
+    addEventListener('DOMContentLoaded', () => {
+      const b = $('#sfx-toggle'); if (!b) return;
+      if (quiet()) { b.hidden = true; return; }
+      set(on);
+      b.addEventListener('click', () => set(!on));
+    });
+
+    return { play, set, get on() { return on; } };
+  })();
+
   /* Настоящее изменение размера окна, а не спрятавшаяся адресная строка.
 
      На телефоне браузер убирает и возвращает адресную строку прямо во время
@@ -245,6 +368,7 @@
     const digits = v => (v.match(/\d/g) || []).length;
 
     function fail(el, msg, box) {
+      sfx.play('nope');            // поле не заполнено: мягко, без резкости
       el.setAttribute('aria-invalid', 'true');
       box.textContent = msg; box.hidden = false;
       el.focus();
@@ -286,6 +410,7 @@
     }
 
     function done(f) {
+      sfx.play('sent');            // заявка ушла — короткое подтверждение
       f.classList.add('is-sent');
       const head = $('.lf__head', f);
       head.innerHTML = '<p class="eyebrow">Готово</p>'
@@ -702,6 +827,7 @@
       const run = () => {
         const end = LEN;
         if (end - scrollY < 8) return;
+        sfx.play('lamp');          // свет включают — звук у этого действия тёплый и низкий
         stopRide(); driving = true;
         const frac = (end - scrollY) / LEN;
         ride = gsap.to({ y: scrollY }, { y: end, duration: Math.max(1.1, 2.6 * frac),
@@ -818,6 +944,7 @@
       if (open) return false;
       const sr = stone.getBoundingClientRect(); if (!(px > sr.left && px < sr.right && py > sr.top && py < sr.bottom)) { last = null; return false; }
       idle = 0; stone.classList.remove('pulse'); hint.classList.add('is-touched');
+      sfx.play('scrape');         // шорох по камню, с ограничителем частоты
       offer.classList.add('is-touched');   // слово «Гигиена» на камне больше не нужно
       const cx = (px - sr.left) * dpr, cy = (py - sr.top) * dpr, rad = radCss * dpr;
       if (last) { const dx = cx - last.x, dy = cy - last.y, n = Math.max(1, Math.round(Math.hypot(dx, dy) / (rad * .35))); for (let i = 1; i <= n; i++) erase(last.x + dx * i / n, last.y + dy * i / n, rad); } else erase(cx, cy, rad);
@@ -836,12 +963,13 @@
         gsap.to(hp, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', onComplete: () => hp.classList.add('wiggle') }); }); }, { threshold: .2 });
       o.observe(hp);
       Draggable.create(hp, { type: 'x,y', zIndexBoost: false, minimumMovement: 3,
-        onPress() { gsap.killTweensOf(hp); hp.classList.add('is-drag'); hp.classList.remove('wiggle'); last = null; },
+        onPress() { gsap.killTweensOf(hp); hp.classList.add('is-drag'); hp.classList.remove('wiggle'); last = null; sfx.play('pick'); },
         onRelease() { hp.classList.remove('is-drag', 'is-drill'); last = null; },
         onDrag() { const r = hp.getBoundingClientRect(); hp.classList.toggle('is-drill', !!scrub(r.left + r.width * .998, r.top + r.height * .117, 38)); } });
     }
     function openOffer(how) {
       if (open) return; open = true; offer.classList.add('is-open'); if (hp) hp.classList.remove('is-drill');
+      sfx.play('reveal');         // из-под камня показалось предложение
       const sr = stone.getBoundingClientRect(); for (let i = 0; i < 6; i++) spawn({ x: sr.left + Math.random() * sr.width, y: sr.top + Math.random() * sr.height }, 10, true);
       gsap.to(stone, { opacity: 0, duration: .8, ease: 'power2.out', onComplete: () => { stone.style.pointerEvents = 'none'; } });
       /* Наконечник свою работу сделал. Дальше он просто лежит поверх карточки
@@ -866,7 +994,7 @@
         back.observe(stage);
       }, 4000);
     }
-    $('#drill-skip').addEventListener('click', () => openOffer('button'));
+    $('#drill-skip').addEventListener('click', () => { sfx.play('tap'); openOffer('button'); });
   })();
 
   /* ---------- РЕСТАВРАЦИЯ: четыре этапа ----------
@@ -1037,6 +1165,7 @@
     /* лампу можно взять уже на укладке — если композита мало, реставрация сорвётся */
     const canUse = t => t.k === stage || (t.k === 4 && stage === 3);
     function setStage(k) {
+      if (k > 1) sfx.play('place');   // этап пройден, следующий инструмент на очереди
       const prev = stage;
       stage = k; ops = 0; last = null;
       if (k === 3 && prev === 2) { ec.clearRect(0, 0, W, H); wet.classList.add('is-on'); }  // гель смыт начисто
@@ -1064,7 +1193,7 @@
       TOOLS.forEach(t => gsap.set(t.el, { x: 0, y: 0 }));
       setStage(1); updScore();
     }
-    again.addEventListener('click', () => { track('fill_again'); reset(); });
+    again.addEventListener('click', () => { sfx.play('tap'); track('fill_again'); reset(); });
 
     /* ---- провал: композит рассыпается и растворяется ---- */
     function crumble() {
@@ -1183,8 +1312,9 @@
     if (!touchOnly) TOOLS.forEach(t => {
       Draggable.create(t.el, { type: 'x,y', zIndexBoost: false, minimumMovement: 2,
         onPress() {
-          if (!canUse(t) || busy) { this.endDrag(); return; }
+          if (!canUse(t) || busy) { this.endDrag(); sfx.play('nope'); return; }
           gsap.killTweensOf(t.el);
+          sfx.play('pick');                               // инструмент взяли
           t.el.classList.add('is-drag'); t.el.classList.remove('wiggle'); last = null;
           if (t.k === 4) { lamp = t; startCure(); }
           if (t.k === 5) { brush = t; startPolish(); }
@@ -1251,11 +1381,13 @@
       stage.classList.toggle('is-started', tools.some(inTray));
       if (all && !stage.classList.contains('is-uv') && !stage.classList.contains('is-clean')) {
         stage.classList.add('is-uv'); done.textContent = 'Многоступенчатая стерилизация';
+        sfx.play('uv');            // лампа разгорается: выдох, а не щелчок
         hint.classList.add('is-touched'); gsap.to(hint, { opacity: 0, duration: .5 });
         clearTimeout(timer);
         timer = setTimeout(() => {                       // свет плавно гаснет, инструменты остаются чистыми
           stage.classList.remove('is-uv'); stage.classList.add('is-clean');
           done.textContent = 'Набор стерилен';
+          sfx.play('done');
           sparkle();
           cta.hidden = false; gsap.from(cta, { y: 12, opacity: 0, duration: .8, ease: 'power2.out' });
         }, 3000);
@@ -1374,7 +1506,9 @@
         live = true;
         if (el.dataset.slot !== undefined) {          // уже в лотке — забираем
           delete el.dataset.slot; m.bx = 0; m.by = 0; dirty = true; kick();
-        } else if (!snap(el)) { check(); }            // свободных мест нет
+          sfx.play('pick');
+        } else if (snap(el)) { sfx.play('place'); }
+        else { check(); }                             // свободных мест нет
       }));
       hint.textContent = 'Нажимайте на инструменты — они лягут в лоток, и начнётся многоступенчатая стерилизация.';
     }
@@ -1382,6 +1516,7 @@
       onPress() {
         const el = this.target, m = el.__m;
         gsap.killTweensOf(el); live = true;
+        sfx.play('pick');                                 // инструмент взяли в руку
         el.classList.add('is-drag'); el.classList.remove('wiggle');
         delete el.dataset.slot;
         gsap.set(el, { x: m.cx, y: m.cy });               // стартуем ровно оттуда, где инструмент виден
@@ -1391,7 +1526,8 @@
         el.classList.remove('is-drag');
         m.cx = gsap.getProperty(el, 'x'); m.cy = gsap.getProperty(el, 'y');
         m.bx = m.cx; m.by = m.cy;
-        if (!(nearTray(el) && snap(el))) { kick(); check(); }
+        if (nearTray(el) && snap(el)) sfx.play('place');   // лёг в лоток
+        else { kick(); check(); }
       } });
   })();
 

@@ -1269,23 +1269,8 @@ html.vi .fab__ring{display:none}
    показывает <style> внутри <noscript> в самой странице. */
 .lf__nojs{display:none;margin:0;font-size:var(--fs-3);line-height:1.6;color:var(--ink-2)}
 
-/* ---------------------------------------------------------------------------
-   НАДПИСЬ НА КАМНЕ
-
-   Раньше под блоком стояли две строки инструкции: чем водить, чем взять, где
-   нажать, если не хочется. Для оффера, ради которого блок и сделан, это
-   слишком громко — человек читает указания вместо предложения.
-
-   Вместо них одно слово на самом камне: видно, что под ним, и никто ничего
-   не требует. Как только камень тронули, слово уходит.
---------------------------------------------------------------------------- */
-.slab__label{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:3;margin:0;
-  font-size:var(--fs-2);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);
-  pointer-events:none;transition:opacity .5s ease}
-.offer.is-touched .slab__label,
-.offer.is-open .slab__label{opacity:0}
-/* Ссылка «открыть сразу» остаётся, но не спорит с предложением: мелкая,
-   спокойная, без маркера-точки. */
+/* Ссылка «открыть сразу» рядом с камнем: мелкая и спокойная, без
+   маркера-точки — она не должна спорить с самим предложением. */
 .hint--quiet{margin-top:18px;padding-left:0}
 .hint--quiet .hint__i{display:none}
 .hint--quiet .offer__skip{color:var(--mute);font-size:var(--fs-2)}

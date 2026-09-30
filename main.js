@@ -843,6 +843,14 @@
       if (open) return; open = true; offer.classList.add('is-open'); if (hp) hp.classList.remove('is-drill');
       const sr = stone.getBoundingClientRect(); for (let i = 0; i < 6; i++) spawn({ x: sr.left + Math.random() * sr.width, y: sr.top + Math.random() * sr.height }, 10, true);
       gsap.to(stone, { opacity: 0, duration: .8, ease: 'power2.out', onComplete: () => { stone.style.pointerEvents = 'none'; } });
+      /* Наконечник свою работу сделал. Дальше он просто лежит поверх карточки
+         и накрывает строку с ценами по прейскуранту — мелкий текст под
+         железкой не прочитать. Убираем его вместе с камнем.
+         Через стиль это не сделать: перетаскиванием управляет GSAP, и он
+         держит прозрачность во встроенном стиле, который сильнее любого
+         правила из таблицы. Поэтому гасим тем же GSAP. */
+      if (hp) gsap.to(hp, { opacity: 0, duration: .7, ease: 'power2.out',
+        onComplete: () => { hp.style.pointerEvents = 'none'; } });
       gsap.fromTo('.slab__offer', { scale: .985 }, { scale: 1, duration: .9, ease: 'power2.out' });
       track('offer_open', { how });
       // когда секция ушла с экрана — камень нарастает заново, можно просверлить ещё раз
@@ -851,6 +859,8 @@
           if (e.isIntersecting || !open) return;
           back.disconnect(); open = false; offer.classList.remove('is-open');
           stone.style.pointerEvents = ''; reset(); gsap.set(stone, { opacity: 1 }); stone.classList.add('pulse'); hint.classList.remove('is-touched');
+          /* камень нарос заново — значит и инструмент нужен снова */
+          if (hp) { hp.style.pointerEvents = ''; gsap.to(hp, { opacity: 1, duration: .5 }); }
         }), { threshold: 0 });
         back.observe(stage);
       }, 4000);

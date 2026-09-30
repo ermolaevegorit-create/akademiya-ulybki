@@ -225,7 +225,7 @@
       fr.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups');
       map.appendChild(fr);
       map.classList.add('is-live');
-      btn.remove();
+      sfx.play('tap');
       track('map_open');
     });
   })();

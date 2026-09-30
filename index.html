@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=eee24934">
+<link rel="stylesheet" href="styles.css?v=1d32a78b">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": ["Dentist", "MedicalClinic"], "name": "Стоматологическая клиника «Академия улыбки»", "legalName": "ООО «Академия улыбки»", "telephone": "+79897512851", "url": "https://akademiya-ulybki.ru/", "address": {"@type": "PostalAddress", "streetAddress": "ул. Виноградная, д. 55/1, пом. 22, 2-й этаж", "addressLocality": "Сочи", "addressRegion": "Краснодарский край", "postalCode": "354008", "addressCountry": "RU"}, "geo": {"@type": "GeoCoordinates", "latitude": 43.608995, "longitude": 39.720852}, "hasMap": "https://yandex.ru/maps/org/akademiya_ulybki/196221666219/", "foundingDate": "2026", "employee": {"@type": "Physician", "name": "Белоусова Александра Сергеевна", "jobTitle": "Врач стоматолог-терапевт, хирург, имплантолог", "alumniOf": "Новосибирский государственный медицинский университет"}, "hasCredential": {"@type": "EducationalOccupationalCredential", "credentialCategory": "license", "name": "Лицензия Л041-01126-23/05841444", "dateCreated": "2026-08-03", "recognizedBy": {"@type": "GovernmentOrganization", "name": "Министерство здравоохранения Краснодарского края"}}, "identifier": [{"@type": "PropertyValue", "propertyID": "ИНН", "value": "2366057010"}, {"@type": "PropertyValue", "propertyID": "ОГРН", "value": "1262300000038"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Как проходит первый визит?", "acceptedAnswer": {"@type": "Answer", "text": "Первичный приём длится около часа. Мы разговариваем о том, что беспокоит и чего вы ждёте, осматриваем полость рта, делаем фотопротокол и, если нужно, даём направление на снимок. В конце вы получаете письменный план лечения с этапами и стоимостью. Никаких процедур «заодно» в первый визит не делается — только по вашему решению."}}, {"@type": "Question", "name": "Как часто нужна профессиональная чистка?", "acceptedAnswer": {"@type": "Answer", "text": "Большинству взрослых — раз в шесть месяцев. При заболеваниях дёсен, брекетах, имплантатах или курении — раз в три‑четыре месяца. Интервал врач назначает индивидуально после осмотра."}}, {"@type": "Question", "name": "Что нельзя делать после чистки?", "acceptedAnswer": {"@type": "Answer", "text": "Два‑три часа не есть и не пить ничего, кроме воды. Сутки — без красящих продуктов: кофе, чай, красное вино, свёкла, соевый соус, ягоды. Сутки — без курения. Эмаль после чистки более восприимчива к пигментам."}}, {"@type": "Question", "name": "Больно ли лечить зубы?", "acceptedAnswer": {"@type": "Answer", "text": "Лечение проходит под местной анестезией. Современные анестетики действуют через несколько минут и полностью убирают чувствительность на время процедуры. Если вы боитесь самого укола, скажите — место инъекции предварительно обезболивается гелем."}}, {"@type": "Question", "name": "Обязательно ли удалять зубы мудрости?", "acceptedAnswer": {"@type": "Answer", "text": "Нет. Удаляют те, что растут неправильно, упираются в соседний зуб, регулярно воспаляются или не поддаются лечению. Здоровый, прорезавшийся и доступный для чистки зуб мудрости можно оставить."}}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Академия улыбки", "url": "https://akademiya-ulybki.ru/", "inLanguage": "ru-RU", "publisher": {"@type": "Organization", "name": "ООО «Академия улыбки»"}}</script>
@@ -476,22 +476,19 @@
            как человек решает позвонить. В цвете работают вывеска и небо. -->
       <figure class="contact__photo"><img src="assets/photo/facade.jpg" alt="Вход в клинику" width="952" height="1268" loading="lazy"><figcaption>Вход с улицы Виноградной</figcaption></figure>
     </div>
+    <!-- Место под карту. Пока её не открыли, здесь не фотография, а спокойная
+         плашка: фотография входа стоит в своей колонке рядом с реквизитами и
+         никуда не переезжает. Раньше было наоборот — снимок занимал место
+         карты, а по нажатию уезжал наверх и превращался в миниатюру. Человек
+         нажимал на карту, а в ответ у него перестраивалась вся страница.
+         Высота плашки равна высоте рамки, поэтому при открытии ничего не
+         сдвигается: карта просто встаёт на своё место. -->
     <div class="map rv" id="map">
-      <!-- Фотография входа лежит под картой с самого начала. Раньше на её
-           месте был пустой серый прямоугольник, и если карта не открывалась —
-           у кого-то её режет расширение, у кого-то медленная связь, — человек
-           шесть секунд смотрел в пустоту. Теперь он сразу видит, как выглядит
-           вход; карта, когда загрузится, просто ляжет сверху. -->
-      <img class="map__ph" src="assets/photo/facade.jpg" alt="Вход в клинику" width="952" height="1268" loading="lazy">
-      <p class="map__note">Сочи, ул. Виноградная, 55/1 — вход с улицы, второй этаж.</p>
-      <!-- Карту подключаем по нажатию, а не при открытии страницы.
-           Причины две. Первая: каждое открытие страницы отправляло IP
-           посетителя Яндексу — для медицинского сайта это данные, которые мы
-           передаём третьему лицу без спроса. Теперь их передаёт только тот,
-           кто сам попросил карту. Вторая: рамка не всегда открывается — её
-           режут блокировщики, — и на её месте оставался пустой прямоугольник.
-           Фотография входа стоит сразу и не зависит ни от чего. -->
-      <button class="map__go" type="button" id="map-go" data-map-src="https://yandex.ru/map-widget/v1/?ll=39.720852%2C43.608995&z=17&pt=39.720852%2C43.608995%2Cpm2blm">Показать карту</button>
+      <div class="map__ask">
+        <p class="map__ask-t">Виноградная, 55/1 — рядом с санаторием «Радуга»</p>
+        <button class="map__go" type="button" id="map-go" data-map-src="https://yandex.ru/map-widget/v1/?ll=39.720852%2C43.608995&z=17&pt=39.720852%2C43.608995%2Cpm2blm">Показать карту</button>
+        <p class="map__ask-f">Карта Яндекса загрузится по нажатию. До этого сайт ничего никуда не передаёт.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -606,6 +603,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=5a94ab1b"></script>
+<script src="main.js?v=e216cbf3"></script>
 </body>
 </html>

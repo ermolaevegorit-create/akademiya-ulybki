@@ -704,48 +704,48 @@ html.vi .lfband{background:var(--bg);border-color:var(--ink)}
   gap:clamp(28px,5vw,72px);align-items:start}
 .contact__info{max-width:70ch}
 @media(max-width:860px){.contact__top{grid-template-columns:minmax(0,1fr)}}
-.map{position:relative;margin-top:clamp(28px,4vw,48px);aspect-ratio:16/9;background:var(--tint);border:1px solid var(--hair-2);overflow:hidden}
+/* ---------------------------------------------------------------------------
+   МЕСТО ПОД КАРТУ
+
+   Карта подключается по нажатию: до него ни один запрос к Яндексу не уходит,
+   то есть IP посетителя никуда не передаётся, — и никакой блокировщик не
+   оставит на её месте пустой прямоугольник.
+
+   Но само ожидание не должно перестраивать страницу. В первом варианте на
+   месте карты лежала фотография входа, а по нажатию она уезжала наверх и
+   превращалась в миниатюру рядом с реквизитами: человек нажимал на карту, а
+   менялась вся секция. Теперь фотография всегда стоит на своём месте, а здесь
+   спокойная плашка с адресом и кнопкой. Высота у плашки и у рамки одна и та
+   же, поэтому при открытии ничего не подпрыгивает — карта просто встаёт.
+--------------------------------------------------------------------------- */
+/* Высота задана числом, а не пропорцией: на широком мониторе 16 к 9 давали
+   семьсот пикселей, и до нажатия это была почти пустая плашка в целый экран.
+   Полоса в четыреста с небольшим читается как карта и не съедает страницу. */
+.map{position:relative;margin-top:clamp(28px,4vw,48px);
+  height:clamp(280px,40svh,440px);
+  background:var(--tint);border:1px solid var(--hair-2);overflow:hidden}
 .map__frame{position:absolute;inset:0;width:100%;height:100%;border:0;filter:grayscale(.15)}
-.map__ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-/* Пока карта не открыта, на её месте стоит фотография входа. Тогда маленькое
-   фото в колонке рядом с реквизитами — то же самое дважды: прячем его и
-   отдаём реквизитам всю ширину. Как только человек открыл карту, маленькое
-   фото возвращается: фотография входа ему теперь нужна отдельно. */
-.contact__top:has(+ .map:not(.is-live)) .contact__photo{display:none}
-.contact__top:has(+ .map:not(.is-live)){grid-template-columns:minmax(0,1fr)}
-/* Кадр вертикальный, а место под карту широкое: при обрезке по центру дверь
-   уходит за нижний край и остаётся стена с окнами. Смещаем кадрирование вниз
-   — в рамке оказываются вывеска и вход, то есть то, что человек ищет
-   глазами, когда подходит к дому. */
-/* Фотография входа — опознавательный кадр, а не панорама во весь экран.
-   На широком мониторе три к двум давали восемьсот пикселей высоты: человек
-   пролистывал целый экран здания, чтобы добраться до подвала. Ограничиваем
-   высоту, кадр при этом остаётся цельным. */
-.map:not(.is-live){aspect-ratio:auto;height:clamp(260px,42svh,440px)}
-/* Кадр вертикальный, а место под карту — широкая полоса: в неё попадает лишь
-   четверть высоты снимка. Ставим окно так, чтобы в него встали вывеска и
-   верх двери — по ним человек и узнаёт дом. */
-.map__ph{object-position:50% 42%}
-.map.is-live .map__ph,.map.is-live .map__note{display:none}
-/* Кнопка лежит на фотографии, а не под ней: место одно, а действие понятное. */
-/* Кнопка стоит в углу, а не по центру: в середине кадра вывеска, и накрывать
-   её белой плашкой — значит прятать то единственное, по чему дом узнают. */
-.map__go{position:absolute;right:16px;bottom:56px;z-index:2;
-  min-height:52px;padding:14px 26px;border:1px solid var(--hair);border-radius:2px;
-  background:rgba(255,255,255,.96);color:var(--ink);font:inherit;font-size:var(--fs-3);
-  font-weight:500;cursor:pointer;box-shadow:0 8px 26px rgba(20,22,26,.18);
-  transition:background var(--t-fast),transform var(--t-fast)}
-.map__go:hover{background:#fff;transform:scale(1.02)}
+
+.map__ask{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+.map__ask-t{margin:0;font-size:var(--fs-4);color:var(--ink);max-width:34ch}
+.map__ask-f{margin:0;font-size:var(--fs-2);color:var(--mute);max-width:48ch}
+.map.is-live .map__ask{display:none}
+
+.map__go{min-height:52px;padding:14px 26px;border:1px solid var(--ink);border-radius:2px;
+  background:var(--bg);color:var(--ink);font:inherit;font-size:var(--fs-3);font-weight:500;
+  cursor:pointer;transition:background var(--t-fast),color var(--t-fast)}
+.map__go:hover{background:var(--ink);color:var(--bg)}
 .map__go:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
-/* Без скрипта карту не подключить — и кнопки, которая ничего не делает, быть
-   не должно: остаётся фотография с адресом, этого достаточно. */
+/* Без скрипта подключить карту нечем, и кнопка, которая ничего не делает,
+   хуже её отсутствия: остаются адрес и строка о том, где вход. */
 .no-js .map__go{display:none}
-/* На телефоне кадр узкий: кнопка у правого края прижимается к рамке и садится
-   на подпись с адресом. Ставим её по центру и выше подписи. */
+
 @media(max-width:620px){
-  .map__go{left:50%;right:auto;translate:-50% 0;bottom:82px;
-    font-size:var(--fs-2);padding:12px 20px;min-height:48px}
-  .map__go:hover{transform:none}
+  .map{height:clamp(260px,38svh,320px)}
+  .map__ask{gap:12px;padding:18px}
+  .map__ask-t{font-size:var(--fs-3)}
+  .map__go{font-size:var(--fs-2);padding:12px 20px;min-height:48px}
 }
 .map__note{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:rgba(255,255,255,.9);font-size:var(--fs-2);margin:0}
 .contact__in h2{margin-bottom:8px}

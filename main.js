@@ -818,6 +818,7 @@
       if (open) return false;
       const sr = stone.getBoundingClientRect(); if (!(px > sr.left && px < sr.right && py > sr.top && py < sr.bottom)) { last = null; return false; }
       idle = 0; stone.classList.remove('pulse'); hint.classList.add('is-touched');
+      offer.classList.add('is-touched');   // слово «Гигиена» на камне больше не нужно
       const cx = (px - sr.left) * dpr, cy = (py - sr.top) * dpr, rad = radCss * dpr;
       if (last) { const dx = cx - last.x, dy = cy - last.y, n = Math.max(1, Math.round(Math.hypot(dx, dy) / (rad * .35))); for (let i = 1; i <= n; i++) erase(last.x + dx * i / n, last.y + dy * i / n, rad); } else erase(cx, cy, rad);
       last = { x: cx, y: cy }; spawn({ x: px, y: py }, 4);
@@ -858,7 +859,7 @@
         const back = new IntersectionObserver(es => es.forEach(e => {
           if (e.isIntersecting || !open) return;
           back.disconnect(); open = false; offer.classList.remove('is-open');
-          stone.style.pointerEvents = ''; reset(); gsap.set(stone, { opacity: 1 }); stone.classList.add('pulse'); hint.classList.remove('is-touched');
+          stone.style.pointerEvents = ''; reset(); gsap.set(stone, { opacity: 1 }); stone.classList.add('pulse'); hint.classList.remove('is-touched'); offer.classList.remove('is-touched');
           /* камень нарос заново — значит и инструмент нужен снова */
           if (hp) { hp.style.pointerEvents = ''; gsap.to(hp, { opacity: 1, duration: .5 }); }
         }), { threshold: 0 });

@@ -174,6 +174,10 @@
   addEventListener('scroll', () => hdr.classList.toggle('stuck', scrollY > 8), { passive: true });
   const burger = $('.burger');
   burger.addEventListener('click', () => burger.setAttribute('aria-expanded', document.body.classList.toggle('nav-open')));
+  /* Меню закрывается и с клавиатуры: открытое меню без выхода по Escape —
+     ловушка для того, кто не пользуется мышью. */
+  addEventListener('keydown', e => { if (e.key !== 'Escape' || !document.body.classList.contains('nav-open')) return;
+    document.body.classList.remove('nav-open'); burger.setAttribute('aria-expanded', 'false'); burger.focus(); });
   $$('.nav a').forEach(a => a.addEventListener('click', () => { document.body.classList.remove('nav-open'); burger.setAttribute('aria-expanded', 'false'); }));
   (function activeNav() {
     const links = $$('.nav a, .pnav a').filter(a => a.hash && $(a.hash));
@@ -256,12 +260,16 @@
       html.style.setProperty('--cookie-h', '0px');
       if (v === 'all') startMetrika();
     }
-    /* В режиме для слабовидящих баннер растянут во всю ширину внизу экрана:
-       карточка поверх текста там читается как наложение. Чтобы полоса не
-       закрывала последние строки, страница получает отступ в её высоту. */
-    const pad = () => { if (!html.classList.contains('vi')) return;
-      html.style.setProperty('--cookie-h', (bar.hidden ? 0 : bar.offsetHeight + 8) + 'px'); };
-    function show() { bar.hidden = false; document.body.classList.add('has-cookie'); pad(); }
+    /* Высота полосы нужна в двух местах, поэтому считаем её всегда.
+       В режиме для слабовидящих баннер растянут во всю ширину внизу экрана —
+       страница получает отступ в его высоту, иначе полоса закрывает последние
+       строки. На узком экране на ту же высоту поднимается кнопка вызова:
+       раньше она пряталась и не возвращалась. */
+    const pad = () => html.style.setProperty(
+      '--cookie-h', (bar.hidden ? 0 : bar.offsetHeight + 8) + 'px');
+    function show() { bar.hidden = false; document.body.classList.add('has-cookie'); pad();
+      /* Полоса переносится по-разному при повороте телефона — высота меняется. */
+      addEventListener('resize', pad, { passive: true }); }
 
     const saved = (read() || '').split('|')[0];
     /* поверх вступления окно не показываем — ждём, пока откроется содержимое */
@@ -491,17 +499,20 @@
       });
       /* Порог показа — один экран прокрутки после того, как страница открыта.
          На главной «открыта» означает, что вступление закончилось. */
-      const bar = $('#cookie');
-      /* Кнопка показана, когда выполнено всё сразу: страница открыта, человек
-         прокрутил хотя бы половину экрана и полоса о cookie не висит. Полоса
-         стоит в том же углу и приходит с задержкой — если проверить один раз
-         и забыть, она накроет кнопку. Поэтому не «показать однажды», а
-         держать в согласии с обстановкой: состояние пересчитывается. */
+      /* Кнопка показана, когда страница открыта и человек прокрутил хотя бы
+         половину экрана.
+
+         Раньше её ещё и прятали, пока висит полоса о cookie. Полоса стоит
+         в том же углу и ждёт ответа сколько угодно: кто её не трогал, до
+         конца визита оставался без кнопки записи. Замерено — на телефоне
+         кнопка пропадала после 11000 px и больше не возвращалась. Теперь
+         пересечение разводит стиль: на узком экране кнопка поднимается над
+         полосой (--cookie-h), на мониторе карточка стоит по центру и до
+         угла не достаёт. */
       let armed = false;
       const sync = () => {
         if (html.classList.contains('ready') && scrollY >= innerHeight * .6) armed = true;
-        const busy = bar && !bar.hidden;
-        b.classList.toggle('is-on', armed && !busy);
+        b.classList.toggle('is-on', armed);
       };
       addEventListener('scroll', sync, { passive: true });
       setInterval(sync, 700);
@@ -762,7 +773,26 @@
 
     if (tall) {                       /* обычная страница: шкалу ведёт скролл, назад тоже */
       box.classList.add('is-tall');
-      lite(true);
+
+      /* Пришли по ссылке с якорем — например «Врач» из подвала другой
+         страницы. Тогда экономный режим не включаем вовсе.
+
+         Почему. В экономном режиме секции получают content-visibility:auto:
+         браузер не размечает то, что за экраном, и считает их высоту по
+         заглушке в 900 px. Прыжок к якорю он вычисляет по этим заглушкам, а
+         потом секции размечаются по-настоящему, их высота меняется — и
+         прокрутка остаётся не там. Замерено: промах от 200 до 2000 пикселей,
+         то есть человек нажимал «Врач», а попадал на отзывы.
+
+         Заодно после загрузки дважды поправляем положение: картинки и шрифты
+         догружаются и могут сдвинуть разметку ещё раз. */
+      const якорь = location.hash.length > 1 && document.querySelector(location.hash);
+      if (!якорь) lite(true);
+      else {
+        const доводка = () => { const el = document.querySelector(location.hash);
+          if (el) el.scrollIntoView({ behavior: 'instant', block: 'start' }); };
+        addEventListener('load', () => { доводка(); setTimeout(доводка, 350); });
+      }
       let raf = 0, driving = false, LEN = 1;
       /* Единица шкалы — ровно то положение прокрутки, при котором первый экран
          встаёт по верху кадра. Иначе конец шкалы и конец вступления расходятся

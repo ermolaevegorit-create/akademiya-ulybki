@@ -1,2 +1,10 @@
 _рабочее/
 .DS_Store
+
+# архив выкладки и исходные JPEG: заменены на webp, на сайт не идут
+site-dist.tgz
+assets/editorial/*.jpg
+assets/edu/*.jpg
+assets/photo/facade.jpg
+assets/photo/tour-reception.jpg
+assets/photo/work-1.jpg

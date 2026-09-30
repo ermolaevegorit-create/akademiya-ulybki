@@ -116,7 +116,11 @@ p{margin:0 0 1em}
 .js .rv.in{opacity:1;transform:none}
 
 /* кнопки */
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 26px;border:1px solid var(--ink);border-radius:2px;font-size:15px;font-weight:500;color:var(--ink);background:transparent;cursor:pointer;transition:background var(--t-fast),color var(--t-fast),border-color var(--t-fast);white-space:nowrap;font-variant-numeric:tabular-nums}
+/* font-family здесь обязателен. У <button> браузер ставит свой шрифт —
+   Arial, — и не наследует его от страницы, в отличие от ссылки. Из-за
+   этого «Позвонить», «Записаться», «Принять всё» набирались Arial'ом,
+   а такие же кнопки-ссылки рядом — фирменным Golos. */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 26px;border:1px solid var(--ink);border-radius:2px;font-family:inherit;font-size:15px;font-weight:500;color:var(--ink);background:transparent;cursor:pointer;transition:background var(--t-fast),color var(--t-fast),border-color var(--t-fast);white-space:nowrap;font-variant-numeric:tabular-nums}
 .btn:hover{background:var(--ink);color:#fff}
 .btn--fill{background:var(--navy);border-color:var(--navy);color:#fff}
 .btn--fill:hover{background:var(--navy-d);border-color:var(--navy-d)}
@@ -184,7 +188,7 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
    высота 290svh и отрицательный нижний отступ в 100svh, поэтому его
    заливка уходила на целый экран ниже кадра и просвечивала сквозь
    прозрачные секции: блок направлений разрезало по горизонтали. */
-.intro{display:none;position:relative;height:clamp(480px,100svh,860px);margin-top:calc(-1 * var(--hdr));overscroll-behavior:contain}
+.intro{display:none;position:relative;height:max(480px,100svh);margin-top:calc(-1 * var(--hdr));overscroll-behavior:contain}
 /* Отрицательный отступ снизу подводит первый экран ровно под залитый светом
    кадр: пока засвет расходится, содержимое уже стоит на своём месте и
    проступает сквозь него. Пустого белого кадра между ними не остаётся. */
@@ -193,7 +197,11 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
    Пальцем длинный путь утомляет быстрее, чем колесом. */
 @media(max-width:700px){.intro.is-tall{height:235svh}}
 .intro__inner{height:100%;background:#F7F8F9}
-.intro.is-tall .intro__inner{height:100svh}
+/* Высота кадра до и после класса is-tall обязана совпадать: класс ставит
+   скрипт, и всякое расхождение подбрасывает подсказку «Прокрутите вниз»
+   на глазах у человека. Замерено: скачок 40 px при окне 900 и сдвиг
+   вёрстки 0.089. Поэтому и здесь, и в базовом правиле — одна формула. */
+.intro.is-tall .intro__inner{height:max(480px,100svh)}
 .js .intro{display:block}
 .intro__inner{position:sticky;top:0;overflow:hidden;z-index:40;
   background:radial-gradient(115% 92% at 50% 38%,#FCFDFE 0%,#F2F4F7 46%,#E3E7ED 100%)}
@@ -874,7 +882,21 @@ html.vi .tray__cta[hidden]{display:block}
    и правый край текста уходил за экран. */
 html.vi h1,html.vi h2,html.vi h3,html.vi h4,html.vi p,html.vi li,html.vi dd,html.vi dt,
 html.vi td,html.vi th,html.vi b,html.vi span,html.vi a,html.vi figcaption,html.vi summary{
-  overflow-wrap:break-word}
+  /* Перенос по слогам включаем только здесь. Без него длинное слово рубится
+     по месту переполнения: на 390 px при крупном кегле «стоматолог-терапевт»
+     оставлял на следующей строке одну букву «т». Со слогами браузер ставит
+     разрыв там, где положено, и рисует знак переноса. */
+  overflow-wrap:break-word;hyphens:auto}
+/* Два места, где break-word не спасал, замерено при кегле ×1.8 на 390 px.
+   1. Блок врача — гибкая строка: у элемента внутри min-width по умолчанию
+      равен минимальной ширине содержимого, и колонка с текстом не ужималась,
+      вылезая за правый край на 59 px.
+   2. Адрес надзорного органа — ссылка строчно-блочная: её ширину считают
+      по самому длинному слову, поэтому перенос внутри слова не срабатывал.
+      anywhere, в отличие от break-word, учитывается и при подсчёте ширины. */
+html.vi .doc__head{flex-wrap:wrap}
+html.vi .doc__head > *{min-width:0}
+html.vi .lnk,html.vi a[href^="http"]{overflow-wrap:anywhere}
 /* Панель настроек: подпись и кнопки на узком экране встают друг под друга,
    иначе подпись оказывается в одной строке с кнопкой, а остальные переносятся. */
 @media(max-width:700px){
@@ -1247,7 +1269,13 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
    получает запас снизу ровно на её высоту. */
 @media(max-width:620px){
   .ftr__legal{padding-bottom:76px}
-  .fab{height:52px}
+  .fab{height:52px;
+    /* Полоса о cookie на узком экране разворачивается во всю ширину и
+       накрывает угол с кнопкой. Раньше кнопку на это время прятали — и если
+       человек полосу не трогал, кнопки не было до конца визита. Теперь она
+       поднимается над полосой: видны обе. На мониторе карточка стоит по
+       центру и до угла не достаёт, там ничего не двигаем. */
+    bottom:calc(max(16px,env(safe-area-inset-bottom)) + var(--cookie-h,0px))}
   .fab__ph{width:52px;height:52px}
 }
 /* Покой есть покой: ни волн, ни выезда. Кнопка просто стоит на месте. */
@@ -1333,4 +1361,24 @@ html.vi .fab__ring{display:none}
   .brand{gap:6px;min-width:0;flex-shrink:1}
   .brand__t{min-width:0}
   .brand__t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+
+/* ---------------------------------------------------------------------------
+   ПЕЧАТЬ
+
+   Прейскурант и адрес люди печатают. На бумаге не нужны ни меню, ни игры, ни
+   плавающая кнопка записи — нужны название, телефон, адрес и сам текст.
+--------------------------------------------------------------------------- */
+@media print{
+  .hdr,.fab,.cookie,.lfpop,.vip,.intro,.map,.lfband,.sfx-btn,.vi-btn,.burger,
+  .offer__stage,.fill__in,.tray__stage,.tray__cta,.hint,.skip{display:none!important}
+  html,body{background:#fff;color:#000}
+  .sec{padding-block:16pt;break-inside:avoid}
+  .sec--band{background:none;border:0}
+  a{color:#000;text-decoration:none}
+  /* адрес ссылки рядом с текстом: на бумаге ссылка без адреса бесполезна */
+  .ftr a[href^="http"]::after{content:" (" attr(href) ")";font-size:9pt;color:#444}
+  table{break-inside:auto}
+  tr{break-inside:avoid}
+  thead{display:table-header-group}
 }

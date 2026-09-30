@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<noscript><style>.intro,.slab__stone,.hint,.cookie,.vi-btn{display:none!important}</style></noscript>
+<noscript><style>.intro,.slab__stone,.hint,.cookie,.vi-btn,.fab,.lfpop{display:none!important}.lf > *{display:none!important}.lf__nojs{display:block!important}</style></noscript>
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
 <script>(function(){try{var v=JSON.parse(localStorage.getItem('au-vi')||'null');if(!v||!v.on)return;var c=document.documentElement.classList;c.add('vi');if(v.size>1)c.add('vi-'+v.size);if(v.scheme&&v.scheme!=='light')c.add('vi-'+v.scheme);if(v.noimg)c.add('vi-noimg');}catch(e){}})()</script>
@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=34f00a99">
+<link rel="stylesheet" href="styles.css?v=15e986f4">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": ["Dentist", "MedicalClinic"], "name": "Стоматологическая клиника «Академия улыбки»", "legalName": "ООО «Академия улыбки»", "telephone": "+79897512851", "url": "https://akademiya-ulybki.ru/", "address": {"@type": "PostalAddress", "streetAddress": "ул. Виноградная, д. 55/1, пом. 22, 2-й этаж", "addressLocality": "Сочи", "addressRegion": "Краснодарский край", "postalCode": "354008", "addressCountry": "RU"}, "geo": {"@type": "GeoCoordinates", "latitude": 43.608995, "longitude": 39.720852}, "hasMap": "https://yandex.ru/maps/org/akademiya_ulybki/196221666219/", "foundingDate": "2026", "employee": {"@type": "Physician", "name": "Белоусова Александра Сергеевна", "jobTitle": "Врач стоматолог-терапевт, хирург, имплантолог", "alumniOf": "Новосибирский государственный медицинский университет"}, "hasCredential": {"@type": "EducationalOccupationalCredential", "credentialCategory": "license", "name": "Лицензия Л041-01126-23/05841444", "dateCreated": "2026-08-03", "recognizedBy": {"@type": "GovernmentOrganization", "name": "Министерство здравоохранения Краснодарского края"}}, "identifier": [{"@type": "PropertyValue", "propertyID": "ИНН", "value": "2366057010"}, {"@type": "PropertyValue", "propertyID": "ОГРН", "value": "1262300000038"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Как проходит первый визит?", "acceptedAnswer": {"@type": "Answer", "text": "Первичный приём длится около часа. Мы разговариваем о том, что беспокоит и чего вы ждёте, осматриваем полость рта, делаем фотопротокол и, если нужно, даём направление на снимок. В конце вы получаете письменный план лечения с этапами и стоимостью. Никаких процедур «заодно» в первый визит не делается — только по вашему решению."}}, {"@type": "Question", "name": "Как часто нужна профессиональная чистка?", "acceptedAnswer": {"@type": "Answer", "text": "Большинству взрослых — раз в шесть месяцев. При заболеваниях дёсен, брекетах, имплантатах или курении — раз в три‑четыре месяца. Интервал врач назначает индивидуально после осмотра."}}, {"@type": "Question", "name": "Что нельзя делать после чистки?", "acceptedAnswer": {"@type": "Answer", "text": "Два‑три часа не есть и не пить ничего, кроме воды. Сутки — без красящих продуктов: кофе, чай, красное вино, свёкла, соевый соус, ягоды. Сутки — без курения. Эмаль после чистки более восприимчива к пигментам."}}, {"@type": "Question", "name": "Больно ли лечить зубы?", "acceptedAnswer": {"@type": "Answer", "text": "Лечение проходит под местной анестезией. Современные анестетики действуют через несколько минут и полностью убирают чувствительность на время процедуры. Если вы боитесь самого укола, скажите — место инъекции предварительно обезболивается гелем."}}, {"@type": "Question", "name": "Обязательно ли удалять зубы мудрости?", "acceptedAnswer": {"@type": "Answer", "text": "Нет. Удаляют те, что растут неправильно, упираются в соседний зуб, регулярно воспаляются или не поддаются лечению. Здоровый, прорезавшийся и доступный для чистки зуб мудрости можно оставить."}}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Академия улыбки", "url": "https://akademiya-ulybki.ru/", "inLanguage": "ru-RU", "publisher": {"@type": "Organization", "name": "ООО «Академия улыбки»"}}</script>
@@ -274,12 +274,21 @@
       <div class="lf__grid">
         <label class="lf__f">
           <span class="lf__l">Как вас зовут</span>
-          <input class="lf__i" type="text" name="name" id="lf-doc-name" autocomplete="given-name"
+          <!-- У полей с именем и телефоном намеренно нет атрибута name.
+               Без него браузер не может подставить их в адресную строку: если
+               скрипт по какой-то причине не перехватит отправку, форма уйдёт
+               обычным запросом — и тогда имя и телефон пациента оказались бы в
+               адресе страницы, в истории браузера и в журналах сервера.
+               Скрипт берёт поля по id, автоподстановку ведёт autocomplete —
+               оба механизма в name не нуждаются. У переключателя времени name
+               остаётся: без него три кнопки перестанут быть одной группой, а
+               личных данных в нём нет. -->
+          <input class="lf__i" type="text" id="lf-doc-name" autocomplete="given-name"
                  required minlength="2" maxlength="60" placeholder="Имя">
         </label>
         <label class="lf__f">
           <span class="lf__l">Телефон</span>
-          <input class="lf__i" type="tel" name="tel" id="lf-doc-tel" autocomplete="tel"
+          <input class="lf__i" type="tel" id="lf-doc-tel" autocomplete="tel"
                  required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
         </label>
       </div>
@@ -302,6 +311,12 @@
       <p class="lf__err" id="lf-doc-err" role="alert" hidden></p>
       <button class="btn btn--fill lf__go" type="submit" data-track="lead_lf-doc">Записаться на приём</button>
       <p class="fine lf__fine">Ответим в рабочее время. Можно и просто позвонить: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a></p>
+      <!-- Видно только тогда, когда в браузере выключены скрипты: отправлять
+           заявку нечем, и пустая форма, которая молча ничего не делает, хуже,
+           чем честная строка с телефоном. -->
+      <p class="lf__nojs">Чтобы отправить заявку, нужен включённый JavaScript.
+        Позвоните, пожалуйста: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a> —
+        запишем на приём за минуту.</p>
     </form>
   </div>
 </section>
@@ -387,12 +402,21 @@
       <div class="lf__grid">
         <label class="lf__f">
           <span class="lf__l">Как вас зовут</span>
-          <input class="lf__i" type="text" name="name" id="lf-faq-name" autocomplete="given-name"
+          <!-- У полей с именем и телефоном намеренно нет атрибута name.
+               Без него браузер не может подставить их в адресную строку: если
+               скрипт по какой-то причине не перехватит отправку, форма уйдёт
+               обычным запросом — и тогда имя и телефон пациента оказались бы в
+               адресе страницы, в истории браузера и в журналах сервера.
+               Скрипт берёт поля по id, автоподстановку ведёт autocomplete —
+               оба механизма в name не нуждаются. У переключателя времени name
+               остаётся: без него три кнопки перестанут быть одной группой, а
+               личных данных в нём нет. -->
+          <input class="lf__i" type="text" id="lf-faq-name" autocomplete="given-name"
                  required minlength="2" maxlength="60" placeholder="Имя">
         </label>
         <label class="lf__f">
           <span class="lf__l">Телефон</span>
-          <input class="lf__i" type="tel" name="tel" id="lf-faq-tel" autocomplete="tel"
+          <input class="lf__i" type="tel" id="lf-faq-tel" autocomplete="tel"
                  required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
         </label>
       </div>
@@ -415,6 +439,12 @@
       <p class="lf__err" id="lf-faq-err" role="alert" hidden></p>
       <button class="btn btn--fill lf__go" type="submit" data-track="lead_lf-faq">Жду звонка</button>
       <p class="fine lf__fine">Ответим в рабочее время. Можно и просто позвонить: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a></p>
+      <!-- Видно только тогда, когда в браузере выключены скрипты: отправлять
+           заявку нечем, и пустая форма, которая молча ничего не делает, хуже,
+           чем честная строка с телефоном. -->
+      <p class="lf__nojs">Чтобы отправить заявку, нужен включённый JavaScript.
+        Позвоните, пожалуйста: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a> —
+        запишем на приём за минуту.</p>
     </form>
   </div>
 </section>
@@ -489,12 +519,21 @@
       <div class="lf__grid">
         <label class="lf__f">
           <span class="lf__l">Как вас зовут</span>
-          <input class="lf__i" type="text" name="name" id="lf-pop-name" autocomplete="given-name"
+          <!-- У полей с именем и телефоном намеренно нет атрибута name.
+               Без него браузер не может подставить их в адресную строку: если
+               скрипт по какой-то причине не перехватит отправку, форма уйдёт
+               обычным запросом — и тогда имя и телефон пациента оказались бы в
+               адресе страницы, в истории браузера и в журналах сервера.
+               Скрипт берёт поля по id, автоподстановку ведёт autocomplete —
+               оба механизма в name не нуждаются. У переключателя времени name
+               остаётся: без него три кнопки перестанут быть одной группой, а
+               личных данных в нём нет. -->
+          <input class="lf__i" type="text" id="lf-pop-name" autocomplete="given-name"
                  required minlength="2" maxlength="60" placeholder="Имя">
         </label>
         <label class="lf__f">
           <span class="lf__l">Телефон</span>
-          <input class="lf__i" type="tel" name="tel" id="lf-pop-tel" autocomplete="tel"
+          <input class="lf__i" type="tel" id="lf-pop-tel" autocomplete="tel"
                  required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
         </label>
       </div>
@@ -517,6 +556,12 @@
       <p class="lf__err" id="lf-pop-err" role="alert" hidden></p>
       <button class="btn btn--fill lf__go" type="submit" data-track="lead_lf-pop">Записаться</button>
       <p class="fine lf__fine">Ответим в рабочее время. Можно и просто позвонить: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a></p>
+      <!-- Видно только тогда, когда в браузере выключены скрипты: отправлять
+           заявку нечем, и пустая форма, которая молча ничего не делает, хуже,
+           чем честная строка с телефоном. -->
+      <p class="lf__nojs">Чтобы отправить заявку, нужен включённый JavaScript.
+        Позвоните, пожалуйста: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a> —
+        запишем на приём за минуту.</p>
     </form>
   </div>
 </div>
@@ -551,6 +596,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=7601035a"></script>
+<script src="main.js?v=bd343356"></script>
 </body>
 </html>

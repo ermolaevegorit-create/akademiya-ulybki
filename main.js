@@ -224,6 +224,20 @@
 
   (function leadForms() {
     const forms = $$('.lf'); if (!forms.length) return;
+
+    /* Перехват отправки вешаем первым делом — до всего остального.
+       Если ниже что-нибудь сломается, обработчик уже стоит, и браузер не
+       отправит форму сам: иначе страница просто перезагрузилась бы, человек
+       решил бы, что заявка ушла, а она бы никуда не ушла. */
+    forms.forEach(f => f.addEventListener('submit', e => {
+      e.preventDefault();
+      try { send(f); } catch (err) {
+        const box = f.querySelector('.lf__err');
+        if (box) { box.textContent = 'Не получилось отправить. Позвоните, пожалуйста, по телефону.';
+                   box.hidden = false; }
+      }
+    }));
+
     const WA = '79897512851';
 
     /* Телефон принимаем в любом виде, но проверяем, что цифр достаточно:
@@ -238,7 +252,10 @@
     }
 
     function send(f) {
-      const name = f.querySelector('[name=name]'), tel = f.querySelector('[name=tel]'),
+      /* Имя и телефон ищем по id: атрибута name у них нет намеренно —
+         так браузер не сможет подставить их в адресную строку, если отправку
+         вдруг не перехватит скрипт. */
+      const name = f.querySelector('.lf__i[type=text]'), tel = f.querySelector('.lf__i[type=tel]'),
             ok = f.querySelector('[name=ok]'), box = f.querySelector('.lf__err'),
             when = f.querySelector('[name=when]:checked');
       [name, tel].forEach(el => el.removeAttribute('aria-invalid'));
@@ -279,7 +296,6 @@
       if (pop && !pop.hidden) setTimeout(closePop, 2600);
     }
 
-    forms.forEach(f => f.addEventListener('submit', e => { e.preventDefault(); send(f); }));
 
     /* ---------- всплывающее окно ----------
        Показываем один раз и только тому, кто уже читал страницу: после блока

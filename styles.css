@@ -1191,3 +1191,7 @@ html.vi .fab__t{max-width:none;opacity:1;overflow:visible;font-size:1em}
 html.vi .fab__ring{display:none}
 /* Без скрипта отправлять заявку нечем — кнопки нет. */
 .no-js .fab{display:none}
+
+/* Запасная строка в форме: видна только при выключенных скриптах — её
+   показывает <style> внутри <noscript> в самой странице. */
+.lf__nojs{display:none;margin:0;font-size:var(--fs-3);line-height:1.6;color:var(--ink-2)}

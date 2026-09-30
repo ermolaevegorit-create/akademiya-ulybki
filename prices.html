@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<noscript><style>.intro,.slab__stone,.hint,.cookie,.vi-btn{display:none!important}</style></noscript>
+<noscript><style>.intro,.slab__stone,.hint,.cookie,.vi-btn,.fab,.lfpop{display:none!important}.lf > *{display:none!important}.lf__nojs{display:block!important}</style></noscript>
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
 <script>(function(){try{var v=JSON.parse(localStorage.getItem('au-vi')||'null');if(!v||!v.on)return;var c=document.documentElement.classList;c.add('vi');if(v.size>1)c.add('vi-'+v.size);if(v.scheme&&v.scheme!=='light')c.add('vi-'+v.scheme);if(v.noimg)c.add('vi-noimg');}catch(e){}})()</script>
@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=34f00a99">
+<link rel="stylesheet" href="styles.css?v=15e986f4">
 
 </head>
 <body>
@@ -125,12 +125,21 @@
       <div class="lf__grid">
         <label class="lf__f">
           <span class="lf__l">Как вас зовут</span>
-          <input class="lf__i" type="text" name="name" id="lf-pop-name" autocomplete="given-name"
+          <!-- У полей с именем и телефоном намеренно нет атрибута name.
+               Без него браузер не может подставить их в адресную строку: если
+               скрипт по какой-то причине не перехватит отправку, форма уйдёт
+               обычным запросом — и тогда имя и телефон пациента оказались бы в
+               адресе страницы, в истории браузера и в журналах сервера.
+               Скрипт берёт поля по id, автоподстановку ведёт autocomplete —
+               оба механизма в name не нуждаются. У переключателя времени name
+               остаётся: без него три кнопки перестанут быть одной группой, а
+               личных данных в нём нет. -->
+          <input class="lf__i" type="text" id="lf-pop-name" autocomplete="given-name"
                  required minlength="2" maxlength="60" placeholder="Имя">
         </label>
         <label class="lf__f">
           <span class="lf__l">Телефон</span>
-          <input class="lf__i" type="tel" name="tel" id="lf-pop-tel" autocomplete="tel"
+          <input class="lf__i" type="tel" id="lf-pop-tel" autocomplete="tel"
                  required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
         </label>
       </div>
@@ -153,6 +162,12 @@
       <p class="lf__err" id="lf-pop-err" role="alert" hidden></p>
       <button class="btn btn--fill lf__go" type="submit" data-track="lead_lf-pop">Записаться</button>
       <p class="fine lf__fine">Ответим в рабочее время. Можно и просто позвонить: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a></p>
+      <!-- Видно только тогда, когда в браузере выключены скрипты: отправлять
+           заявку нечем, и пустая форма, которая молча ничего не делает, хуже,
+           чем честная строка с телефоном. -->
+      <p class="lf__nojs">Чтобы отправить заявку, нужен включённый JavaScript.
+        Позвоните, пожалуйста: <a class="lnk" href="tel:+79897512851">+7 (989) 751‑28‑51</a> —
+        запишем на приём за минуту.</p>
     </form>
   </div>
 </div>
@@ -187,6 +202,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=7601035a"></script>
+<script src="main.js?v=bd343356"></script>
 </body>
 </html>

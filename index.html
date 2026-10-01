@@ -295,7 +295,12 @@
         <label class="lf__f">
           <span class="lf__l">Телефон</span>
           <input class="lf__i" type="tel" id="lf-doc-tel" autocomplete="tel"
-                 required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
+                 <!-- Предел чуть больше готового номера (18 знаков) намеренно:
+                      когда человек набирает междугородную восьмёрку перед кодом
+                      города, поле на мгновение заполнено целиком, и без запаса
+                      браузер не пустил бы последнюю цифру — а именно она даёт
+                      понять, что первая восьмёрка лишняя. -->
+                 required inputmode="tel" maxlength="22" placeholder="+7 (___) ___-__-__">
         </label>
       </div>
       <!-- Во всплывающем окне этот блок скрыт стилем (.lf--compact): там нужно
@@ -423,7 +428,12 @@
         <label class="lf__f">
           <span class="lf__l">Телефон</span>
           <input class="lf__i" type="tel" id="lf-faq-tel" autocomplete="tel"
-                 required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
+                 <!-- Предел чуть больше готового номера (18 знаков) намеренно:
+                      когда человек набирает междугородную восьмёрку перед кодом
+                      города, поле на мгновение заполнено целиком, и без запаса
+                      браузер не пустил бы последнюю цифру — а именно она даёт
+                      понять, что первая восьмёрка лишняя. -->
+                 required inputmode="tel" maxlength="22" placeholder="+7 (___) ___-__-__">
         </label>
       </div>
       <!-- Во всплывающем окне этот блок скрыт стилем (.lf--compact): там нужно
@@ -547,7 +557,12 @@
         <label class="lf__f">
           <span class="lf__l">Телефон</span>
           <input class="lf__i" type="tel" id="lf-pop-tel" autocomplete="tel"
-                 required inputmode="tel" maxlength="20" placeholder="+7 ___ ___‑__‑__">
+                 <!-- Предел чуть больше готового номера (18 знаков) намеренно:
+                      когда человек набирает междугородную восьмёрку перед кодом
+                      города, поле на мгновение заполнено целиком, и без запаса
+                      браузер не пустил бы последнюю цифру — а именно она даёт
+                      понять, что первая восьмёрка лишняя. -->
+                 required inputmode="tel" maxlength="22" placeholder="+7 (___) ___-__-__">
         </label>
       </div>
       <!-- Во всплывающем окне этот блок скрыт стилем (.lf--compact): там нужно
@@ -629,6 +644,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=720bffc6"></script>
+<script src="main.js?v=f63f153c"></script>
 </body>
 </html>

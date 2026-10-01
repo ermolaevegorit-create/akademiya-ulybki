@@ -717,12 +717,18 @@ html.vi .lfband{background:var(--bg);border-color:var(--ink)}
    сверху вниз, и карта оказывается там, где она нужна — в конце. */
 .contact__in{display:block}
 /* Реквизиты и фото входа — рядом, а не друг под другом: раньше слева стояла
-   узкая колонка, а справа оставалось пустое поле во весь экран. Фото держим
-   справа и не даём ему расти шире 300 px — это опознавательный кадр, а не
-   иллюстрация во всю страницу. */
-.contact__top{display:grid;grid-template-columns:minmax(0,1fr) 300px;
+   узкая колонка, а рядом оставалось пустое поле во весь экран. Фото не даём
+   расти шире 300 px — это опознавательный кадр, а не иллюстрация во всю
+   страницу. */
+/* Фотография слева, сведения справа — как в блоке первого визита. Причина та
+   же: у колонки с текстом ровный левый край и рваный правый, и рваный не
+   должен смотреть в середину разворота. */
+.contact__top{display:grid;grid-template-columns:300px minmax(0,1fr);
   gap:clamp(28px,5vw,72px);align-items:start}
 .contact__info{max-width:70ch}
+@media(min-width:861px){.contact__photo{order:-1}}
+/* На узком экране порядок прежний: сначала адрес и телефон, фотография после.
+   Человеку с телефона нужен не вид подъезда, а номер, по которому звонить. */
 @media(max-width:860px){.contact__top{grid-template-columns:minmax(0,1fr)}}
 /* ---------------------------------------------------------------------------
    МЕСТО ПОД КАРТУ
@@ -1280,6 +1286,17 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
    его тянули за руку. Угол считает скрипт по скорости, здесь только способ
    его применить и скорость возврата. */
 .msc.is-drag .msc__img{transform:rotate(var(--msc-tilt,0deg));transition:transform .12s linear}
+/* Искра, сердце или вопросительный знак — короткая вспышка над плечом.
+   Лежит в своём слое, персонажа не двигает. */
+.msc__fx{position:absolute;right:4%;top:2%;width:34%;height:auto;
+  opacity:0;pointer-events:none;transform-origin:50% 100%}
+.msc__fx.is-on{animation:mscFx 1.5s ease-out}
+@keyframes mscFx{
+  0%{opacity:0;transform:translateY(6px) scale(.7)}
+  22%{opacity:1;transform:translateY(-2px) scale(1)}
+  70%{opacity:1;transform:translateY(-6px) scale(1)}
+  100%{opacity:0;transform:translateY(-12px) scale(.96)}
+}
 .msc__lines{position:absolute;left:50%;top:34%;width:62%;height:auto;
   translate:-50% -50%;opacity:0;pointer-events:none;z-index:-1;
   transition:opacity .18s ease}
@@ -1305,11 +1322,13 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
    полную ширину, даже когда во второй строке стояло одно слово, — и половина
    облачка оставалась пустой. max-content ужимает её ровно по фразе, а предел
    не даёт расплыться на длинной. */
-/* Отрицательный отступ подводит облачко к голове. В кадре 256x256 персонаж
-   начинает примерно с одной девятой сверху — это пустые пиксели внутри
-   картинки, из-за них хвостик указывал в воздух над макушкой. */
+/* Между облачком и головой должен быть воздух, иначе оно выглядит приклеенным
+   ко лбу. Расстояние держит не отступ, а длинный хвостик: он тянется к макушке
+   и связывает их, а само облачко стоит отдельно. В кадре 256x256 персонаж
+   начинается примерно с одной девятой сверху — эти пустые пиксели внутри
+   картинки хвостик и перекрывает. */
 .msc__bub{position:relative;width:max-content;max-width:min(272px,calc(100vw - 28px));
-  margin-bottom:-7px;
+  margin-bottom:4px;
   background:var(--bg);color:var(--ink);border:1px solid var(--hair);
   border-radius:11px;padding:8px 12px;
   box-shadow:0 10px 26px rgba(20,22,26,.14),0 2px 5px rgba(20,22,26,.07);
@@ -1318,11 +1337,13 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   to{opacity:1;transform:none}}
 /* Хвостик у облачка. Два треугольника: нижний — цвет рамки, верхний — фон. */
 .msc__bub::before,.msc__bub::after{content:"";position:absolute;top:100%;
-  right:24px;width:0;height:0;border:7px solid transparent}
-.msc__bub::before{border-top-color:var(--hair)}
-.msc__bub::after{border-top-color:var(--bg);top:calc(100% - 1px);border-width:6px;right:25px}
-.msc--left .msc__bub::before{right:auto;left:24px}
-.msc--left .msc__bub::after{right:auto;left:25px}
+  right:26px;width:0;height:0;
+  border-left:6px solid transparent;border-right:6px solid transparent;
+  border-top:15px solid var(--hair)}
+.msc__bub::after{top:calc(100% - 1.5px);right:27px;
+  border-left-width:5px;border-right-width:5px;border-top:13px solid var(--bg)}
+.msc--left .msc__bub::before{right:auto;left:26px}
+.msc--left .msc__bub::after{right:auto;left:27px}
 .msc--left{align-items:flex-start}
 
 .msc__say{margin:0;padding-right:20px;font-size:14px;line-height:1.35;font-weight:500}
@@ -1372,14 +1393,14 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
   .msc:not(.is-drag) .msc__img{animation:none}
   .msc.is-on .msc__ring{animation:none}
   .msc.is-drag .msc__img{transform:none;transition:none}
-  .msc__lines,.msc__dots i{display:none;animation:none}
+  .msc__lines,.msc__dots i,.msc__fx{display:none;animation:none}
 }
 
 /* Версия для слабовидящих: рисунка нет, есть прямоугольная контрастная кнопка
    со словом. Картинка там мешает — крупный шрифт, высокий контраст, ничего
    лишнего; и всплывающего окна в этом режиме тоже нет, помощник ведёт прямо к
    форме на странице. */
-html.vi .msc__img,html.vi .msc__ring,html.vi .msc__lines{display:none}
+html.vi .msc__img,html.vi .msc__ring,html.vi .msc__lines,html.vi .msc__fx{display:none}
 html.vi .msc__btn{width:auto;height:auto;padding:10px 16px;background:var(--ink);
   color:var(--bg);border:2px solid var(--ink);border-radius:2px;font:inherit;font-size:1em}
 html.vi .msc__btn::after{content:"Записаться"}

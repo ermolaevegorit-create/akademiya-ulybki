@@ -761,36 +761,56 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .still .lfpop{display:none!important}
 html.vi .lfpop{display:none!important}
 html.vi .lf__i,html.vi .lf__chip span{border-color:var(--ink)}
-html.vi .lfband{background:var(--bg);border-color:var(--ink)}
+html.vi .lfband,html.vi .faqt{background:var(--bg);border-color:var(--ink)}
+/* В режиме для слабовидящих снимок не нужен: он декоративный, а подпись под
+   ним — нет. Картинку убираем вместе с тенью, подпись поднимаем над вопросами
+   и ставим в одну колонку: иначе слева остаётся пустое поле во весь блок. */
+html.vi .faqt__ph-w{display:none}
+html.vi .faqt__in{grid-template-columns:minmax(0,1fr);justify-content:stretch;gap:24px}
+html.vi .faqt__who{display:block;order:1}
+html.vi .faqt__cap{margin:0}
+html.vi .faqt__talk{order:2}
 
 /* ВОПРОСЫ */
 /* ---- разворот «интервью» ----
-   Узкая колонка с тем, кто отвечает, и широкая с вопросами — как разворот в
-   журнале. Снимок вырезан, халат белый, поэтому под ним светлая подложка:
-   на белом фоне страницы фигура иначе растворяется. */
-.faqt__in{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);
-  gap:clamp(28px,4vw,64px);align-items:end}
-.faqt .sec__head{margin-bottom:clamp(28px,3.4vw,40px)}
-.faqt__who{margin:0;position:relative;display:grid;grid-template-rows:auto auto}
-.faqt__pad{grid-column:1;grid-row:1;align-self:stretch;
-  background:linear-gradient(180deg,rgba(245,246,248,0) 0%,var(--tint) 24%,var(--tint) 100%)}
-.faqt__ph{grid-column:1;grid-row:1;width:100%;height:auto;display:block;position:relative;
-  filter:drop-shadow(0 16px 18px rgba(23,30,42,.08))}
-.faqt__cap{grid-column:1;grid-row:2;margin:16px 0 0;display:flex;flex-direction:column;gap:3px}
-.faqt__cap b{font-weight:500;font-size:var(--fs-4);line-height:1.25}
+   Узкая колонка с тем, кто отвечает, и колонка вопросов читаемой ширины —
+   как разворот в журнале. Весь блок на сером поле: халат белый, и на белой
+   странице вырезанная фигура растворялась. Подложки под снимком нет, вместо
+   неё растушёванная тень у ног — она даёт опору, не рисуя прямоугольника. */
+.faqt{background:var(--band);border-top:1px solid var(--hair-2);border-bottom:1px solid var(--hair-2)}
+/* Колонки выровнены по верху. Раньше по низу — и при раскрытии вопроса
+   правая колонка росла, а портрет уезжал вместе с ней. */
+.faqt__in{display:grid;grid-template-columns:minmax(0,200px) minmax(0,640px);
+  gap:clamp(28px,4vw,64px);align-items:start;justify-content:center}
+.faqt .sec__head{margin-bottom:clamp(24px,3vw,34px)}
+.faqt__who{margin:0}
+.faqt__ph-w{position:relative;display:block}
+/* Тень — мягкое пятно под ногами, без краёв и без заливки. Привязана к низу
+   снимка, а не к низу всего блока: подпись под ним бывает в две строки и в
+   три, и тень не должна от этого ездить. */
+.faqt__ph-w::before{content:"";position:absolute;left:50%;bottom:-4px;
+  width:92%;height:38px;translate:-50% 0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side ellipse,rgba(23,30,42,.26) 0%,rgba(23,30,42,.11) 46%,rgba(23,30,42,0) 100%)}
+.faqt__ph{width:100%;height:auto;display:block;position:relative}
+.faqt__cap{margin:18px 0 0;display:flex;flex-direction:column;gap:3px}
+.faqt__cap b{font-weight:500;font-size:var(--fs-3);line-height:1.3;white-space:nowrap}
 .faqt__cap span{color:var(--ink-2);font-size:var(--fs-2);line-height:1.45}
 /* Кнопка стояла вплотную к тексту — отбивка задана явно, а не остатком
    от соседнего правила. */
 .faqt__all{margin:clamp(24px,3vw,34px) 0 0}
 @media(max-width:900px){
-  .faqt__in{grid-template-columns:minmax(0,1fr);align-items:start;gap:26px}
-  /* На узком экране портрет уходит вниз, под вопросы: сначала то, за чем
-     пришли, потом тот, кто отвечает. */
-  .faqt__who{order:2;display:grid;grid-template-columns:minmax(0,128px) minmax(0,1fr);
-    grid-template-rows:auto;gap:0 18px;align-items:end;max-width:430px}
-  .faqt__pad,.faqt__ph{grid-column:1;grid-row:1}
-  .faqt__cap{grid-column:2;grid-row:1;margin:0 0 10px}
+  /* На узком экране сначала вопросы, портрет под ними: сперва то, за чем
+     пришли, потом тот, кто отвечает. Снимок уходит вбок, подпись рядом —
+     в столбик он занял бы пол-экрана. */
+  .faqt__in{grid-template-columns:minmax(0,1fr);gap:30px;justify-content:stretch}
   .faqt__talk{order:1}
+  .faqt__who{order:2;display:grid;grid-template-columns:minmax(0,130px) minmax(0,1fr);
+    gap:0 20px;align-items:end;max-width:420px}
+  .faqt__ph-w{grid-column:1;grid-row:1}
+  .faqt__cap{grid-column:2;grid-row:1;margin:0 0 12px}
+  /* На узком экране имя переносится, если не влезло: обрезать его нельзя. */
+  .faqt__cap b{white-space:normal}
+  .faqt__ph-w::before{height:28px;bottom:-3px}
 }
 /* Вопрос и ответ с тире — так набирают интервью в печати. Разметка не
    меняется: тире рисует стиль, в тексте и в поиске его нет. */
@@ -1250,7 +1270,7 @@ html.lite #vrach{contain-intrinsic-size:auto 883px}
 html.lite #zapis{contain-intrinsic-size:auto 716px}
 html.lite #otzyvy{contain-intrinsic-size:auto 902px}
 html.lite #sterilno{contain-intrinsic-size:auto 1024px}
-html.lite #voprosy{contain-intrinsic-size:auto 1101px}
+html.lite #voprosy{contain-intrinsic-size:auto 1081px}
 html.lite #svyaz{contain-intrinsic-size:auto 271px}
 html.lite #kontakty{contain-intrinsic-size:auto 1140px}
 html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 398px}
@@ -1264,7 +1284,7 @@ html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 398px}
   html.lite #zapis{contain-intrinsic-size:auto 1157px}
   html.lite #otzyvy{contain-intrinsic-size:auto 1209px}
   html.lite #sterilno{contain-intrinsic-size:auto 736px}
-  html.lite #voprosy{contain-intrinsic-size:auto 1428px}
+  html.lite #voprosy{contain-intrinsic-size:auto 1437px}
   html.lite #svyaz{contain-intrinsic-size:auto 287px}
   html.lite #kontakty{contain-intrinsic-size:auto 1523px}
   html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 949px}

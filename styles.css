@@ -762,14 +762,11 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 html.vi .lfpop{display:none!important}
 html.vi .lf__i,html.vi .lf__chip span{border-color:var(--ink)}
 html.vi .lfband,html.vi .faqt{background:var(--bg);border-color:var(--ink)}
-/* В режиме для слабовидящих снимок не нужен: он декоративный, а подпись под
-   ним — нет. Картинку убираем вместе с тенью, подпись поднимаем над вопросами
-   и ставим в одну колонку: иначе слева остаётся пустое поле во весь блок. */
-html.vi .faqt__ph-w{display:none}
-html.vi .faqt__in{grid-template-columns:minmax(0,1fr);justify-content:stretch;gap:24px}
-html.vi .faqt__who{display:block;order:1}
-html.vi .faqt__cap{margin:0}
-html.vi .faqt__talk{order:2}
+/* В режиме для слабовидящих снимок не нужен — он декоративный, имя врача
+   есть в заголовке раздела и в «Враче». Колонка убирается целиком, вопросы
+   занимают всю ширину. */
+html.vi .faqt__who{display:none}
+html.vi .faqt__in{grid-template-columns:minmax(0,1fr);justify-content:stretch}
 
 /* ВОПРОСЫ */
 /* ---- разворот «интервью» ----
@@ -785,31 +782,22 @@ html.vi .faqt__talk{order:2}
 .faqt .sec__head{margin-bottom:clamp(24px,3vw,34px)}
 .faqt__who{margin:0}
 .faqt__ph-w{position:relative;display:block}
-/* Тень — мягкое пятно под ногами, без краёв и без заливки. Привязана к низу
-   снимка, а не к низу всего блока: подпись под ним бывает в две строки и в
-   три, и тень не должна от этого ездить. */
+/* Тень — мягкое пятно под ногами, без краёв и без заливки, нарисованное за
+   фигурой: поверх неё оно читалось бы как дымка на обуви. */
 .faqt__ph-w::before{content:"";position:absolute;left:50%;bottom:-4px;
   width:92%;height:38px;translate:-50% 0;border-radius:50%;pointer-events:none;
   background:radial-gradient(closest-side ellipse,rgba(23,30,42,.26) 0%,rgba(23,30,42,.11) 46%,rgba(23,30,42,0) 100%)}
 .faqt__ph{width:100%;height:auto;display:block;position:relative}
-.faqt__cap{margin:18px 0 0;display:flex;flex-direction:column;gap:3px}
-.faqt__cap b{font-weight:500;font-size:var(--fs-3);line-height:1.3;white-space:nowrap}
-.faqt__cap span{color:var(--ink-2);font-size:var(--fs-2);line-height:1.45}
 /* Кнопка стояла вплотную к тексту — отбивка задана явно, а не остатком
    от соседнего правила. */
 .faqt__all{margin:clamp(24px,3vw,34px) 0 0}
 @media(max-width:900px){
   /* На узком экране сначала вопросы, портрет под ними: сперва то, за чем
-     пришли, потом тот, кто отвечает. Снимок уходит вбок, подпись рядом —
-     в столбик он занял бы пол-экрана. */
+     пришли, потом тот, кто отвечает. Снимок небольшой и по центру — в полную
+     ширину колонки он занял бы весь экран. */
   .faqt__in{grid-template-columns:minmax(0,1fr);gap:30px;justify-content:stretch}
   .faqt__talk{order:1}
-  .faqt__who{order:2;display:grid;grid-template-columns:minmax(0,130px) minmax(0,1fr);
-    gap:0 20px;align-items:end;max-width:420px}
-  .faqt__ph-w{grid-column:1;grid-row:1}
-  .faqt__cap{grid-column:2;grid-row:1;margin:0 0 12px}
-  /* На узком экране имя переносится, если не влезло: обрезать его нельзя. */
-  .faqt__cap b{white-space:normal}
+  .faqt__who{order:2;width:170px;margin-inline:auto}
   .faqt__ph-w::before{height:28px;bottom:-3px}
 }
 /* Вопрос и ответ с тире — так набирают интервью в печати. Разметка не
@@ -1270,7 +1258,7 @@ html.lite #vrach{contain-intrinsic-size:auto 883px}
 html.lite #zapis{contain-intrinsic-size:auto 716px}
 html.lite #otzyvy{contain-intrinsic-size:auto 902px}
 html.lite #sterilno{contain-intrinsic-size:auto 1024px}
-html.lite #voprosy{contain-intrinsic-size:auto 1081px}
+html.lite #voprosy{contain-intrinsic-size:auto 1051px}
 html.lite #svyaz{contain-intrinsic-size:auto 271px}
 html.lite #kontakty{contain-intrinsic-size:auto 1140px}
 html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 398px}
@@ -1284,7 +1272,7 @@ html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 398px}
   html.lite #zapis{contain-intrinsic-size:auto 1157px}
   html.lite #otzyvy{contain-intrinsic-size:auto 1209px}
   html.lite #sterilno{contain-intrinsic-size:auto 736px}
-  html.lite #voprosy{contain-intrinsic-size:auto 1437px}
+  html.lite #voprosy{contain-intrinsic-size:auto 1605px}
   html.lite #svyaz{contain-intrinsic-size:auto 287px}
   html.lite #kontakty{contain-intrinsic-size:auto 1523px}
   html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 949px}

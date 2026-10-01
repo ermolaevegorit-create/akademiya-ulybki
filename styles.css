@@ -310,7 +310,7 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 /* ДОКАЗАТЕЛЬСТВА */
 .proof{border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
 .proof__in{display:grid;grid-template-columns:repeat(4,1fr)}
-.proof__in > div{padding:22px 24px 22px 0;border-left:1px solid var(--hair-2);padding-left:24px;display:flex;flex-direction:column;gap:4px}
+.proof__in > div{padding:22px 24px 22px 0;border-left:1px solid var(--hair-2);padding-left:24px;display:flex;flex-direction:column;justify-content:center;gap:4px}
 .proof__in > div:first-child{border-left:0;padding-left:0}
 .proof b{font-weight:500;font-size:var(--fs-3)}
 .proof span{font-size:var(--fs-2);color:var(--mute);line-height:1.45}

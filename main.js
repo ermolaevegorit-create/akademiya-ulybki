@@ -382,22 +382,29 @@
 
        Так одинаково разбираются +7 989…, 8 989…, 989… и номер, вставленный
        из буфера со скобками и дефисами. */
-    const тело = v => {
+    const тело = (v, живой) => {
       let d = String(v || '').replace(/\D/g, '');
       /* Семёрка впереди — всегда код страны: российский номер с неё не
-         начинается. С восьмёркой сложнее: это и междугородняя восьмёрка, и
-         первая цифра кода города (Сочи — 862, Петербург — 812). Считаем её
-         междугородней, когда дальше идёт девятка (мобильный) или когда цифр
-         уже больше десяти — в номере их ровно десять, так что лишняя впереди
-         может быть только восьмёркой набора. Иначе оставляем: набрали код
-         города без неё. */
+         начинается.
+
+         С восьмёркой два случая. Когда человек набирает её руками, это
+         междугородняя восьмёрка — он просто начал привычным образом, и её
+         надо снять сразу, не дожидаясь второй цифры: «+7 (8…» в поле
+         выглядит ошибкой. Когда номер вставили из буфера или подставил
+         браузер, видно всю строку, и там восьмёрка может быть первой цифрой
+         кода города (Сочи — 862, Петербург — 812). Тогда снимаем её, только
+         если дальше идёт девятка (мобильный) или если цифр больше десяти —
+         в номере их ровно десять, лишняя впереди может быть только
+         восьмёркой набора. */
       if (d[0] === '7') d = d.slice(1);
-      if (d[0] === '8' && (d[1] === '9' || d.length > 10)) d = d.slice(1);
+      if (d[0] === '8' && (живой || d[1] === '9' || d.length > 10)) d = d.slice(1);
       return d.slice(0, 10);
     };
+    /* «+7» стоит отдельной надписью слева от поля, в самом поле его нет:
+       так сразу видно, что набирать нужно с девятки. */
     const красиво = d => {
       if (!d) return '';
-      let s = '+7 (' + d.slice(0, 3);
+      let s = '(' + d.slice(0, 3);
       if (d.length >= 3) s += ')';
       if (d.length > 3) s += ' ' + d.slice(3, 6);
       if (d.length > 6) s += '-' + d.slice(6, 8);
@@ -407,24 +414,35 @@
     /* Сколько цифр номера стоит левее каретки — по этому числу её и вернём
        на место после переписывания поля. Иначе каретка прыгала бы в конец
        при любой правке в середине. */
-    const цифрДо = (v, pos) => тело(v.slice(0, pos)).length;
+    const цифрДо = (v, pos) => (v.slice(0, pos).match(/\d/g) || []).length;
     const местоПосле = (s, n) => {
       if (!s) return 0;
-      if (n <= 0) return Math.min(4, s.length);
+      if (n <= 0) return Math.min(1, s.length);      // сразу после «(»
       let к = 0;
-      for (let i = 3; i < s.length; i++) {          // «+7 » пропускаем: это не номер
+      for (let i = 0; i < s.length; i++) {
         if (s[i] >= '0' && s[i] <= '9' && ++к === n) return i + 1;
       }
       return s.length;
     };
 
     function маска(el) {
-      let прежнее = тело(el.value);
+      let прежнее = тело(el.value), снято = false;
       const править = e => {
         const было = прежнее;
         const v = el.value;
         let n = цифрДо(v, el.selectionStart == null ? v.length : el.selectionStart);
-        let d = тело(v);
+        /* Набор руками — это вставка одного знака. Всё остальное (буфер,
+           автозаполнение, первичная правка) разбираем по всей строке.
+
+           Восьмёрку снимаем на лету только один раз за заполнение. Иначе у
+           того, кто набирает городской через междугороднюю — 8 862 … —
+           пропали бы обе восьмёрки подряд, и от номера осталось бы девять
+           цифр. Счётчик сбрасывается, когда поле правят стиранием. */
+        if (e && /delete/i.test(e.inputType || '')) снято = false;
+        const живой = !!(e && e.inputType === 'insertText') && !снято;
+        const сырые = v.replace(/\D/g, '');
+        let d = тело(v, живой);
+        if (живой && сырые.length && d.length < сырые.length) снято = true;
         /* Забой по разделителю: браузер стёр скобку или дефис, цифр столько
            же. Человек метил в цифру — убираем её. */
         if (e && e.inputType === 'deleteContentBackward' && d.length === было.length && n > 0) {
@@ -464,17 +482,19 @@
       box.hidden = true;
 
       if (name.value.trim().length < 2) return fail(name, 'Напишите, как к вам обращаться.', box);
-      if (тело(tel.value).length < 10) return fail(tel, 'Проверьте номер: в нём должно быть десять цифр после +7.', box);
+      const номер = тело(tel.value);
+      if (номер.length < 10) return fail(tel, 'Проверьте номер: в нём должно быть десять цифр после +7.', box);
+      const полный = '+7 ' + красиво(номер);
       if (!ok.checked) { box.textContent = 'Без согласия на обработку данных мы не сможем перезвонить.';
         box.hidden = false; ok.focus(); return false; }
 
       const text = 'Здравствуйте! Меня зовут ' + name.value.trim()
-        + '. Хочу записаться на приём. Телефон: ' + tel.value.trim()
+        + '. Хочу записаться на приём. Телефон: ' + полный
         + '. Звонить ' + (when ? when.value : 'в любое время') + '.';
 
       if (FORM_ENDPOINT) {
         fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name.value.trim(), tel: tel.value.trim(),
+          body: JSON.stringify({ name: name.value.trim(), tel: '+7' + номер,
                                  when: when ? when.value : '', page: location.pathname }) })
           .then(r => { if (!r.ok) throw 0; done(f); })
           .catch(() => { box.textContent = 'Не получилось отправить. Позвоните, пожалуйста, по телефону.';
@@ -642,7 +662,7 @@
          говорит, зачем он здесь; нажимают — открывается форма записи.
          Промежуточный шаг с выбором убран: он стоял между человеком и тем
          единственным действием, ради которого помощник и нужен. */
-      const РЕПЛИКА = 'Проконсультироваться с врачом';
+      const РЕПЛИКА = 'На приём!';
       let открыто = false, таймерПодсказки = 0;
       function показать(текст) {
         bub.classList.remove('is-dots');
@@ -792,20 +812,33 @@
          сильнее, чем быстрее его тянут, а за спиной появляются полоски.
          Скорость считаем по последнему шагу указателя и сглаживаем, иначе
          наклон дёргается на каждом кадре. */
-      let пред = null, скорость = 0;
+      let пред = null, скорость = 0, вверхвниз = 0, кадрПереноса = '';
+      /* Поза зависит от того, куда тянут. Вверх — персонаж летит, руки вверх;
+         вниз — группируется перед приземлением; вбок — просто заваливается.
+         Кадр меняем только когда он действительно другой: подмена src на
+         каждом движении мыши — лишняя работа для браузера. */
+      const поза = () => {
+        if (вверхвниз < -110) return 'assets/mascot/jump_03.webp';
+        if (вверхвниз > 110) return 'assets/mascot/landing_01.webp';
+        return ПЕРЕНОС;
+      };
       function живость(e) {
         const т = performance.now();
         if (пред) {
           const дт = Math.max(8, т - пред.t);
-          const v = (e.clientX - пред.x) / дт * 1000;        // пикселей в секунду
-          скорость = скорость * .7 + v * .3;
+          const vx = (e.clientX - пред.x) / дт * 1000;       // пикселей в секунду
+          const vy = (e.clientY - пред.y) / дт * 1000;
+          скорость = скорость * .7 + vx * .3;
+          вверхвниз = вверхвниз * .7 + vy * .3;
           const наклон = Math.max(-16, Math.min(16, скорость / 55));
           box.style.setProperty('--msc-tilt', наклон.toFixed(1) + 'deg');
           box.style.setProperty('--msc-speed',
-            Math.min(.85, Math.abs(скорость) / 900).toFixed(2));
+            Math.min(.85, Math.hypot(скорость, вверхвниз) / 900).toFixed(2));
           if (Math.abs(скорость) > 60) box.classList.toggle('is-back', скорость > 0);
+          const к = поза();
+          if (к !== кадрПереноса) { кадрПереноса = к; img.src = asset(к); }
         }
-        пред = { x: e.clientX, t: т };
+        пред = { x: e.clientX, y: e.clientY, t: т };
       }
       addEventListener('pointermove', e => {
         if (!взяли || e.pointerId !== взяли.id) return;
@@ -814,9 +847,9 @@
           if (Math.hypot(дx, дy) < ЗАПАС) return;
           тащим = true; состояние = 'drag'; тише(); clearTimeout(миг);
           спрятать();
-          пред = null; скорость = 0;
+          пред = null; скорость = 0; вверхвниз = 0; кадрПереноса = ПЕРЕНОС;
           box.classList.add('is-drag'); img.src = asset(ПЕРЕНОС);
-          греть('landing'); sfx.play('pick');
+          греть('landing'); греть('jump'); sfx.play('pick');
           try { btn.setPointerCapture(взяли.id); } catch (err) {}
         }
         живость(e);
@@ -833,10 +866,35 @@
         box.style.setProperty('--msc-tilt', '0deg');
         box.style.setProperty('--msc-speed', '0');
         box.classList.remove('is-back');
-        пред = null; скорость = 0;
-        запомнить(); sfx.play('place');
-        состояние = 'idle';                       // приземление имеет право начаться
-        ряд('landing');
+        пред = null; скорость = 0; вверхвниз = 0; кадрПереноса = '';
+        запомнить();
+        упасть();
+      }
+
+      /* Отпустили — помощник падает и приземляется.
+
+         Падение короткое и с хвостом: сначала он проседает вниз с разгоном,
+         потом подбрасывается и успокаивается. Кадры идут не ровной чередой, а
+         под движение: группировка в падении, удар о землю в нижней точке,
+         выпрямление на отскоке. Без этого отпускание выглядело так, будто
+         картинку просто положили на место. */
+      function упасть() {
+        тише(); clearTimeout(миг);
+        состояние = 'landing';
+        sfx.play('place');
+        if (reduced) { box.style.setProperty('--msc-drop', '0px'); покой(); return; }
+        img.src = asset('assets/mascot/landing_01.webp');
+        const точка = { v: 0 };
+        const сдвиг = () => box.style.setProperty('--msc-drop', точка.v.toFixed(1) + 'px');
+        gsap.timeline({ onComplete() {
+            box.style.setProperty('--msc-drop', '0px');
+            if (состояние === 'landing') покой();
+          } })
+          .to(точка, { v: 16, duration: .17, ease: 'power2.in', onUpdate: сдвиг })
+          .add(() => { if (состояние === 'landing') img.src = asset('assets/mascot/landing_02.webp'); })
+          .to(точка, { v: -7, duration: .16, ease: 'power2.out', onUpdate: сдвиг })
+          .add(() => { if (состояние === 'landing') img.src = asset('assets/mascot/landing_03.webp'); })
+          .to(точка, { v: 0, duration: .22, ease: 'power1.inOut', onUpdate: сдвиг });
       }
       addEventListener('pointerup', отпустили);
       addEventListener('pointercancel', отпустили);
@@ -1944,7 +2002,7 @@
         } else if (snap(el)) { sfx.play('place'); }
         else { check(); }                             // свободных мест нет
       }));
-      hint.textContent = 'Нажимайте на инструменты — они лягут в лоток, и начнётся многоступенчатая стерилизация.';
+      hint.textContent = 'Нажимайте на инструменты — они соберутся в набор, и начнётся многоступенчатая стерилизация.';
     }
     if (!touchTray) Draggable.create(tools, { type: 'x,y', bounds: stage, zIndexBoost: false, minimumMovement: 3,
       onPress() {

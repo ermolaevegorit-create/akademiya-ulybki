@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=dcaea070">
+<link rel="stylesheet" href="styles.css?v=403f71fa">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": ["Dentist", "MedicalClinic"], "name": "Стоматологическая клиника «Академия улыбки»", "legalName": "ООО «Академия улыбки»", "telephone": "+79897512851", "url": "https://akademiya-ulybki.ru/", "address": {"@type": "PostalAddress", "streetAddress": "ул. Виноградная, д. 55/1, пом. 22, 2-й этаж", "addressLocality": "Сочи", "addressRegion": "Краснодарский край", "postalCode": "354008", "addressCountry": "RU"}, "geo": {"@type": "GeoCoordinates", "latitude": 43.608995, "longitude": 39.720852}, "hasMap": "https://yandex.ru/maps/org/akademiya_ulybki/196221666219/", "foundingDate": "2026", "employee": {"@type": "Physician", "name": "Белоусова Александра Сергеевна", "jobTitle": "Врач стоматолог-терапевт, хирург, имплантолог", "alumniOf": "Новосибирский государственный медицинский университет"}, "hasCredential": {"@type": "EducationalOccupationalCredential", "credentialCategory": "license", "name": "Лицензия Л041-01126-23/05841444", "dateCreated": "2026-08-03", "recognizedBy": {"@type": "GovernmentOrganization", "name": "Министерство здравоохранения Краснодарского края"}}, "identifier": [{"@type": "PropertyValue", "propertyID": "ИНН", "value": "2366057010"}, {"@type": "PropertyValue", "propertyID": "ОГРН", "value": "1262300000038"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://akademiya-ulybki.ru/"}, {"@type": "ListItem", "position": 2, "name": "Сведения о клинике", "item": "https://akademiya-ulybki.ru/info.html"}]}</script>
 </head>
@@ -176,13 +176,16 @@
         </label>
         <label class="lf__f">
           <span class="lf__l">Телефон</span>
-          <input class="lf__i" type="tel" id="lf-pop-tel" autocomplete="tel"
-                 <!-- Предел чуть больше готового номера (18 знаков) намеренно:
-                      когда человек набирает междугородную восьмёрку перед кодом
-                      города, поле на мгновение заполнено целиком, и без запаса
-                      браузер не пустил бы последнюю цифру — а именно она даёт
-                      понять, что первая восьмёрка лишняя. -->
-                 required inputmode="tel" maxlength="22" placeholder="+7 (___) ___-__-__">
+          <!-- «+7» стоит отдельной надписью и набран жирнее остального номера:
+               так сразу видно, что вводить нужно с девятки. Если всё же начнут
+               с восьмёрки или с +7, поле снимет их само. -->
+          <span class="lf__tel">
+            <span class="lf__tel-code" aria-hidden="true">+7</span>
+            <input class="lf__i lf__i--tel" type="tel" id="lf-pop-tel" autocomplete="tel"
+                   required inputmode="tel" maxlength="22" placeholder="(___) ___-__-__"
+                   aria-describedby="lf-pop-tel-code">
+            <span class="vis-hidden" id="lf-pop-tel-code">Код страны +7 подставляется сам</span>
+          </span>
         </label>
       </div>
       <!-- Во всплывающем окне этот блок скрыт стилем (.lf--compact): там нужно
@@ -264,6 +267,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=f63f153c"></script>
+<script src="main.js?v=cb00f26f"></script>
 </body>
 </html>

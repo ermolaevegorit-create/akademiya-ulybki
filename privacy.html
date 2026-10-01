@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=dcaea070">
+<link rel="stylesheet" href="styles.css?v=403f71fa">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://akademiya-ulybki.ru/"}, {"@type": "ListItem", "position": 2, "name": "Политика обработки персональных данных", "item": "https://akademiya-ulybki.ru/privacy.html"}]}</script>
 </head>
 <body>
@@ -160,13 +160,16 @@
         </label>
         <label class="lf__f">
           <span class="lf__l">Телефон</span>
-          <input class="lf__i" type="tel" id="lf-pop-tel" autocomplete="tel"
-                 <!-- Предел чуть больше готового номера (18 знаков) намеренно:
-                      когда человек набирает междугородную восьмёрку перед кодом
-                      города, поле на мгновение заполнено целиком, и без запаса
-                      браузер не пустил бы последнюю цифру — а именно она даёт
-                      понять, что первая восьмёрка лишняя. -->
-                 required inputmode="tel" maxlength="22" placeholder="+7 (___) ___-__-__">
+          <!-- «+7» стоит отдельной надписью и набран жирнее остального номера:
+               так сразу видно, что вводить нужно с девятки. Если всё же начнут
+               с восьмёрки или с +7, поле снимет их само. -->
+          <span class="lf__tel">
+            <span class="lf__tel-code" aria-hidden="true">+7</span>
+            <input class="lf__i lf__i--tel" type="tel" id="lf-pop-tel" autocomplete="tel"
+                   required inputmode="tel" maxlength="22" placeholder="(___) ___-__-__"
+                   aria-describedby="lf-pop-tel-code">
+            <span class="vis-hidden" id="lf-pop-tel-code">Код страны +7 подставляется сам</span>
+          </span>
         </label>
       </div>
       <!-- Во всплывающем окне этот блок скрыт стилем (.lf--compact): там нужно
@@ -248,6 +251,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=f63f153c"></script>
+<script src="main.js?v=cb00f26f"></script>
 </body>
 </html>

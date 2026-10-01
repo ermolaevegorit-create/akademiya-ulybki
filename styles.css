@@ -1242,7 +1242,7 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
 --------------------------------------------------------------------------- */
 .msc{position:fixed;right:max(12px,env(safe-area-inset-right));
   bottom:max(10px,env(safe-area-inset-bottom));z-index:110;
-  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  display:flex;flex-direction:column;align-items:flex-end;gap:0;
   /* сдвиг от переноса живёт в переменных: сам блок остаётся привязан к углу,
      а вернуть его на место — это обнулить две величины */
   transform:translate3d(var(--msc-x,0px),var(--msc-y,0px),0);
@@ -1294,25 +1294,33 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
 
 /* Облачко. Рисуем стилями, а не картинкой: в нём живой текст и кнопки, а
    растянутая картинка под переменную высоту не подходит. */
-.msc__bub{position:relative;max-width:min(260px,calc(100vw - 32px));
+/* Ширина по содержимому, а не фиксированная: при max-width коробка держала
+   полную ширину, даже когда во второй строке стояло одно слово, — и половина
+   облачка оставалась пустой. max-content ужимает её ровно по фразе, а предел
+   не даёт расплыться на длинной. */
+/* Отрицательный отступ подводит облачко к голове. В кадре 256x256 персонаж
+   начинает примерно с одной девятой сверху — это пустые пиксели внутри
+   картинки, из-за них хвостик указывал в воздух над макушкой. */
+.msc__bub{position:relative;width:max-content;max-width:min(272px,calc(100vw - 28px));
+  margin-bottom:-7px;
   background:var(--bg);color:var(--ink);border:1px solid var(--hair);
-  border-radius:14px;padding:14px 16px 12px;
-  box-shadow:0 16px 36px rgba(20,22,26,.16),0 2px 6px rgba(20,22,26,.08);
+  border-radius:11px;padding:8px 12px;
+  box-shadow:0 10px 26px rgba(20,22,26,.14),0 2px 5px rgba(20,22,26,.07);
   transform-origin:100% 100%;animation:mscBubIn .28s var(--ease) both}
 @keyframes mscBubIn{from{opacity:0;transform:translateY(6px) scale(.96)}
   to{opacity:1;transform:none}}
 /* Хвостик у облачка. Два треугольника: нижний — цвет рамки, верхний — фон. */
 .msc__bub::before,.msc__bub::after{content:"";position:absolute;top:100%;
-  right:30px;width:0;height:0;border:9px solid transparent}
+  right:24px;width:0;height:0;border:7px solid transparent}
 .msc__bub::before{border-top-color:var(--hair)}
-.msc__bub::after{border-top-color:var(--bg);top:calc(100% - 1px);border-width:8px;right:31px}
-.msc--left .msc__bub::before{right:auto;left:30px}
-.msc--left .msc__bub::after{right:auto;left:31px}
+.msc__bub::after{border-top-color:var(--bg);top:calc(100% - 1px);border-width:6px;right:25px}
+.msc--left .msc__bub::before{right:auto;left:24px}
+.msc--left .msc__bub::after{right:auto;left:25px}
 .msc--left{align-items:flex-start}
 
-.msc__say{margin:0;padding-right:18px;font-size:15px;line-height:1.45;font-weight:500}
+.msc__say{margin:0;padding-right:20px;font-size:14px;line-height:1.35;font-weight:500}
 /* Три точки вместо фразы, пока помощник «набирает». */
-.msc__dots{display:none;gap:5px;padding:3px 2px}
+.msc__dots{display:none;gap:4px;padding:4px 10px 4px 0}
 .msc__bub.is-dots .msc__dots{display:flex}
 .msc__bub.is-dots .msc__say{display:none}
 .msc__dots i{width:7px;height:7px;border-radius:50%;background:var(--mute);
@@ -1325,10 +1333,12 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
    При наведении мышью облачко уходит вместе с курсором, и крестик в нём
    недостижим: пока ведёшь к нему мышь, облачка уже нет. */
 @media(hover:hover){.msc__x{display:none}.msc__say{padding-right:0}}
-.msc__x{position:absolute;top:6px;right:6px;width:26px;height:26px;padding:0;
-  border:0;background:none;cursor:pointer;color:var(--mute);border-radius:6px}
-.msc__x::before,.msc__x::after{content:"";position:absolute;left:8px;top:12px;
-  width:10px;height:1.5px;background:currentColor}
+/* На телефоне крестик остаётся, но мельче: облачко теперь по ширине фразы,
+   и прежний в 26 px занимал в нём заметную долю. */
+.msc__x{position:absolute;top:3px;right:3px;width:22px;height:22px;padding:0;
+  border:0;background:none;cursor:pointer;color:var(--mute);border-radius:5px}
+.msc__x::before,.msc__x::after{content:"";position:absolute;left:6px;top:10px;
+  width:9px;height:1.5px;background:currentColor}
 .msc__x::before{transform:rotate(45deg)} .msc__x::after{transform:rotate(-45deg)}
 .msc__x:hover{color:var(--ink)}
 .msc__x:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
@@ -1338,7 +1348,7 @@ html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:aut
 @media(max-width:620px){
   .ftr__legal{padding-bottom:104px}
   .msc__btn{width:84px;height:84px}
-  .msc__say{font-size:14.5px}
+  .msc__say{font-size:13.5px}
   /* Полоса о cookie на узком экране разворачивается во всю ширину и накрывает
      угол. Раньше кнопку на это время прятали — и если человек полосу не
      трогал, её не было до конца визита. Теперь помощник поднимается над

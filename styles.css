@@ -764,8 +764,38 @@ html.vi .lf__i,html.vi .lf__chip span{border-color:var(--ink)}
 html.vi .lfband{background:var(--bg);border-color:var(--ink)}
 
 /* ВОПРОСЫ */
-.faqt__in{display:grid;grid-template-columns:5fr 7fr;gap:clamp(32px,5vw,88px);align-items:start}
-.faqt .sec__head{margin-bottom:0}
+/* ---- разворот «интервью» ----
+   Узкая колонка с тем, кто отвечает, и широкая с вопросами — как разворот в
+   журнале. Снимок вырезан, халат белый, поэтому под ним светлая подложка:
+   на белом фоне страницы фигура иначе растворяется. */
+.faqt__in{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);
+  gap:clamp(28px,4vw,64px);align-items:end}
+.faqt .sec__head{margin-bottom:clamp(28px,3.4vw,40px)}
+.faqt__who{margin:0;position:relative;display:grid;grid-template-rows:auto auto}
+.faqt__pad{grid-column:1;grid-row:1;align-self:stretch;
+  background:linear-gradient(180deg,rgba(245,246,248,0) 0%,var(--tint) 24%,var(--tint) 100%)}
+.faqt__ph{grid-column:1;grid-row:1;width:100%;height:auto;display:block;position:relative;
+  filter:drop-shadow(0 16px 18px rgba(23,30,42,.08))}
+.faqt__cap{grid-column:1;grid-row:2;margin:16px 0 0;display:flex;flex-direction:column;gap:3px}
+.faqt__cap b{font-weight:500;font-size:var(--fs-4);line-height:1.25}
+.faqt__cap span{color:var(--ink-2);font-size:var(--fs-2);line-height:1.45}
+/* Кнопка стояла вплотную к тексту — отбивка задана явно, а не остатком
+   от соседнего правила. */
+.faqt__all{margin:clamp(24px,3vw,34px) 0 0}
+@media(max-width:900px){
+  .faqt__in{grid-template-columns:minmax(0,1fr);align-items:start;gap:26px}
+  /* На узком экране портрет уходит вниз, под вопросы: сначала то, за чем
+     пришли, потом тот, кто отвечает. */
+  .faqt__who{order:2;display:grid;grid-template-columns:minmax(0,128px) minmax(0,1fr);
+    grid-template-rows:auto;gap:0 18px;align-items:end;max-width:430px}
+  .faqt__pad,.faqt__ph{grid-column:1;grid-row:1}
+  .faqt__cap{grid-column:2;grid-row:1;margin:0 0 10px}
+  .faqt__talk{order:1}
+}
+/* Вопрос и ответ с тире — так набирают интервью в печати. Разметка не
+   меняется: тире рисует стиль, в тексте и в поиске его нет. */
+.qas--talk .qa summary > span::before,
+.qas--talk .qa__a > p:first-child::before{content:"— "}
 .qas{border-top:1px solid var(--ink)}
 .qa{border-bottom:1px solid var(--hair-2)}
 .qa summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:18px 0;font-size:var(--fs-4);font-weight:500;line-height:1.35;min-height:48px}
@@ -1220,7 +1250,7 @@ html.lite #vrach{contain-intrinsic-size:auto 883px}
 html.lite #zapis{contain-intrinsic-size:auto 716px}
 html.lite #otzyvy{contain-intrinsic-size:auto 902px}
 html.lite #sterilno{contain-intrinsic-size:auto 1024px}
-html.lite #voprosy{contain-intrinsic-size:auto 610px}
+html.lite #voprosy{contain-intrinsic-size:auto 1101px}
 html.lite #svyaz{contain-intrinsic-size:auto 271px}
 html.lite #kontakty{contain-intrinsic-size:auto 1140px}
 html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 398px}
@@ -1234,7 +1264,7 @@ html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 398px}
   html.lite #zapis{contain-intrinsic-size:auto 1157px}
   html.lite #otzyvy{contain-intrinsic-size:auto 1209px}
   html.lite #sterilno{contain-intrinsic-size:auto 736px}
-  html.lite #voprosy{contain-intrinsic-size:auto 804px}
+  html.lite #voprosy{contain-intrinsic-size:auto 1428px}
   html.lite #svyaz{contain-intrinsic-size:auto 287px}
   html.lite #kontakty{contain-intrinsic-size:auto 1523px}
   html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 949px}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<noscript><style>.intro,.slab__stone,.hint,.cookie,.vi-btn,.sfx-btn,.fab,.lfpop{display:none!important}.lf > *{display:none!important}.lf__nojs{display:block!important}</style></noscript>
+<noscript><style>.intro,.slab__stone,.hint,.cookie,.vi-btn,.sfx-btn,.msc,.lfpop{display:none!important}.lf > *{display:none!important}.lf__nojs{display:block!important}</style></noscript>
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
 <script>(function(){try{var v=JSON.parse(localStorage.getItem('au-vi')||'null');if(!v||!v.on)return;var c=document.documentElement.classList;c.add('vi');if(v.size>1)c.add('vi-'+v.size);if(v.scheme&&v.scheme!=='light')c.add('vi-'+v.scheme);if(v.noimg)c.add('vi-noimg');}catch(e){}})()</script>
@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=159e6e5c">
+<link rel="stylesheet" href="styles.css?v=9a52d4dd">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://akademiya-ulybki.ru/"}, {"@type": "ListItem", "position": 2, "name": "Политика обработки персональных данных", "item": "https://akademiya-ulybki.ru/privacy.html"}]}</script>
 </head>
 <body>
@@ -131,6 +131,12 @@
   <div class="lfpop__back" data-lf-close></div>
   <div class="lfpop__box" role="dialog" aria-modal="true" aria-labelledby="lf-pop-t">
     <button class="lfpop__x" type="button" aria-label="Закрыть" data-lf-close></button>
+    <!-- Тот же помощник, что зовёт из угла, встречает и внутри окна: человек
+         видит, что попал туда, куда нажимал. После отправки он подпрыгивает —
+         это единственное место, где прыжок уместен. Картинка декоративная,
+         поэтому alt пустой: всё, что нужно знать, сказано текстом рядом. -->
+    <img class="lfpop__msc" id="lfpop-msc" src="assets/mascot/idle.webp" alt=""
+         width="256" height="256" loading="lazy" draggable="false" aria-hidden="true">
     <form class="lf lf--compact" id="lf-pop" novalidate>
       <div class="lf__head">
         <p class="eyebrow">Прежде чем уйти</p>
@@ -187,22 +193,39 @@
   </div>
 </div>
 
-<!-- ВЫЗОВ АССИСТЕНТА
-     Круглая кнопка в углу: одно нажатие — и открывается та же форма записи,
-     что в блоках страницы. Нужна потому, что решение записаться приходит не
-     там, где стоит форма, а в любом месте страницы, и возвращаться к ней
-     человек чаще всего не станет.
-     Пульсация мягкая и конечная: несколько волн и тишина — иначе через
-     минуту это раздражает, а не привлекает.
-     Лицо ассистента появится здесь, когда будет письменное согласие на
-     публикацию и снимок анфас; пока — знак. -->
-<button class="fab" id="fab" type="button" aria-label="Записаться на приём">
-  <span class="fab__ring" aria-hidden="true"></span>
-  <span class="fab__ph" aria-hidden="true">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4c-1.2 0-2.4-.2-3.5-.7L3 21l1.8-5.2A8.2 8.2 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/><circle cx="9" cy="11.5" r=".9" fill="currentColor" stroke="none"/><circle cx="12.5" cy="11.5" r=".9" fill="currentColor" stroke="none"/><circle cx="16" cy="11.5" r=".9" fill="currentColor" stroke="none"/></svg>
-  </span>
-  <span class="fab__t">Записаться</span>
-</button>
+<!-- ПОМОЩНИК В УГЛУ
+     Маскот клиники заменил круглую кнопку с иконкой. Задача та же: решение
+     записаться приходит не там, где стоит форма, и возвращаться к ней человек
+     чаще всего не станет. Разница в том, что маскот сначала спрашивает, а не
+     распахивает форму сразу: из облачка можно уйти к записи, к ценам или к
+     вопросам.
+
+     Кадры — отдельные картинки в общем холсте 256×256, меняются подменой src.
+     Ни GIF, ни канвы: покадровая смена одного <img> дешевле и её видно
+     программе чтения с экрана как один элемент.
+
+     Сразу грузятся только покой и моргание; движения при наведении, нажатии,
+     переносе и прыжке подтягиваются, когда впервые понадобятся.
+
+     Это рисунок, а не человек и не живой оператор: облачко не обещает, что
+     кто-то отвечает прямо сейчас, и ведёт к форме и телефону. -->
+<div class="msc" id="msc" hidden>
+  <div class="msc__bub" id="msc-bub" hidden role="group" aria-label="Помощник клиники">
+    <button class="msc__x" type="button" aria-label="Скрыть подсказку" data-msc="close"></button>
+    <p class="msc__say" id="msc-say"></p>
+    <div class="msc__acts" id="msc-acts">
+      <button class="msc__act" type="button" data-msc="lead">Записаться на приём</button>
+      <button class="msc__act" type="button" data-msc="prices">Посмотреть цены</button>
+      <button class="msc__act" type="button" data-msc="faq">Задать вопрос</button>
+    </div>
+  </div>
+  <button class="msc__btn" id="msc-btn" type="button"
+          aria-label="Помощник клиники: записаться, цены, вопросы">
+    <span class="msc__ring" aria-hidden="true"></span>
+    <img class="msc__img" id="msc-img" src="assets/mascot/idle.webp" alt=""
+         width="256" height="256" draggable="false">
+  </button>
+</div>
 
 <div class="cookie" id="cookie" hidden role="dialog" aria-modal="false" aria-labelledby="cookie-t">
   <p class="cookie__t" id="cookie-t"><b>Cookie и статистика</b></p>
@@ -217,6 +240,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=961fb117"></script>
+<script src="main.js?v=c9d08e70"></script>
 </body>
 </html>

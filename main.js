@@ -420,6 +420,14 @@
     function done(f) {
       sfx.play('sent');            // заявка ушла — короткое подтверждение
       f.classList.add('is-sent');
+      /* Единственное место, где помощник прыгает: заявка ушла. В покое
+         (и в режиме для слабовидящих) прыжка нет — там ничего не скачет. */
+      if (typeof mascot !== 'undefined') mascot.react('jump');
+      const мп = $('#lfpop-msc');
+      if (мп && !reduced) {
+        мп.src = asset('assets/mascot/jump_03.webp');
+        setTimeout(() => { мп.src = asset('assets/mascot/idle.webp'); }, 900);
+      }
       const head = $('.lf__head', f);
       head.innerHTML = '<p class="eyebrow">Готово</p>'
         + '<h3 class="lf__t">Спасибо, заявка у нас</h3>'
@@ -478,45 +486,291 @@
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
 
-    /* ---------- кнопка вызова в углу ----------
+    /* ---------- помощник в углу ----------
        Есть на каждой странице: решение записаться приходит не там, где стоит
        форма. Появляется не сразу — сначала человек должен что-то прочитать,
-       иначе это просто баннер поверх ещё не увиденной страницы. */
-    (function fab() {
-      const b = $('#fab'); if (!b) return;
-      b.addEventListener('click', () => {
-        track('fab_click');
+       иначе это просто баннер поверх ещё не увиденной страницы.
+
+       Персонаж собран из отдельных картинок в общем холсте: состояние меняет
+       src одного <img>. Ни GIF, ни канвы, ни постоянного requestAnimationFrame
+       — смена кадров идёт по таймеру и только пока состояние живо.
+
+       Порядок состояний строгий: перенос важнее нажатия, нажатие важнее
+       прыжка, прыжок важнее наведения, наведение важнее моргания. Из любого
+       состояния возвращаемся в покой. */
+    const mascot = (function () {
+      const box = $('#msc'), btn = $('#msc-btn'), img = $('#msc-img'),
+            bub = $('#msc-bub'), say = $('#msc-say'), acts = $('#msc-acts');
+      const пусто = { say(){}, think(){}, hideBubble(){}, react(){},
+                      setPosition(){}, resetPosition(){}, show(){}, hide(){} };
+      if (!box || !btn || !img) return пусто;
+
+      const ПУТЬ = 'assets/mascot/';
+      /* Пути выписаны целиком, а не собраны из кусков: сборщик ищет ассеты в
+         тексте скрипта обычным поиском и склеенное имя не найдёт. */
+      const РЯДЫ = {
+        blink: ['assets/mascot/blink_01.webp', 'assets/mascot/blink_02.webp',
+                'assets/mascot/blink_03.webp', 'assets/mascot/blink_04.webp'],
+        hover: ['assets/mascot/hover_01.webp', 'assets/mascot/hover_02.webp',
+                'assets/mascot/hover_03.webp', 'assets/mascot/hover_04.webp'],
+        click: ['assets/mascot/click_01.webp', 'assets/mascot/click_02.webp',
+                'assets/mascot/click_03.webp', 'assets/mascot/click_04.webp',
+                'assets/mascot/click_05.webp'],
+        jump:  ['assets/mascot/jump_01.webp', 'assets/mascot/jump_02.webp',
+                'assets/mascot/jump_03.webp', 'assets/mascot/jump_04.webp',
+                'assets/mascot/jump_05.webp'],
+        landing: ['assets/mascot/landing_01.webp', 'assets/mascot/landing_02.webp',
+                  'assets/mascot/landing_03.webp'],
+      };
+      const ПОКОЙ = 'assets/mascot/idle.webp', ПЕРЕНОС = 'assets/mascot/drag.webp';
+      const ШАГ = { blink: 65, hover: 110, click: 110, jump: 90, landing: 100 };
+
+      /* Ряды подтягиваем по требованию. Сразу с разметкой приходит только
+         покой; моргание — первое, что понадобится, его греем на простое. */
+      const греты = {};
+      function греть(имя) {
+        if (греты[имя]) return;
+        греты[имя] = 1;
+        (РЯДЫ[имя] || []).forEach(p => { const i = new Image(); i.src = asset(p); });
+      }
+      const простой = window.requestIdleCallback || (f => setTimeout(f, 1200));
+      простой(() => греть('blink'));
+
+      let состояние = 'idle', таймер = 0, миг = 0;
+      const тише = () => { clearTimeout(таймер); таймер = 0; };
+
+      function покой() { состояние = 'idle'; img.src = asset(ПОКОЙ); заводитьМиг(); }
+
+      /* Проигрывает ряд кадр за кадром и возвращает в покой. */
+      function ряд(имя, потом) {
+        тише(); clearTimeout(миг);
+        состояние = имя; греть(имя);
+        const к = РЯДЫ[имя], шаг = ШАГ[имя] || 100;
+        let i = 0;
+        const дальше = () => {
+          if (состояние !== имя) return;            // перебило состояние поважнее
+          if (i >= к.length) { (потом || покой)(); return; }
+          img.src = asset(к[i++]);
+          таймер = setTimeout(дальше, шаг);
+        };
+        дальше();
+      }
+
+      /* Моргание — единственное, что происходит само. Со случайным перерывом,
+         и только в покое: перебивать им нажатие или перенос незачем. */
+      function заводитьМиг() {
+        clearTimeout(миг);
+        if (reduced || !box.classList.contains('is-on')) return;
+        миг = setTimeout(() => {
+          if (состояние === 'idle' && !document.hidden) ряд('blink');
+          else заводитьМиг();
+        }, 4000 + Math.random() * 3000);
+      }
+
+      /* ---------- облачко ---------- */
+      let открыто = false;
+      function показать(текст, сДействиями) {
+        say.textContent = текст;
+        acts.hidden = !сДействиями;
+        bub.hidden = false; открыто = true;
+        сторона();
+      }
+      function спрятать() { bub.hidden = true; открыто = false; }
+      /* Облачко всегда в ту сторону, где есть место: хвостик переезжает
+         вместе с ним. */
+      function сторона() {
+        const r = btn.getBoundingClientRect();
+        box.classList.toggle('msc--left', r.left + r.width / 2 < innerWidth / 2);
+      }
+
+      /* ---------- куда ведут кнопки в облачке ---------- */
+      const кФорме = () => {
         /* В покое и в версии для слабовидящих всплывающего окна нет вовсе —
-           там ведём к форме, которая уже стоит на странице, а если её нет
+           ведём к форме, которая уже стоит на странице, а если её нет
            (внутренние страницы), к контактам. */
         if (html.classList.contains('still') || html.classList.contains('vi')) {
-          const t = $('.lfband .lf') || $('#kontakty') || $('.ftr');
-          if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                   const f = $('input', t); if (f) setTimeout(() => f.focus(), 500); }
+          const т = $('.lfband .lf') || $('#kontakty') || $('.ftr');
+          if (т) { т.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                   const f = $('input', т); if (f) setTimeout(() => f.focus(), 500); }
           return;
         }
         openPop(true);
-      });
-      /* Порог показа — один экран прокрутки после того, как страница открыта.
-         На главной «открыта» означает, что вступление закончилось. */
-      /* Кнопка показана, когда страница открыта и человек прокрутил хотя бы
-         половину экрана.
-
-         Раньше её ещё и прятали, пока висит полоса о cookie. Полоса стоит
-         в том же углу и ждёт ответа сколько угодно: кто её не трогал, до
-         конца визита оставался без кнопки записи. Замерено — на телефоне
-         кнопка пропадала после 11000 px и больше не возвращалась. Теперь
-         пересечение разводит стиль: на узком экране кнопка поднимается над
-         полосой (--cookie-h), на мониторе карточка стоит по центру и до
-         угла не достаёт. */
-      let armed = false;
-      const sync = () => {
-        if (html.classList.contains('ready') && scrollY >= innerHeight * .6) armed = true;
-        b.classList.toggle('is-on', armed);
       };
-      addEventListener('scroll', sync, { passive: true });
-      setInterval(sync, 700);
-      setTimeout(sync, 3000);
+      /* Предлагать страницу, на которой человек и так стоит, незачем:
+         кнопку убираем, остальные остаются. */
+      (function ненужное() {
+        const тут = location.pathname.split('/').pop() || 'index.html';
+        const пара = { 'prices.html': 'prices', 'faq.html': 'faq' };
+        const лишняя = пара[тут];
+        if (!лишняя) return;
+        const к = $('[data-msc="' + лишняя + '"]', acts);
+        if (к) к.hidden = true;
+      })();
+      acts.addEventListener('click', e => {
+        const к = e.target.closest('[data-msc]'); if (!к) return;
+        const что = к.dataset.msc;
+        sfx.play('tap'); track('msc_' + что); спрятать();
+        if (что === 'lead') {
+          /* Окно запоминает, кто его открыл, чтобы вернуть туда фокус при
+             закрытии. Кнопка в облачке для этого не годится: к моменту
+             закрытия облачка уже нет, и фокус улетал в никуда. Возвращаем на
+             помощника — он на месте всегда. */
+          btn.focus();
+          кФорме();
+        }
+        else if (что === 'prices') location.href = 'prices.html';
+        else if (что === 'faq') location.href = 'faq.html';
+      });
+      $('[data-msc="close"]', bub).addEventListener('click', () => {
+        спрятать(); btn.focus();
+      });
+      addEventListener('keydown', e => {
+        if (e.key === 'Escape' && открыто) { спрятать(); btn.focus(); }
+      });
+
+      /* ---------- наведение ---------- */
+      if (matchMedia('(hover: hover)').matches && !reduced) {
+        btn.addEventListener('mouseenter', () => {
+          if (состояние === 'idle') ряд('hover');
+        });
+      }
+
+      /* ---------- нажатие ---------- */
+      function нажали() {
+        if (состояние === 'drag') return;
+        sfx.play('tap');
+        /* Повторное нажатие закрывает облачко — как и полагается переключателю.
+           Разыгрывать при этом всю сценку незачем: человек уже посмотрел. */
+        if (открыто) { спрятать(); return; }
+        track('msc_click');
+        ряд('click', () => {
+          покой();
+          показать('Здравствуйте. Записать вас на приём?', true);
+          /* Фокус уводим в облачко: тому, кто пришёл с клавиатуры, иначе
+             пришлось бы искать появившиеся кнопки наугад. */
+          const п = $('[data-msc="lead"]', bub); if (п) п.focus();
+        });
+      }
+
+      /* ---------- перенос ----------
+         Pointer Events, а не отдельные ветки для мыши и пальца. Перенос
+         начинается только после 8 px движения: без порога обычное нажатие
+         превращалось бы в микроперетаскивание и не срабатывало. */
+      const ЗАПАС = 8, КЛЮЧ = 'au-msc';
+      let x = 0, y = 0, взяли = null, тащим = false;
+
+      function поставить(нx, нy) {
+        const r = btn.getBoundingClientRect();
+        const ш = r.width, в = r.height;
+        /* Не даём утащить за край: держим целиком в окне с отступом. */
+        const минX = -(innerWidth - ш - 24), максX = 0;
+        const минY = -(innerHeight - в - 24), максY = 0;
+        x = Math.min(максX, Math.max(минX, нx));
+        y = Math.min(максY, Math.max(минY, нy));
+        box.style.setProperty('--msc-x', x + 'px');
+        box.style.setProperty('--msc-y', y + 'px');
+        сторона();
+      }
+      function запомнить() {
+        try { localStorage.setItem(КЛЮЧ, x + ',' + y); } catch (e) {}
+      }
+      (function вспомнить() {
+        try {
+          const в = (localStorage.getItem(КЛЮЧ) || '').split(',');
+          if (в.length === 2) поставить(+в[0] || 0, +в[1] || 0);
+        } catch (e) {}
+      })();
+
+      btn.addEventListener('pointerdown', e => {
+        if (e.button) return;
+        взяли = { id: e.pointerId, sx: e.clientX, sy: e.clientY, x0: x, y0: y };
+      });
+      addEventListener('pointermove', e => {
+        if (!взяли || e.pointerId !== взяли.id) return;
+        const дx = e.clientX - взяли.sx, дy = e.clientY - взяли.sy;
+        if (!тащим) {
+          if (Math.hypot(дx, дy) < ЗАПАС) return;
+          тащим = true; состояние = 'drag'; тише(); clearTimeout(миг);
+          спрятать();
+          box.classList.add('is-drag'); img.src = asset(ПЕРЕНОС);
+          греть('landing'); sfx.play('pick');
+          try { btn.setPointerCapture(взяли.id); } catch (err) {}
+        }
+        поставить(взяли.x0 + дx, взяли.y0 + дy);
+      }, { passive: true });
+      function отпустили(e) {
+        if (!взяли || (e && e.pointerId !== взяли.id)) return;
+        const тащили = тащим;
+        взяли = null; тащим = false;
+        if (!тащили) { нажали(); return; }
+        box.classList.remove('is-drag');
+        запомнить(); sfx.play('place');
+        состояние = 'idle';                       // приземление имеет право начаться
+        ряд('landing');
+      }
+      addEventListener('pointerup', отпустили);
+      addEventListener('pointercancel', отпустили);
+      /* Клавиатура: пробел и Enter дают то же, что нажатие пальцем. Браузер
+         сам шлёт click кнопке, а нажатие мы уже обработали в pointerup —
+         поэтому здесь отзываемся только тогда, когда указателя не было. */
+      btn.addEventListener('click', e => {
+        if (e.detail === 0) нажали();             // detail 0 — это клавиатура
+      });
+
+      /* После поворота экрана прежний сдвиг может унести персонажа за край. */
+      onRealResize(() => поставить(x, y), 200);
+
+      /* Помощник отходит в сторону над играми.
+
+         На телефоне он крупнее прежней кнопки и накрывал два инструмента из
+         пяти в игре про пломбу: замерено — «Свет» и «Полировка» оказывались
+         под ним, а по ним надо попадать пальцем. Пока площадка игры на
+         экране, помощник уходит; игра прокрутилась — возвращается.
+         На мониторе он стоит далеко от площадок и никому не мешает, поэтому
+         правило только для узких экранов. */
+      (function встороне() {
+        if (!window.IntersectionObserver) return;
+        const площадки = $$('#fill-arena, #tray-stage');
+        if (!площадки.length) return;
+        const занято = new Set();
+        const глядя = new IntersectionObserver(записи => {
+          записи.forEach(з => з.isIntersecting ? занято.add(з.target) : занято.delete(з.target));
+          box.classList.toggle('is-shy', innerWidth <= 900 && занято.size > 0);
+        }, { threshold: .35 });
+        площадки.forEach(э => глядя.observe(э));
+        onRealResize(() => box.classList.toggle('is-shy', innerWidth <= 900 && занято.size > 0), 200);
+      })();
+
+      /* ---------- показ ----------
+         Порог — примерно половина экрана прокрутки после того, как страница
+         открыта. На главной «открыта» означает, что вступление закончилось. */
+      let готов = false, показан = false;
+      const сверить = () => {
+        if (html.classList.contains('ready') && scrollY >= innerHeight * .6) готов = true;
+        box.classList.toggle('is-on', готов);
+        /* Моргание заводим ровно один раз, на переходе в показ. Сверка идёт
+           каждые 0.7 с, и если заводить её отсюда каждый раз, отсчёт до
+           моргания обнуляется быстрее, чем успевает дойти до конца, —
+           замерено: за 15 секунд не сменился ни один кадр. */
+        if (готов && !показан) { показан = true; box.hidden = false; заводитьМиг(); }
+      };
+      addEventListener('scroll', сверить, { passive: true });
+      setInterval(сверить, 700);
+      setTimeout(сверить, 3000);
+
+      return {
+        say(текст) { показать(текст, false); },
+        think() { показать('…', false); },
+        hideBubble: спрятать,
+        react(что) {
+          if (reduced && что !== 'click') return;
+          if (РЯДЫ[что]) ряд(что);
+        },
+        setPosition: поставить,
+        resetPosition() { поставить(0, 0); запомнить(); },
+        show() { box.hidden = false; box.classList.add('is-on'); },
+        hide() { box.classList.remove('is-on'); спрятать(); },
+      };
     })();
 
     /* Само окно приходит только на главной: там есть что прочитать до него —
@@ -1281,6 +1535,10 @@
       gsap.fromTo(okImg, { opacity: 0, filter: 'blur(12px)' },
         { opacity: 1, filter: 'blur(0px)', duration: 1.3, ease: 'power2.out', delay: .15 });
       gsap.to(TOOLS[3].el, { x: 0, y: 0, duration: .5 });
+      /* Снимаем размытие, когда оно отработало. Значение filter остаётся на
+         элементе и после анимации, а каждый такой элемент браузер держит
+         отдельным слоем — лишние слои на сцене ни к чему. */
+      setTimeout(() => gsap.set([etchC, paintC, bad], { filter: 'none' }), 1400);
       setTimeout(() => setStage(5), 900);            // остаётся отполировать
       track('cure_done', { full: full });
     }

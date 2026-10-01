@@ -183,8 +183,30 @@
     const links = $$('.nav a, .pnav a').filter(a => a.hash && $(a.hash));
     if (!links.length || !('IntersectionObserver' in window)) return;
     const map = new Map(links.map(a => [a.hash.slice(1), a]));
+    /* Раньше побеждал тот раздел, о котором наблюдатель отчитался последним.
+       При загрузке он отчитывается обо всех сразу, последними в разметке идут
+       контакты — и на самом верху страницы, пока человек смотрит вступление,
+       в меню горели «Контакты». Теперь держим список тех, кто действительно в
+       кадре, и выбираем из них тот, что пересекает линию чтения. Никого в
+       кадре нет — не подсвечиваем ничего. */
+    const видны = new Set();
+    function обновить() {
+      const линия = innerHeight * 0.3;
+      let лучший = null, ближе = Infinity;
+      видны.forEach(id => {
+        const el = document.getElementById(id); if (!el) return;
+        const r = el.getBoundingClientRect();
+        const d = (r.top <= линия && r.bottom >= линия) ? 0
+                : Math.min(Math.abs(r.top - линия), Math.abs(r.bottom - линия));
+        if (d < ближе) { ближе = d; лучший = id; }
+      });
+      links.forEach(a => a.classList.remove('is-active'));
+      const a = лучший && map.get(лучший);
+      if (a) a.classList.add('is-active');
+    }
     const io = new IntersectionObserver(es => {
-      es.forEach(e => { if (e.isIntersecting) { links.forEach(a => a.classList.remove('is-active')); const a = map.get(e.target.id); if (a) a.classList.add('is-active'); } });
+      es.forEach(e => { if (e.isIntersecting) видны.add(e.target.id); else видны.delete(e.target.id); });
+      обновить();
     }, { rootMargin: '-30% 0px -60% 0px' });
     map.forEach((a, id) => io.observe($('#' + id)));
   })();
@@ -564,6 +586,9 @@
       if (lastFocus && lastFocus.focus) lastFocus.focus();
     }
     $$('[data-lf-close]', pop).forEach(el => el.addEventListener('click', closePop));
+    /* Любая кнопка с data-lf-open открывает то же окно заявки. Так вторая
+       форма на странице не нужна: одна разметка, одна проверка, одна отправка. */
+    $$('[data-lf-open]').forEach(el => el.addEventListener('click', () => openPop(true)));
     addEventListener('keydown', e => {
       if (pop.hidden) return;
       if (e.key === 'Escape') { closePop(); return; }
@@ -810,14 +835,19 @@
          перемешивается и раздаётся до конца, поэтому подряд одно и то же не
          выпадает, а за семь наведений человек увидит весь набор. Первое
          наведение всегда взмах — это приветствие, оно должно быть узнаваемым. */
+      /* Повороты головы сюда не берём: на наведении они читаются вяло, человек
+         ждёт отклика, а получает медленный разворот. Все варианты строятся на
+         двух живых движениях — взмах и подскок — и различаются эффектом и
+         ритмом. Повороты остаются там, где они к месту: на простое и в
+         перетаскивании. */
       const ПРИВЕТЫ = [
         () => ряд('hover'),
-        () => ряд('назад'),
-        () => ряд(Math.random() < .5 ? 'влево' : 'вправо'),
-        () => { эффект('искра'); ряд('радость'); },
         () => { эффект('сердце'); ряд('hover'); },
+        () => { эффект('искра'); ряд('hover'); },
         () => ряд('радость'),
-        () => ряд('blink', () => ряд('hover')),
+        () => { эффект('сердце'); ряд('радость'); },
+        () => { эффект('искра'); ряд('радость'); },
+        () => ряд('hover', () => ряд('hover')),
       ];
       let колода = [], первыйПривет = true;
       function привет() {
@@ -842,7 +872,7 @@
              чтобы вторая реакция не дёргалась на загрузке. */
           if (!греломПриветы) {
             греломПриветы = 1;
-            простой(() => { ['назад', 'влево', 'вправо', 'радость'].forEach(греть); });
+            простой(() => { ['радость', 'jump', 'landing'].forEach(греть); });
           }
           if (!reduced && состояние === 'idle') привет();
         });
@@ -1144,7 +1174,9 @@
       const els = $$('.sec').concat($$('.ftr'));
       let i = 0;
       const step = () => {
-        for (let n = 0; n < 2 && i < els.length; n++, i++) {
+        /* По одной секции за кадр. На две приходилось по 150 мс на кадр при
+           шестикратном замедлении процессора — заминка была заметна глазом. */
+        for (let n = 0; n < 1 && i < els.length; n++, i++) {
           els[i].classList.add('lite-off');
           void els[i].offsetHeight;      // считаем вёрстку здесь, а не когда она понадобится
         }
@@ -1298,6 +1330,14 @@
       box.style.pointerEvents = open ? 'none' : '';
       if (open && !closed) {
         closed = true; track('intro_done');
+        /* Вступление пройдено — экономный режим больше не нужен, и держать его
+           дальше вредно. Пока он включён, каждая секция размечается ровно в тот
+           момент, когда въезжает в кадр, и её содержимое появляется уже внутри
+           экрана: браузер считает это сдвигом вёрстки. Замерено на обычной
+           прокрутке — от 0,5 до 1,2 при пороге 0,1. Снимаем по две секции за
+           кадр, на простое, чтобы не отнимать кадры у самого перехода. */
+        const потом = window.requestIdleCallback || (f => setTimeout(f, 400));
+        потом(() => { unlite(); lite(false); });
         if (!tall) setTimeout(() => { if (box.parentNode) box.remove(); }, 260);
       }
       if (!open) closed = false;

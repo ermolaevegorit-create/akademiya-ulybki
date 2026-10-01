@@ -31,6 +31,10 @@
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 
 :root{
+  /* Длина дорожки вступления. Было 290svh — почти три экрана прокрутки до
+     заголовка и телефона. Движение то же самое, просто идёт вдвое быстрее:
+     шкала считается от реальной высоты блока, а не от пикселей. */
+  --intro-h:195svh;
   --bg:#FFFFFF; --ink:#14161A; --ink-2:#4B5058; --mute:#5F646D;
   --hair:rgba(20,22,26,.14); --hair-2:rgba(20,22,26,.07); --tint:#F5F6F8; --band:#F5F6F8;
   --navy:#1B3D96; --navy-d:#15307A; --teal:#2F7E86; --uv:#7A4DFF; --err:#B3261E;
@@ -192,10 +196,19 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 /* Отрицательный отступ снизу подводит первый экран ровно под залитый светом
    кадр: пока засвет расходится, содержимое уже стоит на своём месте и
    проступает сквозь него. Пустого белого кадра между ними не остаётся. */
-.intro.is-tall{height:290svh;margin-bottom:-100svh;overscroll-behavior:auto}
-/* На телефоне дорожка короче: полтора экрана прокрутки вместо двух.
-   Пальцем длинный путь утомляет быстрее, чем колесом. */
-@media(max-width:700px){.intro.is-tall{height:235svh}}
+/* Длина дорожки. Было 290svh — почти три экрана прокрутки до заголовка и
+   телефона. Движение то же, но ждать его человек не обязан: сцена играет
+   ровно ту же партию вдвое быстрее, потому что шкала считается от реальной
+   высоты блока, а не от пикселей. */
+/* Отрицательный отступ считается от длины дорожки, а не задан числом. Так
+   первый экран стоит на одном и том же месте до того, как скрипт поставит
+   is-tall, и после: иначе при загрузке он въезжал в кадр и браузер засчитывал
+   это сдвигом вёрстки (замерено на телефоне: 0,09 при пороге 0,1). */
+.intro.is-tall{height:var(--intro-h);margin-bottom:calc(100svh - var(--intro-h));overscroll-behavior:auto}
+/* На телефоне дорожка ещё короче — один экран сверх кадра. Пальцем долгий
+   путь утомляет быстрее, чем колесом, а под лампой там сразу стоит адрес и
+   кнопка звонка: человеку есть куда уйти, не досматривая. */
+@media(max-width:700px){:root{--intro-h:170svh}}
 .intro__inner{height:100%;background:#F7F8F9}
 /* Высота кадра до и после класса is-tall обязана совпадать: класс ставит
    скрипт, и всякое расхождение подбрасывает подсказку «Прокрутите вниз»
@@ -209,6 +222,13 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 /* высоту прибора ограничиваем и по высоте окна — иначе на низком экране
    лампа съедает весь кадр и строки слогана упираются в шапку */
 .intro__stage{position:absolute;left:50%;top:50%;width:min(88vmin,660px,75svh);translate:-50% -50%;transform-origin:50% 42%;will-change:transform}
+/* Мягкая тень под корпусом. Без неё в середине сцены, когда лампа вырастает
+   на весь кадр, экран вырождается в почти сплошное светлое поле: белый
+   корпус на светлом фоне, опереться глазу не на что. Тень рисуется до
+   картинки лампы и потому всегда под ней. */
+.intro__stage::before{content:"";position:absolute;left:50%;top:70%;width:72%;height:24%;translate:-50% 0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side ellipse,rgba(23,30,42,.16) 0%,rgba(23,30,42,.08) 50%,rgba(23,30,42,0) 100%)}
+.intro.is-blank .intro__stage::before{visibility:hidden}
 .intro__lamp{position:relative;display:block;width:100%;padding:0;margin:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .intro__lamp:focus-visible{outline:2px solid var(--navy);outline-offset:4px;border-radius:24px}
 /* Тени на лампе нет намеренно: фильтр пришлось бы снимать при первом же
@@ -276,12 +296,30 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 .intro__bloom{position:absolute;left:50%;top:50%;width:78vmax;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;opacity:0;z-index:4;
   background:radial-gradient(closest-side circle,rgba(255,255,255,1) 0%,rgba(255,254,251,.94) 24%,rgba(255,254,250,.82) 41%,rgba(255,253,247,.56) 59%,rgba(255,253,246,.26) 78%,rgba(255,255,255,0) 100%);will-change:transform,opacity}
 .intro__flash{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 44%,#fff 0%,#fff 62%,rgba(255,255,255,.94) 100%);opacity:0;pointer-events:none;z-index:6;will-change:opacity}
-.intro__hint{position:absolute;left:0;right:0;bottom:clamp(20px,4vh,40px);text-align:center;margin:0;z-index:2}
+/* Подвал кадра. На большом экране здесь только подсказка о прокрутке —
+   она и была. На телефоне вместо неё стоит то, за чем человек чаще всего и
+   пришёл: адрес и кнопка звонка. Слово «прокрутите вниз» на телефоне лишнее:
+   прокрутка там и так единственное движение, которое знают все. */
+.intro__foot{position:absolute;left:0;right:0;bottom:clamp(20px,4vh,40px);text-align:center;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:14px}
+.intro__where,.intro__call{display:none}
+.intro__where{margin:0;font-size:var(--fs-2);color:var(--mute)}
+.intro__hint{margin:0}
 .intro__go{display:inline-flex;flex-direction:column;align-items:center;gap:10px;border:0;background:none;cursor:pointer;padding:8px 14px;
   font:inherit;font-size:var(--fs-1);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);transition:color .3s}
 .intro__go:hover{color:var(--ink)}
 .intro__arrow{display:block;width:14px;height:14px;border-right:1.2px solid currentColor;border-bottom:1.2px solid currentColor;rotate:45deg;animation:arrow 2.4s ease-in-out infinite}
 @keyframes arrow{0%,100%{transform:translateY(-3px);opacity:.35}50%{transform:translateY(3px);opacity:.9}}
+/* Телефон: адрес и звонок вместо подсказки. Кнопка со стрелкой остаётся —
+   она ведёт к сайту тем, кто нажимает, а не прокручивает, и нужна с
+   клавиатуры; видимой подписи у неё больше нет. */
+@media(max-width:700px){
+  .intro__where,.intro__call{display:block}
+  .intro__call{padding:12px 28px}
+  .intro__golabel{display:none}
+  .intro__foot{gap:12px}
+  .intro__go{padding:4px 14px;gap:0}
+}
 /* шапка видна и на первом экране — полупрозрачная, при наведении проявляется */
 /* на первом экране шапка без полосы, но логотип и кнопки читаются полностью */
 .hdr--ghost{background:rgba(255,255,255,0);backdrop-filter:none;opacity:1;border-color:transparent!important;transition:background .45s ease}
@@ -320,6 +358,14 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
 
 /* НАПРАВЛЕНИЯ */
 .dirs__in{display:grid;grid-template-columns:5fr 7fr;gap:clamp(32px,5vw,88px);align-items:start}
+/* Левая колонка липкая. Список направлений раскрывается и становится в
+   полтора-два раза длиннее заголовка, а заголовок с кнопкой прейскуранта
+   оставался наверху — под ними открывалась дыра в несколько сотен пикселей.
+   Теперь колонка едет вместе с чтением: дыры нет, а прейскурант всё время
+   под рукой. */
+@media(min-width:901px){
+  .dirs__in .sec__head{position:sticky;top:calc(var(--hdr) + 32px)}
+}
 .dirs__in .sec__head{margin-bottom:0}
 .dirs{border-top:1px solid var(--ink)}
 .dir summary span{display:flex;flex-direction:column;gap:4px}
@@ -591,6 +637,26 @@ body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .
   padding-block:clamp(48px,6vw,80px)}
 .lfband--alt{background:var(--bg);border-color:var(--hair-2)}
 .lfband__in{display:flex;justify-content:center}
+/* Форма и «что дальше» рядом. Колонка со ступенями уже формы и выровнена по
+   её середине: на широком экране это пара, на узком — форма, под ней ступени. */
+.lfband__in--pair{display:grid;grid-template-columns:minmax(0,560px) minmax(0,300px);
+  gap:clamp(32px,5vw,72px);align-items:center;justify-content:center}
+@media(max-width:880px){.lfband__in--pair{grid-template-columns:minmax(0,560px);justify-items:center}}
+.lfnext{display:flex;flex-direction:column;gap:14px}
+.lfnext__l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;counter-reset:n}
+.lfnext__l li{counter-increment:n;display:grid;grid-template-columns:28px minmax(0,1fr);gap:0 12px;
+  padding:14px 0;border-top:1px solid var(--hair-2)}
+.lfnext__l li:first-child{border-top:0;padding-top:0}
+.lfnext__l li::before{content:counter(n);grid-row:span 2;align-self:start;
+  font-size:var(--fs-1);color:var(--mute);line-height:1.6;font-variant-numeric:tabular-nums}
+.lfnext__l b{font-weight:500;font-size:var(--fs-3);line-height:1.35}
+.lfnext__l span{color:var(--ink-2);font-size:var(--fs-2);line-height:1.5;margin-top:2px}
+/* Узкая перебивка вместо второй формы */
+.lfband--slim{padding-block:clamp(36px,4.5vw,60px)}
+.lfband__in--slim{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.lfslim__t{font-family:var(--serif);font-weight:400;font-size:var(--fs-5);line-height:1.18;margin:0;text-wrap:balance}
+.lfslim__acts{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 24px;margin:14px 0 0}
+.lfslim__more{border:0;background:none;padding:0;font:inherit;cursor:pointer}
 .lf{width:100%;max-width:560px;display:flex;flex-direction:column;gap:18px}
 .lf__head{display:flex;flex-direction:column;gap:8px}
 .lf__t{font-family:var(--serif);font-weight:400;font-size:var(--fs-6);line-height:1.18;margin:0;text-wrap:balance}
@@ -754,6 +820,43 @@ html.vi .lfband{background:var(--bg);border-color:var(--ink)}
 
 .map__ask{position:absolute;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+/* ---- схема проезда ----
+   Улица — полоса с осевой пунктирной линией, дома висят на ней с одной
+   стороны. Клиника выделена цветом и стоит первой: читают слева направо, и
+   первым должно быть то, что ищут. */
+.plan{width:100%;margin:0 auto;text-align:left}
+.plan__street,.plan__row{max-width:720px;margin-inline:auto}
+.plan__street{margin-top:0;margin-bottom:7px;font-size:var(--fs-1);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+/* Улица идёт через весь кадр, а дома висят на ней только посередине: так
+   видно, что это кусок длинной улицы, а не замкнутая картинка. */
+.plan__road{height:28px;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  background-image:repeating-linear-gradient(to right,var(--mute) 0 18px,transparent 18px 38px);
+  background-size:100% 1px;background-position:center;background-repeat:no-repeat;opacity:.9}
+.plan__row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start;gap:0}
+.plan__sp{padding:16px 18px;border:1px solid var(--hair-2);border-top:0;background:var(--bg)}
+/* Клиника: цветная кромка там, где дом выходит на улицу, — это и есть метка. */
+.plan__sp:first-child{border-top:3px solid var(--navy);border-color:var(--navy) var(--hair-2) var(--hair-2)}
+.plan__sp--nb{opacity:.82}
+.plan__n{margin:0;font-size:var(--fs-1);letter-spacing:.06em;color:var(--mute)}
+.plan__name{margin:2px 0 0;font-size:var(--fs-3);font-weight:500;line-height:1.3}
+.plan__sp:first-child .plan__name{color:var(--navy)}
+.plan__fine{margin:6px 0 0;font-size:var(--fs-2);color:var(--ink-2);line-height:1.45}
+/* Мерка между домами: пунктир по центру и цифра на фоне. */
+.plan__dist{position:relative;align-self:center;margin:0;padding:0 14px;min-width:96px;text-align:center}
+.plan__dist::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px dashed var(--hair)}
+.plan__dist span{position:relative;display:inline-block;padding:0 8px;background:var(--tint);
+  font-size:var(--fs-2);color:var(--mute);font-variant-numeric:tabular-nums}
+/* На узком экране схема встаёт столбиком и перестаёт влезать в фиксированную
+   высоту плашки — поэтому там плашка растёт под содержимое, а не обрезает его. */
+@media(max-width:640px){
+  .map{height:auto;min-height:clamp(280px,40svh,440px)}
+  .map__ask{position:relative;inset:auto;min-height:clamp(280px,40svh,440px);padding:20px 16px}
+  .plan__row{grid-template-columns:minmax(0,1fr);gap:0}
+  .plan__dist{min-width:0;padding:10px 0;text-align:left}
+  .plan__dist::before{display:none}
+  .plan__dist span{padding:0;background:none}
+  .plan__sp--nb{border-top:1px solid var(--hair-2)}
+}
 .map__ask-t{margin:0;font-size:var(--fs-4);color:var(--ink);max-width:34ch}
 .map__ask-f{margin:0;font-size:var(--fs-2);color:var(--mute);max-width:48ch}
 .map.is-live .map__ask{display:none}
@@ -1100,6 +1203,42 @@ main:has(> section:last-child.sec--band) + .ftr{margin-top:0}
    секций и тремя холстами. Как только сайт открыт — всё как обычно. */
 html.lite .sec:not(.lite-off){content-visibility:auto;contain-intrinsic-size:auto 900px}
 html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:auto 620px}
+/* Заглушка высоты была одна на все секции — 900 px. На деле они от 270 до
+   1260: пока человек прокручивал страницу первый раз, каждая секция при
+   разметке меняла высоту на сотни пикселей и утаскивала за собой всё, что
+   ниже. Замерено на быстрой прокрутке: суммарный сдвиг 0,74 — втрое выше
+   порога, за которым Google считает страницу «дёргающейся».
+   Теперь у каждой секции своя высота, снятая измерением на двух ширинах.
+   Ключевое слово auto оставлено: со второго показа браузер берёт настоящий
+   размер, а эти числа нужны ровно для первого прохода. */
+html.lite #napravleniya{contain-intrinsic-size:auto 911px}
+html.lite #pervyj-vizit{contain-intrinsic-size:auto 943px}
+html.lite #kabinet{contain-intrinsic-size:auto 626px}
+html.lite #ekskursiya{contain-intrinsic-size:auto 977px}
+html.lite #plomba{contain-intrinsic-size:auto 1259px}
+html.lite #vrach{contain-intrinsic-size:auto 883px}
+html.lite #zapis{contain-intrinsic-size:auto 716px}
+html.lite #otzyvy{contain-intrinsic-size:auto 902px}
+html.lite #sterilno{contain-intrinsic-size:auto 1024px}
+html.lite #voprosy{contain-intrinsic-size:auto 610px}
+html.lite #svyaz{contain-intrinsic-size:auto 271px}
+html.lite #kontakty{contain-intrinsic-size:auto 1140px}
+html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 398px}
+@media(max-width:700px){
+  html.lite #napravleniya{contain-intrinsic-size:auto 1288px}
+  html.lite #pervyj-vizit{contain-intrinsic-size:auto 1464px}
+  html.lite #kabinet{contain-intrinsic-size:auto 924px}
+  html.lite #ekskursiya{contain-intrinsic-size:auto 1110px}
+  html.lite #plomba{contain-intrinsic-size:auto 1000px}
+  html.lite #vrach{contain-intrinsic-size:auto 1128px}
+  html.lite #zapis{contain-intrinsic-size:auto 1157px}
+  html.lite #otzyvy{contain-intrinsic-size:auto 1209px}
+  html.lite #sterilno{contain-intrinsic-size:auto 736px}
+  html.lite #voprosy{contain-intrinsic-size:auto 804px}
+  html.lite #svyaz{contain-intrinsic-size:auto 287px}
+  html.lite #kontakty{contain-intrinsic-size:auto 1523px}
+  html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 949px}
+}
 
 /* ---- ВСТУПЛЕНИЕ НА СТОРОНЕ БРАУЗЕРА ----
    Те же значения, что в скриптовой версии, но привязаны к прокрутке

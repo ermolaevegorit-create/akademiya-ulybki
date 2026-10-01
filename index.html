@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=9a52d4dd">
+<link rel="stylesheet" href="styles.css?v=5cd1ac72">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": ["Dentist", "MedicalClinic"], "name": "Стоматологическая клиника «Академия улыбки»", "legalName": "ООО «Академия улыбки»", "telephone": "+79897512851", "url": "https://akademiya-ulybki.ru/", "address": {"@type": "PostalAddress", "streetAddress": "ул. Виноградная, д. 55/1, пом. 22, 2-й этаж", "addressLocality": "Сочи", "addressRegion": "Краснодарский край", "postalCode": "354008", "addressCountry": "RU"}, "geo": {"@type": "GeoCoordinates", "latitude": 43.608995, "longitude": 39.720852}, "hasMap": "https://yandex.ru/maps/org/akademiya_ulybki/196221666219/", "foundingDate": "2026", "employee": {"@type": "Physician", "name": "Белоусова Александра Сергеевна", "jobTitle": "Врач стоматолог-терапевт, хирург, имплантолог", "alumniOf": "Новосибирский государственный медицинский университет"}, "hasCredential": {"@type": "EducationalOccupationalCredential", "credentialCategory": "license", "name": "Лицензия Л041-01126-23/05841444", "dateCreated": "2026-08-03", "recognizedBy": {"@type": "GovernmentOrganization", "name": "Министерство здравоохранения Краснодарского края"}}, "identifier": [{"@type": "PropertyValue", "propertyID": "ИНН", "value": "2366057010"}, {"@type": "PropertyValue", "propertyID": "ОГРН", "value": "1262300000038"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Как проходит первый визит?", "acceptedAnswer": {"@type": "Answer", "text": "Первичный приём длится около часа. Мы разговариваем о том, что беспокоит и чего вы ждёте, осматриваем полость рта, делаем фотопротокол и, если нужно, даём направление на снимок. В конце вы получаете письменный план лечения с этапами и стоимостью. Никаких процедур «заодно» в первый визит не делается — только по вашему решению."}}, {"@type": "Question", "name": "Как часто нужна профессиональная чистка?", "acceptedAnswer": {"@type": "Answer", "text": "Большинству взрослых — раз в шесть месяцев. При заболеваниях дёсен, брекетах, имплантатах или курении — раз в три‑четыре месяца. Интервал врач назначает индивидуально после осмотра."}}, {"@type": "Question", "name": "Что нельзя делать после чистки?", "acceptedAnswer": {"@type": "Answer", "text": "Два‑три часа не есть и не пить ничего, кроме воды. Сутки — без красящих продуктов: кофе, чай, красное вино, свёкла, соевый соус, ягоды. Сутки — без курения. Эмаль после чистки более восприимчива к пигментам."}}, {"@type": "Question", "name": "Больно ли лечить зубы?", "acceptedAnswer": {"@type": "Answer", "text": "Лечение проходит под местной анестезией. Современные анестетики действуют через несколько минут и полностью убирают чувствительность на время процедуры. Если вы боитесь самого укола, скажите — место инъекции предварительно обезболивается гелем."}}, {"@type": "Question", "name": "Обязательно ли удалять зубы мудрости?", "acceptedAnswer": {"@type": "Answer", "text": "Нет. Удаляют те, что растут неправильно, упираются в соседний зуб, регулярно воспаляются или не поддаются лечению. Здоровый, прорезавшийся и доступный для чистки зуб мудрости можно оставить."}}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Академия улыбки", "url": "https://akademiya-ulybki.ru/", "inLanguage": "ru-RU", "publisher": {"@type": "Organization", "name": "ООО «Академия улыбки»"}}</script>
@@ -184,11 +184,14 @@
     </figure>
     <div class="tour__txt rv">
       <p class="eyebrow">Экскурсия</p>
-      <h2>Посмотрите клинику до того, как придёте</h2>
-      <p class="lead">Оборудование, стерилизационная зона, кабинеты — рассмотрите вблизи и без записи. Видно, на чём работает врач, чем обрабатывают инструменты и как устроено всё вокруг кресла: чистота и удобство складываются из мелочей, которые на приёме обычно не показывают.</p>
-      <p class="sec__note--b">Экскурсия интерактивная, а по дороге спрятана игра: победите кариес — получите подарочный сертификат в клинику. <span class="tag">номинал сертификата утверждает клиника</span></p>
-      <p><a class="btn btn--fill" href="https://ermolaevegorit-create.github.io/akademiya-ulybki-tour/" target="_blank" rel="noopener" data-track="tour_open">Загляните в клинику</a></p>
-      <p class="fine">Откроется в новой вкладке.</p>
+      <h2>Изучите клинику до того, как придёте</h2>
+      <!-- Сначала то, ради чего стоит смотреть, и только потом приглашение.
+           Обратный порядок — сначала «посмотрите», потом «а там вот что» —
+           требует от человека поверить на слово и только после этого
+           вознаграждает. -->
+      <p class="lead">Два изолированных кабинета, в каждом своя установка. Стерилизационная зона с автоклавом: инструменты раскрывают при пациенте, одноразовое уходит в утилизацию после каждого приёма. Цифровой сканер вместо слепочной массы. Чистота и удобство складываются из мелочей, которые на приёме обычно не показывают.</p>
+      <p class="sec__note--b">Всё это можно рассмотреть своими глазами — онлайн и без записи. Экскурсия интерактивная, а по дороге спрятана игра: победите кариес и заберите подарочный сертификат в клинику. <span class="tag">номинал сертификата утверждает клиника</span></p>
+      <p><a class="btn btn--fill" href="https://ermolaevegorit-create.github.io/akademiya-ulybki-tour/" target="_blank" rel="noopener" data-track="tour_open">Пройти экскурсию</a></p>
     </div>
   </div>
 </section>
@@ -484,7 +487,7 @@
       <div class="map__ask">
         <p class="map__ask-t">Виноградная, 55/1 — рядом с санаторием «Радуга»</p>
         <button class="map__go" type="button" id="map-go" data-map-src="https://yandex.ru/map-widget/v1/?ll=39.720852%2C43.608995&z=17&pt=39.720852%2C43.608995%2Cpm2blm">Показать карту</button>
-        <p class="map__ask-f">Карта Яндекса загрузится по нажатию. До этого сайт ничего никуда не передаёт.</p>
+        <p class="map__ask-f">Карта Яндекса загрузится по нажатию.</p>
       </div>
     </div>
   </div>
@@ -579,9 +582,10 @@
 <!-- ПОМОЩНИК В УГЛУ
      Маскот клиники заменил круглую кнопку с иконкой. Задача та же: решение
      записаться приходит не там, где стоит форма, и возвращаться к ней человек
-     чаще всего не станет. Разница в том, что маскот сначала спрашивает, а не
-     распахивает форму сразу: из облачка можно уйти к записи, к ценам или к
-     вопросам.
+     чаще всего не станет. Облачко здесь — подпись к кнопке, а не меню: при
+     наведении оно сразу говорит, зачем помощник нужен, а нажатие открывает
+     форму записи. Промежуточного выбора нет — он стоял бы между человеком и
+     единственным действием, ради которого помощник и поставлен.
 
      Кадры — отдельные картинки в общем холсте 256×256, меняются подменой src.
      Ни GIF, ни канвы: покадровая смена одного <img> дешевле и её видно
@@ -593,18 +597,20 @@
      Это рисунок, а не человек и не живой оператор: облачко не обещает, что
      кто-то отвечает прямо сейчас, и ведёт к форме и телефону. -->
 <div class="msc" id="msc" hidden>
-  <div class="msc__bub" id="msc-bub" hidden role="group" aria-label="Помощник клиники">
+  <div class="msc__bub" id="msc-bub" hidden aria-hidden="true">
     <button class="msc__x" type="button" aria-label="Скрыть подсказку" data-msc="close"></button>
+    <!-- Три точки — то же, что в переписке: помощник «набирает». Нарисованы
+         стилями, чтобы не тащить ради них картинку. -->
+    <span class="msc__dots" aria-hidden="true"><i></i><i></i><i></i></span>
     <p class="msc__say" id="msc-say"></p>
-    <div class="msc__acts" id="msc-acts">
-      <button class="msc__act" type="button" data-msc="lead">Записаться на приём</button>
-      <button class="msc__act" type="button" data-msc="prices">Посмотреть цены</button>
-      <button class="msc__act" type="button" data-msc="faq">Задать вопрос</button>
-    </div>
   </div>
   <button class="msc__btn" id="msc-btn" type="button"
-          aria-label="Помощник клиники: записаться, цены, вопросы">
+          aria-label="Проконсультироваться с врачом — записаться на приём">
     <span class="msc__ring" aria-hidden="true"></span>
+    <!-- Полоски скорости видны только пока помощника тащат: без них перенос
+         выглядел так, будто картинка просто ездит за курсором. -->
+    <img class="msc__lines" id="msc-lines" src="assets/mascot/motion-lines.webp" alt=""
+         width="128" height="102" loading="lazy" draggable="false" aria-hidden="true">
     <img class="msc__img" id="msc-img" src="assets/mascot/idle.webp" alt=""
          width="256" height="256" draggable="false">
   </button>
@@ -623,6 +629,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=c9d08e70"></script>
+<script src="main.js?v=720bffc6"></script>
 </body>
 </html>

@@ -24,7 +24,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="assets/font/golos-text-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/font/prata-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=a6b98708">
+<link rel="stylesheet" href="styles.css?v=657c37d4">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": ["Dentist", "MedicalClinic"], "name": "Стоматологическая клиника «Академия улыбки»", "legalName": "ООО «Академия улыбки»", "telephone": "+79897512851", "url": "https://akademiya-ulybki.ru/", "address": {"@type": "PostalAddress", "streetAddress": "ул. Виноградная, д. 55/1, пом. 22, 2-й этаж", "addressLocality": "Сочи", "addressRegion": "Краснодарский край", "postalCode": "354008", "addressCountry": "RU"}, "geo": {"@type": "GeoCoordinates", "latitude": 43.608995, "longitude": 39.720852}, "hasMap": "https://yandex.ru/maps/org/akademiya_ulybki/196221666219/", "foundingDate": "2026", "employee": {"@type": "Physician", "name": "Белоусова Александра Сергеевна", "jobTitle": "Врач стоматолог-терапевт, хирург, имплантолог", "alumniOf": "Новосибирский государственный медицинский университет"}, "hasCredential": {"@type": "EducationalOccupationalCredential", "credentialCategory": "license", "name": "Лицензия Л041-01126-23/05841444", "dateCreated": "2026-08-03", "recognizedBy": {"@type": "GovernmentOrganization", "name": "Министерство здравоохранения Краснодарского края"}}, "identifier": [{"@type": "PropertyValue", "propertyID": "ИНН", "value": "2366057010"}, {"@type": "PropertyValue", "propertyID": "ОГРН", "value": "1262300000038"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://akademiya-ulybki.ru/"}, {"@type": "ListItem", "position": 2, "name": "Цены", "item": "https://akademiya-ulybki.ru/prices.html"}]}</script>
 </head>
@@ -126,8 +126,7 @@
          видит, что попал туда, куда нажимал. После отправки он подпрыгивает —
          это единственное место, где прыжок уместен. Картинка декоративная,
          поэтому alt пустой: всё, что нужно знать, сказано текстом рядом. -->
-    <img class="lfpop__msc" id="lfpop-msc" src="assets/mascot/idle.webp" alt=""
-         width="256" height="256" loading="lazy" draggable="false" aria-hidden="true">
+    
     <form class="lf lf--compact" id="lf-pop" novalidate>
       <div class="lf__head">
         <p class="eyebrow">Прежде чем уйти</p>
@@ -192,47 +191,20 @@
   </div>
 </div>
 
-<!-- ПОМОЩНИК В УГЛУ
-     Маскот клиники заменил круглую кнопку с иконкой. Задача та же: решение
-     записаться приходит не там, где стоит форма, и возвращаться к ней человек
-     чаще всего не станет. Облачко здесь — подпись к кнопке, а не меню: при
-     наведении оно сразу говорит, зачем помощник нужен, а нажатие открывает
-     форму записи. Промежуточного выбора нет — он стоял бы между человеком и
-     единственным действием, ради которого помощник и поставлен.
+<!-- КНОПКА ВЫЗОВА В УГЛУ
+     Круглая кнопка с облачком — та, что была до маскота. Решение записаться
+     приходит не там, где стоит форма, и возвращаться к ней человек чаще всего
+     не станет. Появляется не сразу: сначала человек должен что-то прочитать,
+     иначе это баннер поверх ещё не увиденной страницы. При наведении
+     раскрывается подпись «Записаться», нажатие открывает окно записи. -->
+<button class="fab" id="fab" type="button" aria-label="Записаться на приём">
+  <span class="fab__ring" aria-hidden="true"></span>
+  <span class="fab__ph" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4c-1.2 0-2.4-.2-3.5-.7L3 21l1.8-5.2A8.2 8.2 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/><circle cx="9" cy="11.5" r=".9" fill="currentColor" stroke="none"/><circle cx="12.5" cy="11.5" r=".9" fill="currentColor" stroke="none"/><circle cx="16" cy="11.5" r=".9" fill="currentColor" stroke="none"/></svg>
+  </span>
+  <span class="fab__t">Записаться</span>
+</button>
 
-     Кадры — отдельные картинки в общем холсте 256×256, меняются подменой src.
-     Ни GIF, ни канвы: покадровая смена одного <img> дешевле и её видно
-     программе чтения с экрана как один элемент.
-
-     Сразу грузятся только покой и моргание; движения при наведении, нажатии,
-     переносе и прыжке подтягиваются, когда впервые понадобятся.
-
-     Это рисунок, а не человек и не живой оператор: облачко не обещает, что
-     кто-то отвечает прямо сейчас, и ведёт к форме и телефону. -->
-<div class="msc" id="msc" hidden>
-  <div class="msc__bub" id="msc-bub" hidden aria-hidden="true">
-    <button class="msc__x" type="button" aria-label="Скрыть подсказку" data-msc="close"></button>
-    <!-- Три точки — то же, что в переписке: помощник «набирает». Нарисованы
-         стилями, чтобы не тащить ради них картинку. -->
-    <span class="msc__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-    <p class="msc__say" id="msc-say"></p>
-  </div>
-  <button class="msc__btn" id="msc-btn" type="button"
-          aria-label="Проконсультироваться с врачом — записаться на приём">
-    <span class="msc__ring" aria-hidden="true"></span>
-    <!-- Полоски скорости видны только пока помощника тащат: без них перенос
-         выглядел так, будто картинка просто ездит за курсором. -->
-    <img class="msc__lines" id="msc-lines" src="assets/mascot/motion-lines.webp" alt=""
-         width="128" height="102" loading="lazy" draggable="false" aria-hidden="true">
-    <!-- Сюда скрипт подставляет искру, сердце или вопросительный знак — по
-         одному короткому разу, когда помощнику есть чему порадоваться или о
-         чём задуматься. -->
-    <img class="msc__fx" id="msc-fx" src="" alt="" width="128" height="128"
-         loading="lazy" draggable="false" aria-hidden="true" hidden>
-    <img class="msc__img" id="msc-img" src="assets/mascot/idle.webp" alt=""
-         width="256" height="256" draggable="false">
-  </button>
-</div>
 
 <div class="cookie" id="cookie" hidden role="dialog" aria-modal="false" aria-labelledby="cookie-t">
   <p class="cookie__t" id="cookie-t"><b>Cookie и статистика</b></p>
@@ -247,6 +219,6 @@
 <script src="vendor/gsap.min.js?v=2d26f4c0"></script>
 <script src="vendor/ScrollTrigger.min.js?v=489bcf6d"></script>
 <script src="vendor/Draggable.min.js?v=1d366323"></script>
-<script src="main.js?v=b91f7f3a"></script>
+<script src="main.js?v=87f390c7"></script>
 </body>
 </html>

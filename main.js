@@ -1097,6 +1097,38 @@
       };
     })();
 
+    /* ---------- круглая кнопка в углу ----------
+       Стоит на странице, когда маскот выключен (флаг МАСКОТ в build.py).
+       Та же роль: решение записаться приходит не там, где стоит форма.
+       Появляется после полэкрана прокрутки на открытой странице и уступает
+       место полосе о cookie — обе живут в одном углу, поэтому состояние
+       пересчитывается, а не ставится однажды. */
+    (function fab() {
+      const b = $('#fab'); if (!b) return;
+      b.addEventListener('click', () => {
+        track('fab_click');
+        /* В покое и в версии для слабовидящих окна нет — ведём к форме на
+           странице, а на внутренних страницах — к контактам. */
+        if (html.classList.contains('still') || html.classList.contains('vi')) {
+          const t = $('.lfband .lf') || $('#kontakty') || $('.ftr');
+          if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                   const f = $('input', t); if (f) setTimeout(() => f.focus(), 500); }
+          return;
+        }
+        openPop(true);
+      });
+      const bar = $('#cookie');
+      let armed = false;
+      const sync = () => {
+        if (html.classList.contains('ready') && scrollY >= innerHeight * .6) armed = true;
+        const busy = bar && !bar.hidden;
+        b.classList.toggle('is-on', armed && !busy);
+      };
+      addEventListener('scroll', sync, { passive: true });
+      setInterval(sync, 700);
+      setTimeout(sync, 3000);
+    })();
+
     /* Само окно приходит только на главной: там есть что прочитать до него —
        направления, первый визит, врач. На внутренних страницах человек пришёл
        за конкретным (цены, документы), и перебивать его нечем. */

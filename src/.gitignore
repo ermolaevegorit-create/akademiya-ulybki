@@ -1,0 +1,16 @@
+__pycache__/
+dist/
+node_modules/
+*.pyc
+# результат build.py в корне src/ — не хранить, он пересобирается
+/index.html
+/faq.html
+/prices.html
+/docs.html
+/info.html
+/privacy.html
+/404.html
+/sitemap.xml
+/robots.txt
+/llms.txt
+/site.webmanifest

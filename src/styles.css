@@ -1,0 +1,1739 @@
+/* Академия улыбки · v7 */
+
+/* Шрифты лежат у нас, внешних запросов нет.
+   Prata и Golos Text распространяются по SIL Open Font License 1.1;
+   файлы взяты из пакетов @fontsource, начертания — только используемые.
+   Разбивка на кириллицу и латиницу с unicode-range: браузер качает
+   только тот файл, который нужен странице. */
+@font-face{font-family:"Prata";font-style:normal;font-weight:400;font-display:swap;
+  src:url(assets/font/prata-cyrillic-400-normal.woff2) format("woff2");
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Prata";font-style:normal;font-weight:400;font-display:swap;
+  src:url(assets/font/prata-latin-400-normal.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Golos Text";font-style:normal;font-weight:400;font-display:swap;
+  src:url(assets/font/golos-text-cyrillic-400-normal.woff2) format("woff2");
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Golos Text";font-style:normal;font-weight:400;font-display:swap;
+  src:url(assets/font/golos-text-latin-400-normal.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Golos Text";font-style:normal;font-weight:500;font-display:swap;
+  src:url(assets/font/golos-text-cyrillic-500-normal.woff2) format("woff2");
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Golos Text";font-style:normal;font-weight:500;font-display:swap;
+  src:url(assets/font/golos-text-latin-500-normal.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Golos Text";font-style:normal;font-weight:600;font-display:swap;
+  src:url(assets/font/golos-text-cyrillic-600-normal.woff2) format("woff2");
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Golos Text";font-style:normal;font-weight:600;font-display:swap;
+  src:url(assets/font/golos-text-latin-600-normal.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+:root{
+  /* Длина дорожки вступления. Было 290svh — почти три экрана прокрутки до
+     заголовка и телефона. Движение то же самое, просто идёт вдвое быстрее:
+     шкала считается от реальной высоты блока, а не от пикселей. */
+  --intro-h:195svh;
+  --bg:#FFFFFF; --ink:#14161A; --ink-2:#4B5058; --mute:#5F646D;
+  --hair:rgba(20,22,26,.14); --hair-2:rgba(20,22,26,.07); --tint:#F5F6F8; --band:#F5F6F8;
+  --navy:#1B3D96; --navy-d:#15307A; --teal:#2F7E86; --uv:#7A4DFF; --err:#B3261E;
+  --serif:"Prata",Georgia,"Times New Roman",serif;
+  --sans:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --fs-1:12px; --fs-2:14px; --fs-3:16px; --fs-4:18px; --fs-5:22px; --fs-6:clamp(26px,3vw,32px); --fs-7:clamp(30px,3.6vw,44px); --fs-8:clamp(34px,4.4vw,58px);
+  --t-fast:.2s; --t-std:.4s; --t-slow:.9s; --ease:cubic-bezier(.2,.7,.2,1);
+  --wrap:1240px; --gut:clamp(20px,4.5vw,56px); --sec:clamp(88px,10vw,152px); --hdr:72px;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg);scroll-behavior:smooth;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:var(--fs-3);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{margin:0;font-family:var(--serif);font-weight:400;line-height:1.12;letter-spacing:-.005em;text-wrap:balance}
+h1{font-size:var(--fs-8);line-height:1.06}
+h2{font-size:var(--fs-7)}
+h3{font-size:var(--fs-5)}
+p{margin:0 0 1em}
+.lead{font-size:var(--fs-4);line-height:1.6;color:var(--ink-2);max-width:58ch}
+.small{font-size:var(--fs-2);line-height:1.5;color:var(--mute)}
+.fine{font-size:var(--fs-1);line-height:1.5;color:var(--mute);max-width:60ch}
+.eyebrow{font-size:var(--fs-1);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:0 0 20px}
+/* .lnk вешается и на ссылку, и на кнопку «Настройки cookie». У кнопки
+   браузер рисует свой серый фон — на тёмной схеме получалась светлая
+   плашка со светлым текстом. Сбрасываем оформление кнопки. */
+.lnk{border:0;border-bottom:1px solid currentColor;padding:4px 0 2px;color:var(--navy);display:inline-block;line-height:1.3;background:none;font:inherit;cursor:pointer}
+@media(hover:none){.lnk{padding:8px 0 6px}}
+.lnk:hover{color:var(--teal)}
+.tag{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border:1px dashed #B0742E;color:#8A5A1F;vertical-align:middle}
+[data-todo]{outline:1px dashed rgba(176,116,46,.5);outline-offset:3px}
+.wrap{max-width:var(--wrap);margin:0 auto;padding-inline:var(--gut)}
+.sec{position:relative;padding-block:var(--sec);scroll-margin-top:var(--hdr)}
+[id]{scroll-margin-top:calc(var(--hdr) + 16px)}
+
+/* ---------------------------------------------------------------------------
+   ЗОНИРОВАНИЕ
+
+   Текстовая колонка ограничена 1240 px — так и должно быть, длинная строка
+   нечитаема. Но на широком мониторе это давало узкую ленту посреди белого
+   листа, и поля по бокам выглядели не воздухом, а незавёрстанным местом.
+
+   Лечится не шириной колонки, а фоном: через одну секции получают подложку
+   во всю ширину экрана. Поле по бокам перестаёт быть пустым — оно становится
+   частью полосы, а страница читается как последовательность блоков, а не как
+   один бесконечный белый лист. Разница тона всего около четырёх процентов:
+   достаточно, чтобы глаз увидел границу, и мало, чтобы это лезло в глаза.
+--------------------------------------------------------------------------- */
+.sec--band{background:var(--band);
+  border-top:1px solid var(--hair-2);border-bottom:1px solid var(--hair-2);
+  /* Внутри полосы «светлая плашка» — это уже не серый, а белый: иначе лоток
+     в игре, подложка карты и рамка под фото сливаются с самой полосой и
+     пропадают. Переопределяем токен один раз здесь, и всё, что им
+     пользуется, встаёт на место само. */
+  --tint:var(--bg)}
+/* Две полосы подряд слились бы в одну длинную: смежную границу убираем,
+   чтобы между ними не было двойной линии. */
+.sec--band + .sec--band{border-top:0}
+
+
+/* На большом мониторе колонку немного расширяем. Строка текста от этого не
+   удлиняется — абзацы и без того ограничены по числу знаков, — а сетки
+   картинок и плиток перестают жаться к середине. */
+@media(min-width:1600px){:root{--wrap:1360px}}
+.sec__head{max-width:720px;margin-bottom:clamp(40px,5vw,64px)}
+.sec__head--c{margin-inline:auto;text-align:center}
+.sec__head--c .sec__note{margin-inline:auto}
+.sec__head h2{margin-bottom:16px}
+.sec__note{margin:0;color:var(--ink-2);max-width:60ch}
+.sec__note--b{margin-top:14px;color:var(--ink);font-weight:500}
+.sec__more{text-align:center;margin:clamp(32px,4vw,48px) 0 0}
+.bw{filter:grayscale(1) contrast(1.04)}
+.floor{display:block;position:absolute;left:0;right:0;height:1px;background:var(--hair)}
+.shadow{position:absolute;left:50%;bottom:-2px;width:46%;height:10px;translate:-50% 0;border-radius:50%;background:radial-gradient(closest-side,rgba(20,22,26,.22),rgba(20,22,26,0))}
+.skip{position:absolute;left:12px;top:0;translate:0 -200%;z-index:100;background:var(--ink);color:#fff;padding:10px 14px;border-radius:2px;font-size:var(--fs-2)}
+.skip:focus{top:12px;translate:0 0}
+.only-touch{display:none}
+@media(hover:none){.only-fine{display:none!important}.only-touch{display:inline}}
+
+/* появление */
+.js .rv{opacity:0;transform:translateY(16px);transition:opacity var(--t-slow) ease,transform var(--t-slow) var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+
+/* кнопки */
+/* font-family здесь обязателен. У <button> браузер ставит свой шрифт —
+   Arial, — и не наследует его от страницы, в отличие от ссылки. Из-за
+   этого «Позвонить», «Записаться», «Принять всё» набирались Arial'ом,
+   а такие же кнопки-ссылки рядом — фирменным Golos. */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 26px;border:1px solid var(--ink);border-radius:2px;font-family:inherit;font-size:15px;font-weight:500;color:var(--ink);background:transparent;cursor:pointer;transition:background var(--t-fast),color var(--t-fast),border-color var(--t-fast);white-space:nowrap;font-variant-numeric:tabular-nums}
+.btn:hover{background:var(--ink);color:#fff}
+.btn--fill{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn--fill:hover{background:var(--navy-d);border-color:var(--navy-d)}
+:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+
+/* шапка */
+.hdr{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid transparent;transition:border-color var(--t-std),opacity .6s}
+.hdr.stuck{border-color:var(--hair-2)}
+.hdr__in{height:var(--hdr);display:flex;align-items:center;gap:clamp(14px,2.4vw,36px)}
+.brand{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.brand__t{display:flex;flex-direction:column;line-height:1.1}
+.brand__t b{font-family:var(--serif);font-weight:400;font-size:19px;color:var(--navy)}
+.brand__t i{font-style:normal;font-size:11px;letter-spacing:.02em;color:var(--mute);margin-top:3px}
+.nav{display:flex;gap:clamp(10px,1.6vw,26px);margin-left:auto}
+@media(max-width:1260px){.nav{margin-left:0}}
+/* ---------------------------------------------------------------------------
+   ШАПКА НА НОУТБУКЕ
+
+   Содержимое шапки — логотип с подписью, восемь разделов, телефон и две
+   кнопки — не помещалось в колонку 1240 px. Измерено: на 1440 не хватало
+   174 пикселей, на 1280 — 141. Лишнее уезжало за правый край, и первой
+   уезжала кнопка «Для слабовидящих». Меню при этом не сворачивалось в
+   бутерброд: порог стоял на 960 px, то есть сильно ниже.
+
+   Сворачивать меню в бутерброд на ноутбуке не хочется — навигация ухудшится
+   для всех. Поэтому ужимаем то, что можно ужать без потери смысла: подпись
+   под названием клиники (она есть в подвале и на каждой странице в тексте) и
+   промежутки, раздутые процентами от ширины экрана.
+--------------------------------------------------------------------------- */
+@media(max-width:1800px){
+  .hdr .brand__t i{display:none}
+  .hdr__in{gap:16px}
+  .nav{gap:14px}
+  .nav a{font-size:14.5px}
+}
+.nav a{font-size:15px;color:var(--ink-2);position:relative;padding:12px 0;min-height:44px;display:inline-flex;align-items:center;white-space:nowrap}
+.nav a::after{content:"";position:absolute;left:0;right:100%;bottom:8px;height:1px;background:var(--ink);transition:right var(--t-fast)}
+.nav a:hover::after,.nav a.is-cur::after,.nav a.is-active::after{right:0}
+.nav a.is-cur,.nav a.is-active{color:var(--ink)}
+.hdr__tel{display:inline-flex;align-items:center;gap:8px;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums;padding:10px 0;color:var(--ink)}
+.hdr__tel-i{display:none}
+.nav a.nav__tel{display:none}
+.burger{display:none;width:44px;height:44px;border:1px solid var(--hair);background:transparent;margin-left:auto;cursor:pointer;align-items:center;justify-content:center;border-radius:2px}
+.burger span,.burger span::before,.burger span::after{display:block;width:18px;height:1.5px;background:var(--ink);position:relative;content:"";transition:.3s}
+.burger span::before{position:absolute;top:-6px}.burger span::after{position:absolute;top:6px}
+body.nav-open .burger span{background:transparent}
+body.nav-open .burger span::before{top:0;transform:rotate(45deg)}body.nav-open .burger span::after{top:0;transform:rotate(-45deg)}
+@media(max-width:1180px){.hdr__tel span{display:none}.hdr__tel-i{display:block}.hdr__tel{width:44px;height:44px;justify-content:center;border:1px solid var(--hair);border-radius:2px;padding:0;margin-left:auto}}
+/* Порог бутерброда поднят с 960 до 1100 px. Между ними полное меню в
+   строку уже не помещалось: восемь разделов, телефон и две кнопки требовали
+   1050 px при доступных 1024, и правый край уезжал за экран. */
+@media(max-width:1260px){
+  .nav{position:fixed;left:0;right:0;top:var(--hdr);flex-direction:column;gap:0;background:#fff;border-bottom:1px solid var(--hair);padding:8px var(--gut) 20px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:.25s}
+  body.nav-open .nav{opacity:1;visibility:visible;transform:none}
+  .nav a{padding:12px 0;border-bottom:1px solid var(--hair-2);font-size:17px}
+  .nav a::after{display:none}
+  .burger{margin-left:0;display:flex}
+  .nav .nav__quick{display:block;padding-top:4px}
+  .nav{max-height:calc(100svh - var(--hdr));overflow:auto}
+  .brand__t i{display:none}
+}
+
+/* ВСТУПЛЕНИЕ: лампа крупная с самого начала, свет набирает силу и открывает сайт */
+/* Фон вступления живёт на липком кадре, а не на самом блоке. У блока
+   высота 290svh и отрицательный нижний отступ в 100svh, поэтому его
+   заливка уходила на целый экран ниже кадра и просвечивала сквозь
+   прозрачные секции: блок направлений разрезало по горизонтали. */
+.intro{display:none;position:relative;height:max(480px,100svh);margin-top:calc(-1 * var(--hdr));overscroll-behavior:contain}
+/* Отрицательный отступ снизу подводит первый экран ровно под залитый светом
+   кадр: пока засвет расходится, содержимое уже стоит на своём месте и
+   проступает сквозь него. Пустого белого кадра между ними не остаётся. */
+/* Длина дорожки. Было 290svh — почти три экрана прокрутки до заголовка и
+   телефона. Движение то же, но ждать его человек не обязан: сцена играет
+   ровно ту же партию вдвое быстрее, потому что шкала считается от реальной
+   высоты блока, а не от пикселей. */
+/* Отрицательный отступ считается от длины дорожки, а не задан числом. Так
+   первый экран стоит на одном и том же месте до того, как скрипт поставит
+   is-tall, и после: иначе при загрузке он въезжал в кадр и браузер засчитывал
+   это сдвигом вёрстки (замерено на телефоне: 0,09 при пороге 0,1). */
+.intro.is-tall{height:var(--intro-h);margin-bottom:calc(100svh - var(--intro-h));overscroll-behavior:auto}
+/* На телефоне дорожка ещё короче — один экран сверх кадра. Пальцем долгий
+   путь утомляет быстрее, чем колесом, а под лампой там сразу стоит адрес и
+   кнопка звонка: человеку есть куда уйти, не досматривая. */
+@media(max-width:700px){:root{--intro-h:170svh}}
+.intro__inner{height:100%;background:#F7F8F9}
+/* Высота кадра до и после класса is-tall обязана совпадать: класс ставит
+   скрипт, и всякое расхождение подбрасывает подсказку «Прокрутите вниз»
+   на глазах у человека. Замерено: скачок 40 px при окне 900 и сдвиг
+   вёрстки 0.089. Поэтому и здесь, и в базовом правиле — одна формула. */
+.intro.is-tall .intro__inner{height:max(480px,100svh)}
+.js .intro{display:block}
+.intro__inner{position:sticky;top:0;overflow:hidden;z-index:40;
+  background:radial-gradient(115% 92% at 50% 38%,#FCFDFE 0%,#F2F4F7 46%,#E3E7ED 100%)}
+.intro__par{position:absolute;inset:0;z-index:3;will-change:transform}
+/* высоту прибора ограничиваем и по высоте окна — иначе на низком экране
+   лампа съедает весь кадр и строки слогана упираются в шапку */
+.intro__stage{position:absolute;left:50%;top:50%;width:min(88vmin,660px,75svh);translate:-50% -50%;transform-origin:50% 42%;will-change:transform}
+/* Мягкая тень под корпусом. Без неё в середине сцены, когда лампа вырастает
+   на весь кадр, экран вырождается в почти сплошное светлое поле: белый
+   корпус на светлом фоне, опереться глазу не на что. Тень рисуется до
+   картинки лампы и потому всегда под ней. */
+.intro__stage::before{content:"";position:absolute;left:50%;top:70%;width:72%;height:24%;translate:-50% 0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side ellipse,rgba(23,30,42,.16) 0%,rgba(23,30,42,.08) 50%,rgba(23,30,42,0) 100%)}
+.intro.is-blank .intro__stage::before{visibility:hidden}
+.intro__lamp{position:relative;display:block;width:100%;padding:0;margin:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.intro__lamp:focus-visible{outline:2px solid var(--navy);outline-offset:4px;border-radius:24px}
+/* Тени на лампе нет намеренно: фильтр пришлось бы снимать при первом же
+   движении, а это перерисовка обеих картинок ровно в тот момент, когда
+   начинается анимация. Объём лампе даёт аура под ней. */
+.intro__off,.intro__on{width:100%;height:auto;display:block}
+/* Когда лампа разгорелась, погашенная копия полностью скрыта под горящей —
+   держать её в отрисовке незачем: при наезде это вторая картинка на пол-экрана. */
+.intro.is-lit .intro__off{visibility:hidden}
+/* после засвета лампу вообще не рисуем — она под белым и только жрёт кадры */
+.intro.is-blank .intro__stage,.intro.is-blank .intro__glow,.intro.is-blank .intro__bloom{visibility:hidden}
+.intro__on,.intro__hot{position:absolute;inset:0;opacity:0;filter:none}
+/* Раскалённое состояние — отдельная картинка с бликами на каждом светодиоде.
+   Свет во время наезда нарастает перетеканием растров, а не расчётом
+   градиентов: так он выглядит настоящим и почти ничего не стоит на кадре. */
+.intro.is-hot .intro__on{visibility:hidden}
+/* На телефоне раскалённая копия не рисуется вовсе: две большие картинки,
+   которые одновременно увеличиваются, — самая дорогая часть кадра, а
+   блики на светодиодах на экране в ладонь всё равно не различить. */
+@media(max-width:700px){
+  .intro__hot{display:none!important}
+  .intro.is-hot .intro__on{visibility:visible}
+}
+/* тихая жизнь до первого скролла: свет медленно дышит; при движении дыхание гаснет */
+.intro__aura{position:absolute;left:50%;top:50%;width:180%;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side circle,rgba(255,253,247,.9) 0%,rgba(255,251,242,.62) 16%,rgba(255,250,238,.34) 30%,rgba(255,252,244,.12) 46%,rgba(255,255,255,0) 64%);
+  opacity:.45;animation:aura 8s ease-in-out infinite alternate}
+@keyframes aura{from{opacity:.26}to{opacity:.66}}
+.intro.is-moving .intro__aura{animation:none;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility 0s linear .5s}
+/* У обоих световых слоёв прозрачный край стоял на 70–74 % радиуса: почти
+   половина площади каждый кадр закрашивалась впустую. Края сдвинуты на
+   100 %, а сами слои уменьшены ровно во столько же — картинка та же.
+   Сияние лежит отдельным слоем поверх кадра, а не внутри лампы. Раньше оно
+   росло вместе с наездом, и к концу браузер каждый кадр перерисовывал
+   градиент шириной в несколько тысяч пикселей — это и была основная плата
+   за вступление. Теперь размер у слоя постоянный, меняется только яркость:
+   рост света берёт на себя ореол. */
+/* Ореол — присланная заготовка блика, уведённая к холодному белому. Растр вместо градиента: рисунок настоящей оптики (кольца, спад)
+   градиентом не набрать, а стоит он не дороже.
+   Горизонтальной полосы блика здесь нет намеренно: она читается как
+   наклейка поверх кадра, особенно к концу наезда, когда перестаёт двигаться.
+   Сияние лежит отдельным слоем и не масштабируется: пока оно росло вместе
+   с наездом, браузер каждый кадр перерисовывал полотно в несколько тысяч
+   пикселей — это и была основная плата за вступление. */
+.intro__glow{position:absolute;left:50%;top:48%;width:118vmin;max-width:none;height:auto;translate:-50% -50%;opacity:0;pointer-events:none;will-change:opacity;z-index:1}
+/* Слоган в две строки: одна над прибором, вторая под ним, одним шрифтом и
+   кеглем. Отступы считаем от центра кадра, чтобы обе строки держались
+   на равном расстоянии от лампы при любой ширине экрана. */
+/* Слоган прежний: крупная серифная строка над прибором и тонкая подпись под
+   ним. Отступы считаем от половины высоты лампы (ширина * 0.589) плюс воздух,
+   чтобы ни одна строка не наезжала на прибор ни на широком экране, ни на низком. */
+.intro__slogan{position:absolute;left:50%;bottom:calc(50% + min(26vmin,196px,39svh) + clamp(16px,3vh,46px));translate:-50% 0;width:min(92vw,880px);text-align:center;margin:0;z-index:5;pointer-events:none}
+.intro__slogan--under{bottom:auto;top:calc(50% + min(26vmin,196px,39svh) + clamp(14px,2.6vh,38px));width:min(92vw,760px)}
+.intro__slogan b{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.6vw,62px);line-height:1.12;
+  color:var(--ink);text-wrap:balance;letter-spacing:-.01em;text-shadow:0 2px 28px rgba(255,255,255,.9),0 1px 3px rgba(255,255,255,.9)}
+.intro__slogan--under b{font-family:var(--sans);font-size:clamp(13px,1.3vw,18px);font-weight:400;line-height:1.5;
+  color:var(--ink-2);letter-spacing:.01em;text-shadow:0 1px 16px rgba(255,255,255,.95)}
+@media(max-width:900px){
+  .intro__slogan{width:min(84vw,520px)}
+  .intro__slogan--under{width:min(88vw,520px)}
+  .intro__slogan b{font-size:clamp(23px,6.2vw,34px)}
+  .intro__slogan--under b{font-size:14px}
+}
+@media(max-height:760px){.intro__slogan b{font-size:clamp(22px,3.2vw,40px)}}
+.intro__bloom{position:absolute;left:50%;top:50%;width:78vmax;aspect-ratio:1;translate:-50% -50%;border-radius:50%;pointer-events:none;opacity:0;z-index:4;
+  background:radial-gradient(closest-side circle,rgba(255,255,255,1) 0%,rgba(255,254,251,.94) 24%,rgba(255,254,250,.82) 41%,rgba(255,253,247,.56) 59%,rgba(255,253,246,.26) 78%,rgba(255,255,255,0) 100%);will-change:transform,opacity}
+.intro__flash{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 44%,#fff 0%,#fff 62%,rgba(255,255,255,.94) 100%);opacity:0;pointer-events:none;z-index:6;will-change:opacity}
+/* Подвал кадра. На большом экране здесь только подсказка о прокрутке —
+   она и была. На телефоне вместо неё стоит то, за чем человек чаще всего и
+   пришёл: адрес и кнопка звонка. Слово «прокрутите вниз» на телефоне лишнее:
+   прокрутка там и так единственное движение, которое знают все. */
+.intro__foot{position:absolute;left:0;right:0;bottom:clamp(20px,4vh,40px);text-align:center;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:14px}
+.intro__where,.intro__call{display:none}
+.intro__where{margin:0;font-size:var(--fs-2);color:var(--mute)}
+.intro__hint{margin:0}
+.intro__go{display:inline-flex;flex-direction:column;align-items:center;gap:10px;border:0;background:none;cursor:pointer;padding:8px 14px;
+  font:inherit;font-size:var(--fs-1);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);transition:color .3s}
+.intro__go:hover{color:var(--ink)}
+.intro__arrow{display:block;width:14px;height:14px;border-right:1.2px solid currentColor;border-bottom:1.2px solid currentColor;rotate:45deg;animation:arrow 2.4s ease-in-out infinite}
+@keyframes arrow{0%,100%{transform:translateY(-3px);opacity:.35}50%{transform:translateY(3px);opacity:.9}}
+/* Телефон: адрес и звонок вместо подсказки. Кнопка со стрелкой остаётся —
+   она ведёт к сайту тем, кто нажимает, а не прокручивает, и нужна с
+   клавиатуры; видимой подписи у неё больше нет. */
+@media(max-width:700px){
+  .intro__where,.intro__call{display:block}
+  .intro__call{padding:12px 28px}
+  .intro__golabel{display:none}
+  .intro__foot{gap:12px}
+  .intro__go{padding:4px 14px;gap:0}
+}
+/* шапка видна и на первом экране — полупрозрачная, при наведении проявляется */
+/* на первом экране шапка без полосы, но логотип и кнопки читаются полностью */
+.hdr--ghost{background:rgba(255,255,255,0);backdrop-filter:none;opacity:1;border-color:transparent!important;transition:background .45s ease}
+.hdr--ghost .brand,.hdr--ghost .nav a,.hdr--ghost .hdr__tel{text-shadow:0 1px 14px rgba(255,255,255,.95),0 1px 3px rgba(255,255,255,.9)}
+.hdr--ghost:hover,.hdr--ghost:focus-within{background:rgba(255,255,255,.72);backdrop-filter:blur(10px)}
+@media(max-width:900px){.intro__stage{width:min(94vmin,580px)}}
+
+/* ПЕРВЫЙ ЭКРАН */
+.hero{position:relative;padding:clamp(40px,6vh,80px) 0 clamp(56px,8vh,96px)}
+.hero__in{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:clamp(28px,5vw,80px);align-items:center}
+.hero__txt{position:relative;z-index:2}
+.hero__h{max-width:16ch;margin-bottom:24px}
+.hero__lead{margin:0 0 30px;max-width:50ch}
+.hero__cta{display:flex;flex-wrap:wrap;align-items:center;gap:14px 26px}
+.hero__ph{margin:0}
+.hero__ph img{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:55% 35%;filter:grayscale(1) contrast(1.04)}
+.hero__ph figcaption{margin-top:12px;font-size:var(--fs-2);color:var(--mute)}
+@media(max-width:900px){
+  .hero{padding-top:20px}
+  .hero__in{grid-template-columns:minmax(0,1fr);gap:26px}
+  .hero__ph{order:-1}
+  .hero__ph img{aspect-ratio:3/2}
+  .hero__h{max-width:none}
+}
+
+/* ДОКАЗАТЕЛЬСТВА */
+.proof{border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.proof__in{display:grid;grid-template-columns:repeat(4,1fr)}
+.proof__in > div{padding:22px 24px 22px 0;border-left:1px solid var(--hair-2);padding-left:24px;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.proof__in > div:first-child{border-left:0;padding-left:0}
+.proof b{font-weight:500;font-size:var(--fs-3)}
+.proof span{font-size:var(--fs-2);color:var(--mute);line-height:1.45}
+.proof .lnk{align-self:flex-start;padding-top:0}
+@media(max-width:860px){.proof__in{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.proof__in > div:nth-child(3){border-left:0;padding-left:0}.proof__in > div{padding-top:18px;padding-bottom:18px}}
+@media(max-width:480px){.proof__in{grid-template-columns:minmax(0,1fr)}.proof__in > div{border-left:0;padding-left:0;border-top:1px solid var(--hair-2)}.proof__in > div:first-child{border-top:0}}
+
+/* НАПРАВЛЕНИЯ */
+.dirs__in{display:grid;grid-template-columns:5fr 7fr;gap:clamp(32px,5vw,88px);align-items:start}
+/* Левая колонка липкая. Список направлений раскрывается и становится в
+   полтора-два раза длиннее заголовка, а заголовок с кнопкой прейскуранта
+   оставался наверху — под ними открывалась дыра в несколько сотен пикселей.
+   Теперь колонка едет вместе с чтением: дыры нет, а прейскурант всё время
+   под рукой. */
+@media(min-width:901px){
+  .dirs__in .sec__head{position:sticky;top:calc(var(--hdr) + 32px)}
+}
+.dirs__in .sec__head{margin-bottom:0}
+.dirs{border-top:1px solid var(--ink)}
+.dir summary span{display:flex;flex-direction:column;gap:4px}
+.dir summary>span>b{font-family:var(--serif);font-weight:400;font-size:var(--fs-5);line-height:1.2}
+.dir summary small{font-size:var(--fs-2);color:var(--mute);font-weight:400;line-height:1.45}
+/* Выделение внутри описания направления — только насыщенностью.
+   Пока выделенное было ещё и темнее, каждая строка распадалась на две
+   по цвету где-то посередине фразы, и блок читался пятнами. */
+.dir summary small b{font-family:inherit;font-size:inherit;font-weight:500;color:inherit}
+.dir__a ul{list-style:none;margin:0 0 14px;padding:0;font-size:15px;max-width:none}
+.dir__a li{padding:7px 0;border-top:1px solid var(--hair-2)}
+.dir__a li:first-child{border-top:0}
+@media(max-width:900px){.dirs__in{grid-template-columns:minmax(0,1fr)}}
+
+/* подсказки к играм */
+.hint{display:block;position:relative;padding-left:18px;font-size:var(--fs-2);color:var(--ink-2);max-width:48ch;line-height:1.5;margin:0;transition:opacity var(--t-std)}
+.hint__i{position:absolute;left:0;top:7px;width:8px;height:8px;border-radius:50%;background:var(--teal);animation:pulse 1.8s infinite}
+.hint--c{margin:20px auto 0;text-align:center;padding-left:0}
+.hint--c .hint__i{position:static;display:inline-block;margin:0 8px 1px 0}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,126,134,.35)}60%{box-shadow:0 0 0 8px rgba(47,126,134,0)}}
+.wiggle{animation:wiggle 2.6s ease-in-out infinite}
+@keyframes wiggle{0%,100%{rotate:0deg}20%{rotate:-2.2deg}40%{rotate:1.6deg}60%{rotate:-1deg}80%{rotate:.6deg}}
+.pulse{animation:slabpulse 2.8s ease-in-out infinite}
+@keyframes slabpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+.is-touched,.is-touched .wiggle,.is-touched.wiggle{animation:none}
+
+/* ПЕРВЫЙ ВИЗИТ */
+.offer{overflow:visible}
+/* Площадка слева, текст справа. Дело в кромке по центру: у колонки с текстом
+   левый край ровный, а правый рваный. Когда текст стоял слева, рваный край
+   смотрел в середину разворота и резал его зубцами; теперь в середину смотрит
+   ровный, а рваный уходит к полю страницы, где его никто не читает как
+   границу. */
+.offer__in{display:grid;grid-template-columns:6fr 6fr;gap:clamp(32px,4vw,64px);align-items:center}
+@media(min-width:901px){.offer__stage{order:-1}}
+.offer__txt h2{margin-bottom:20px}
+.incl{list-style:none;margin:18px 0 22px;padding:0;border-top:1px solid var(--ink)}
+.incl li{padding:10px 0;border-bottom:1px solid var(--hair-2);font-size:15px}
+.offer__skip{border:0;background:none;padding:4px 0 2px;font:inherit;cursor:pointer;font-size:var(--fs-2)}
+.offer.is-open .hint{opacity:0;pointer-events:none}
+.offer__stage{position:relative;padding:32px 0 72px;overflow:visible}
+/* Карточка занимала всю правую колонку — 680 px, — а текста в ней на 400.
+   Двести пикселей пустоты справа читались как недовёрстанное место, потому
+   что слева этой пустоты не было. Ограничиваем ширину по содержимому и
+   ставим по центру колонки: воздух остаётся, но с обеих сторон поровну. */
+.slab{position:relative;min-height:340px;display:flex;align-items:stretch;
+  max-width:560px;margin-inline:auto;width:100%}
+.slab__offer{position:relative;z-index:0;padding:clamp(28px,3vw,44px);border:1px solid var(--ink);display:flex;flex-direction:column;justify-content:center;gap:10px;width:100%;background:#fff}
+.slab__price{margin:0;display:flex;align-items:baseline;gap:18px;font-family:var(--serif)}
+.slab__price b{font-weight:400;font-size:clamp(40px,4.2vw,58px);line-height:1;font-variant-numeric:tabular-nums}
+/* Прежняя цена — мелко и жирно, рядом с новой. Крупным воздушным шрифтом
+   набрана та сумма, которую человек заплатит; зачёркнутая нужна лишь для
+   сравнения и не должна спорить с ней по весу. */
+.slab__price s{font-family:var(--sans);font-size:var(--fs-2);font-weight:600;
+  color:var(--mute);text-decoration-thickness:1.5px;align-self:center}
+.slab__what{margin:4px 0 12px;color:var(--ink-2);max-width:40ch;line-height:1.5}
+.slab__offer .btn{align-self:flex-start}
+.slab__fine{margin:8px 0 0}
+.slab__stone{position:absolute;inset:0;z-index:2;width:100%;height:100%;cursor:crosshair;touch-action:none;filter:drop-shadow(0 14px 22px rgba(20,22,26,.16))}
+.offer.is-open .slab__stone{pointer-events:none}
+
+.offer__crumbs{position:absolute;left:-10%;top:0;width:120%;height:100%;z-index:3;pointer-events:none}
+@media(max-width:900px){.offer__crumbs{left:0;width:100%}}
+.obj{position:absolute;z-index:4;touch-action:none;user-select:none;-webkit-user-select:none;will-change:transform}
+.obj img{display:block;pointer-events:none;filter:drop-shadow(0 10px 14px rgba(20,22,26,.18))}
+.obj.is-drag img{filter:drop-shadow(0 26px 30px rgba(20,22,26,.22))}
+.obj--hp{left:32%;bottom:-2%;width:clamp(150px,15vw,200px);cursor:grab}
+.obj--hp.is-drag{cursor:grabbing}
+.obj--hp.is-drill img{animation:jitter .09s infinite}
+@keyframes jitter{0%{transform:translate(0,0)}25%{transform:translate(.8px,-.6px)}50%{transform:translate(-.7px,.5px)}75%{transform:translate(.5px,.7px)}100%{transform:translate(0,0)}}
+@media(max-width:900px){.offer__in{grid-template-columns:minmax(0,1fr)}.offer__stage{padding:12px 0 24px}.slab{min-height:280px}}
+
+/* ИГРА: ПЛОМБА */
+.fill__in{position:relative;max-width:860px;margin:0 auto}
+.fill__stage{position:relative;aspect-ratio:16/11;touch-action:pan-y;max-width:540px;margin:0 auto}
+.tooth{position:absolute;left:50%;top:50%;height:88%;aspect-ratio:620/762;translate:-50% -50%;touch-action:none}
+.tooth img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 26px rgba(20,22,26,.14))}
+.tooth__ok{opacity:0}
+.tooth__lay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.tooth__etch{mix-blend-mode:multiply;opacity:.68}
+.tooth__paint{opacity:1}
+.tooth__wet{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .8s ease;
+  background:radial-gradient(45% 30% at 38% 30%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%)}
+.tooth__wet.is-on{opacity:1}
+.tooth__shine{--sx:-60%;position:absolute;inset:0;pointer-events:none;opacity:0;overflow:hidden;z-index:2}
+.tooth__shine::before{content:"";position:absolute;top:-30%;left:var(--sx);width:38%;height:160%;rotate:16deg;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.9),rgba(255,255,255,0));filter:blur(3px)}
+.tooth .spark{position:absolute;pointer-events:none;translate:-50% -50%;fill:#fff;opacity:0;
+  filter:drop-shadow(0 0 5px rgba(255,255,255,.95)) drop-shadow(0 0 2px rgba(190,215,255,.9))}
+.fill.is-done .tooth__wet{opacity:1}
+.fill__bits{position:absolute;left:-10%;top:0;width:120%;height:100%;pointer-events:none;z-index:6}
+@media(max-width:900px){.fill__bits{left:0;width:100%}}
+.cureBar{position:absolute;left:50%;bottom:2%;width:min(240px,52%);height:3px;translate:-50% 0;background:var(--hair-2);opacity:0;transition:opacity .4s;z-index:5}
+.cureBar i{display:block;height:100%;width:0;background:var(--uv);transition:width .12s linear}
+.fill.is-arming .cureBar,.fill.is-curing .cureBar,.fill.is-polishing .cureBar{opacity:1}
+.fill.is-polishing .cureBar i{background:var(--teal)}
+.uvwash{position:absolute;left:50%;top:50%;width:70%;aspect-ratio:1;translate:-50% -50%;border-radius:50%;opacity:0;pointer-events:none;transition:opacity 1.1s ease;
+  /* Обычное смешивание, а не screen. На светлом фоне разница на глаз почти
+     нулевая (сверено снимками), а связка «размытие + режим смешивания»
+     заставляет браузер держать отдельный композитный слой — именно на ней
+     чаще всего и остаётся на экране прямоугольник от засветки. */
+  background:radial-gradient(circle,rgba(140,100,255,.34) 0%,rgba(140,100,255,.14) 45%,rgba(140,100,255,0) 72%);filter:blur(14px)}
+.fill.is-curing .uvwash{opacity:1;transition:opacity .5s ease}
+
+/* стойка с инструментами: стоят по порядку */
+.rack{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(8px,1.8vw,22px);max-width:540px;margin:clamp(4px,1.4vw,14px) auto 0;align-items:end;justify-items:center}
+.obj--tool{width:100%;max-width:88px}
+.obj--tool{position:relative;cursor:grab;touch-action:none;text-align:center;transition:opacity .35s ease,filter .35s ease}
+.obj--tool img{width:auto;max-width:100%;height:clamp(74px,9.5vw,112px);display:block;margin:0 auto;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(20,22,26,.14))}
+.obj--tool.is-off{cursor:not-allowed;opacity:.42;filter:grayscale(.65)}
+.obj--tool.is-drag{cursor:grabbing;z-index:8}
+.obj__n{position:absolute;left:50%;top:-6px;translate:-50% 0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  font-size:12px;font-weight:600;color:var(--mute);background:#fff;border:1px solid var(--hair-2);font-variant-numeric:tabular-nums}
+.obj--tool:not(.is-off) .obj__n{color:#fff;background:var(--teal);border-color:var(--teal)}
+.obj__c{display:block;margin-top:6px;font-size:var(--fs-1);color:var(--mute);letter-spacing:.02em}
+.obj--tool:not(.is-off) .obj__c{color:var(--ink-2)}
+.obj__glow{position:absolute;left:2%;bottom:0;width:120%;aspect-ratio:1;translate:-30% 30%;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .5s ease;
+  /* Как и у засветки зуба: без режима смешивания. Связка «размытие +
+     смешивание» заставляет браузер держать отдельный композитный слой, на
+     котором и залипает свечение. */
+  background:radial-gradient(circle,rgba(140,100,255,.5) 0%,rgba(140,100,255,.18) 45%,rgba(140,100,255,0) 70%);filter:blur(10px)}
+.obj--tool.is-lit .obj__glow{opacity:1;transition:opacity .25s ease}
+.fill__say{min-height:3em;max-width:56ch;margin:clamp(14px,2.4vw,24px) auto 0;text-align:center;font-size:var(--fs-2);line-height:1.55;color:var(--ink-2)}
+.fill.is-fail .fill__say{color:#8A3B3B}
+.fill__bot{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:10px}
+.fill__score{margin:0;font-size:var(--fs-1);letter-spacing:.04em;text-transform:uppercase;color:var(--mute);font-variant-numeric:tabular-nums}
+.fill__again{width:38px;height:38px;flex:none;display:grid;place-items:center;border:1px solid var(--hair);border-radius:50%;
+  background:transparent;color:var(--mute);cursor:pointer;padding:0;transition:color .25s,border-color .25s,rotate .5s var(--ease)}
+.fill__again:hover{color:var(--ink);border-color:var(--ink);rotate:-90deg}
+.fill__again svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:760px){
+  .fill__stage{aspect-ratio:4/3;max-width:420px}
+  .tooth{height:82%}
+  .rack{max-width:360px;gap:5px}
+  .obj--tool{max-width:62px}
+  .obj--tool img{height:54px}
+  .obj__c{font-size:10px}
+}
+
+/* ВРАЧ */
+.doc__in{display:grid;grid-template-columns:7fr 5fr;gap:clamp(28px,5vw,72px);align-items:start}
+.doc__head{display:flex;align-items:center;gap:22px;margin-bottom:22px}
+.doc__ava{width:clamp(84px,9vw,116px);height:auto;border-radius:50%;flex:none;background:var(--tint)}
+.doc__head .eyebrow{margin-bottom:8px}
+.doc__ph{margin:0;position:relative}
+.doc__ph--one img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 25%;background:var(--tint)}
+.doc__ph figcaption{margin-top:10px;font-size:var(--fs-2);color:var(--mute);line-height:1.5}
+.creds{margin:24px 0 0;border-top:1px solid var(--ink)}
+.creds div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--hair-2)}
+.creds dt{font-size:var(--fs-2);color:var(--mute)}.creds dd{margin:0;font-size:15px;line-height:1.5}
+@media(max-width:900px){.doc__in{grid-template-columns:minmax(0,1fr)}.doc__ph img{aspect-ratio:3/2;object-position:50% 20%}.creds div{grid-template-columns:minmax(0,1fr);gap:2px}}
+
+/* ОТЗЫВЫ */
+.revs__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 clamp(40px,6vw,88px);max-width:1000px;margin:0 auto;border-top:1px solid var(--ink)}
+.rev{margin:0;padding:24px 0;border-bottom:1px solid var(--hair-2)}
+.rev blockquote{margin:0 0 12px;font-family:var(--serif);font-size:var(--fs-4);line-height:1.55;color:var(--ink)}
+.rev figcaption{font-size:var(--fs-2);color:var(--mute)}
+.rev figcaption b{display:block;color:var(--ink);font-weight:500}
+@media(max-width:760px){.revs__grid{grid-template-columns:minmax(0,1fr)}}
+
+/* ИГРА: ЛОТОК И УЛЬТРАФИОЛЕТ */
+/* Сцена была 680 px посреди полосы во всю ширину экрана — набор инструментов
+   читался как горстка предметов, потерянная в пустом поле. Расширяем: всё
+   внутри расставлено в процентах, поэтому игра от этого не меняется. */
+.tray__stage{position:relative;max-width:min(880px,100%);margin:0 auto;aspect-ratio:800/330}
+/* рисунок лотка не должен перехватывать нажатия: его овалы лежали поверх
+   инструментов и часть из них было невозможно подхватить */
+.tray__svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.tray__rect{fill:var(--tint);stroke:var(--hair);stroke-width:1.5;transition:fill .8s}
+.tray__rim{fill:none;stroke:var(--hair-2);stroke-width:1}
+/* Трубка ультрафиолетовой лампы. Пока свет не включён, это просто линия,
+   пересекающая инструменты, и читается она как царапина на картинке.
+   Делаем её вполсилы; когда лампа загорится, она и так станет заметной. */
+.tray__tube{stroke:#DCDEE2;transition:stroke .8s}
+.tray__wire{stroke:#DCDEE2}
+.tray__halo,.tray__wash{opacity:0;transition:opacity 1.1s ease}
+.tray__stage.is-uv .tray__tube{stroke:#C7B2FF}
+.tray__stage.is-uv .tray__halo,.tray__stage.is-uv .tray__wash{opacity:1;transition:opacity .6s ease}
+.tray__stage.is-uv .tray__rect{fill:#F3EFFF}
+.tool{position:absolute;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transform-origin:50% 60%;will-change:transform}
+/* область захвата чуть шире самого инструмента — тонкий бор иначе не поймать */
+/* Цель нажатия — не тонкая полоска металла, а круг в середине инструмента,
+   не меньше 56 px. У бора видимая ширина на телефоне — пять пикселей:
+   попасть по нему пальцем без этого круга невозможно. */
+.tool::after{content:"";position:absolute;left:50%;top:52%;translate:-50% -50%;
+  width:max(calc(100% + 28px),56px);height:max(calc(100% + 28px),56px);border-radius:50%}
+/* На телефоне круг ещё и видно: иначе неясно, куда целиться. */
+@media(hover:none){
+  .tool{touch-action:manipulation}
+  .tool::before{content:"";position:absolute;left:50%;top:52%;translate:-50% -50%;
+    width:54px;height:54px;border-radius:50%;border:1px solid var(--hair-2);
+    background:rgba(27,61,150,.05);transition:background var(--t-fast),border-color var(--t-fast)}
+  .tool[data-slot]::before{opacity:0}
+  .tray__stage.is-uv .tool::before,.tray__stage.is-clean .tool::before{opacity:0}
+}
+.tool img{filter:drop-shadow(0 6px 8px rgba(20,22,26,.16));transition:filter .6s}
+.tool.is-drag{cursor:grabbing;z-index:5}
+/* инструмент взят в руку тапом: приподнят и подсвечен */
+.tool.is-pick{z-index:6}
+.tool.is-pick img{filter:drop-shadow(0 16px 18px rgba(20,22,26,.24)) drop-shadow(0 0 10px rgba(122,77,255,.45))}
+.tool.is-drag img{filter:drop-shadow(0 18px 20px rgba(20,22,26,.2))}
+.tray__stage.is-uv .tool img{filter:drop-shadow(0 0 14px rgba(150,110,255,.75)) drop-shadow(0 4px 6px rgba(20,22,26,.12)) saturate(1.08)}
+.tray__stage.is-clean .tool img{filter:drop-shadow(0 4px 8px rgba(20,22,26,.14)) brightness(1.05)}
+.spark{position:absolute;pointer-events:none;translate:-50% -50%;fill:#fff;opacity:0;filter:drop-shadow(0 0 3px rgba(255,255,255,.9))}
+.tool--mirror{left:1%;bottom:6%;width:12%}
+.tool--probe{left:16%;top:8%;width:17%}
+.tool--tweezers{right:2%;bottom:4%;width:19%}
+.tool--forceps{right:10%;top:4%;width:16%}
+/* Бор стоял на 46 % — вплотную к проводу лампы, который идёт по середине
+   сцены. Тонкая железка и тонкая линия сливались в одно, и это читалось как
+   недогрузившаяся картинка. Отодвигаем в сторону и делаем заметно выше:
+   у бора соотношение сторон один к двенадцати, и на прежней высоте его
+   ширина на телефоне была пять пикселей. */
+.tool--bur{left:34%;top:2%;width:auto;height:44%}
+.tool--bur img{height:100%;width:auto}
+.tray__done{position:absolute;left:0;right:0;top:100%;padding-top:10px;text-align:center;margin:0;font-size:var(--fs-2);font-weight:500;color:var(--uv);opacity:0;transition:opacity .5s;pointer-events:none}
+.tray__cta{margin:clamp(36px,4vw,56px) auto 0;max-width:520px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.tray__cta-t{margin:0;font-family:var(--serif);font-size:var(--fs-6);line-height:1.2}
+.tray__cta-p{margin:0;font-size:var(--fs-2);color:var(--mute);font-variant-numeric:tabular-nums}
+.tray__cta-p s{text-decoration-thickness:1px}
+.tray__cta-p b{color:var(--ink);font-weight:500;font-size:var(--fs-3);margin-left:4px}
+.tray__stage.is-uv .tray__done,.tray__stage.is-clean .tray__done{opacity:1}
+.tray__stage.is-clean .tray__done{color:var(--teal)}
+@media(max-width:700px){.tray__stage{aspect-ratio:800/470}.tool--mirror{width:15%}.tool--probe{width:19%}.tool--tweezers{width:23%}.tool--forceps{width:18%}.tool--bur{height:40%}}
+
+/* КАБИНЕТ */
+.equip--plain{padding-block:clamp(48px,6vw,84px)}
+/* колонок ровно столько, сколько карточек: сетка не оставляет пустого места */
+.equip__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:clamp(16px,2vw,28px)}
+.equip__grid figure{margin:0}
+.equip__grid img{aspect-ratio:4/5;object-fit:cover;width:100%}
+.equip__grid figcaption{margin-top:14px}
+.equip__grid b{display:block;font-weight:500;font-size:var(--fs-3)}
+.equip__grid span{display:block;font-size:var(--fs-2);color:var(--mute);margin-top:4px;line-height:1.5}
+@media(max-width:900px){.equip__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+
+/* ЭКСКУРСИЯ ПО КЛИНИКЕ */
+.tour__in{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,72px);align-items:center}
+.tour__ph{margin:0}
+.tour__ph img{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;background:var(--tint)}
+.tour__txt h2{margin-top:6px}
+.tour__txt .lead{margin-top:16px}
+.tour__txt .btn{margin-top:10px}
+.tour__txt .fine{margin-top:14px}
+@media(max-width:900px){.tour__in{grid-template-columns:minmax(0,1fr);gap:24px}}
+
+/* Адрес и мессенджеры в выпадающем меню: только на телефоне, где меню
+   раскрывается списком. На широком экране шапка остаётся строкой ссылок. */
+.nav__quick{display:none}
+.nav .nav__addr{display:block;white-space:normal;font-size:var(--fs-2);color:var(--mute);
+  line-height:1.5;text-decoration:none;border-bottom:1px solid var(--hair-2);
+  padding:0 0 12px;min-height:0}
+.nav__addr:hover{color:var(--ink)}
+.nav__chs{display:flex;flex-wrap:wrap;gap:8px;padding:12px 0 16px;
+  border-bottom:1px solid var(--ink);margin-bottom:4px}
+.nav__ch{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;
+  border:1px solid var(--hair);border-radius:2px;text-decoration:none;color:var(--ink);
+  font-size:var(--fs-2);font-weight:500;transition:border-color var(--t-fast),color var(--t-fast)}
+.nav__ch:hover{border-color:currentColor}
+.nav__ch--tel{color:var(--ink)}
+.nav__ch--wa{color:#0B7B43}
+.nav__ch--max{color:#5B2FD6}
+.nav__ch--tg{color:#1A7FAE}
+
+/* ---- ЗАЯВКА ----
+   Один компонент в трёх местах: две перебивки по странице и всплывающее окно.
+   Поля крупные: попасть по ним пальцем должно быть проще, чем промахнуться. */
+.lfband{background:var(--tint);border-top:1px solid var(--hair-2);border-bottom:1px solid var(--hair-2);
+  padding-block:clamp(48px,6vw,80px)}
+.lfband--alt{background:var(--bg);border-color:var(--hair-2)}
+.lfband__in{display:flex;justify-content:center}
+/* Форма и «что дальше» рядом. Колонка со ступенями уже формы и выровнена по
+   её середине: на широком экране это пара, на узком — форма, под ней ступени. */
+.lfband__in--pair{display:grid;grid-template-columns:minmax(0,560px) minmax(0,300px);
+  gap:clamp(32px,5vw,72px);align-items:center;justify-content:center}
+@media(max-width:880px){.lfband__in--pair{grid-template-columns:minmax(0,560px);justify-items:center}}
+.lfnext{display:flex;flex-direction:column;gap:14px}
+.lfnext__l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;counter-reset:n}
+.lfnext__l li{counter-increment:n;display:grid;grid-template-columns:28px minmax(0,1fr);gap:0 12px;
+  padding:14px 0;border-top:1px solid var(--hair-2)}
+.lfnext__l li:first-child{border-top:0;padding-top:0}
+.lfnext__l li::before{content:counter(n);grid-row:span 2;align-self:start;
+  font-size:var(--fs-1);color:var(--mute);line-height:1.6;font-variant-numeric:tabular-nums}
+.lfnext__l b{font-weight:500;font-size:var(--fs-3);line-height:1.35}
+.lfnext__l span{color:var(--ink-2);font-size:var(--fs-2);line-height:1.5;margin-top:2px}
+/* Узкая перебивка вместо второй формы */
+.lfband--slim{padding-block:clamp(36px,4.5vw,60px)}
+.lfband__in--slim{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.lfslim__t{font-family:var(--serif);font-weight:400;font-size:var(--fs-5);line-height:1.18;margin:0;text-wrap:balance}
+.lfslim__acts{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 24px;margin:14px 0 0}
+.lfslim__more{border:0;background:none;padding:0;font:inherit;cursor:pointer}
+.lf{width:100%;max-width:560px;display:flex;flex-direction:column;gap:18px}
+.lf__head{display:flex;flex-direction:column;gap:8px}
+.lf__t{font-family:var(--serif);font-weight:400;font-size:var(--fs-6);line-height:1.18;margin:0;text-wrap:balance}
+.lf__p{margin:0;color:var(--ink-2);font-size:var(--fs-3);line-height:1.55;max-width:52ch}
+.lf__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media(max-width:560px){.lf__grid{grid-template-columns:minmax(0,1fr)}}
+.lf__f{display:flex;flex-direction:column;gap:6px}
+.lf__l{font-size:var(--fs-1);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.lf__i{width:100%;min-height:52px;padding:12px 14px;background:var(--bg);color:var(--ink);
+  border:1px solid var(--hair);border-radius:2px;font:400 var(--fs-4)/1.3 var(--sans);
+  transition:border-color var(--t-fast)}
+.lf__i::placeholder{color:var(--mute);opacity:.7}
+/* Телефон: «+7» стоит неподвижной надписью внутри рамки поля и набран жирнее
+   самого номера. Это подсказка без слов — набирать с девятки; код страны
+   человеку трогать не нужно. */
+.lf__tel{position:relative;display:block}
+.lf__tel-code{position:absolute;left:14px;top:50%;translate:0 -50%;pointer-events:none;
+  font:600 var(--fs-4)/1.3 var(--sans);color:var(--ink);font-variant-numeric:tabular-nums}
+.lf__i--tel{padding-left:48px}
+.lf__tel:focus-within .lf__tel-code{color:var(--navy)}
+.lf__i:focus{outline:none;border-color:var(--navy);box-shadow:inset 0 0 0 1px var(--navy)}
+.lf__i:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.lf__i[aria-invalid="true"]{border-color:var(--err);box-shadow:inset 0 0 0 1px var(--err)}
+
+.lf__when{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.lf__when legend{padding:0}
+.lf__chips{display:flex;flex-wrap:wrap;gap:8px}
+.lf__chip{position:relative;display:inline-flex}
+.lf__chip input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.lf__chip span{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;
+  border:1px solid var(--hair);border-radius:2px;font-size:var(--fs-2);color:var(--ink-2);
+  transition:border-color var(--t-fast),color var(--t-fast),background var(--t-fast)}
+.lf__chip input:checked + span{border-color:var(--ink);color:var(--ink);background:var(--bg);font-weight:500}
+.lf__chip input:focus-visible + span{outline:2px solid var(--navy);outline-offset:2px}
+
+.lf__ok{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;
+  font-size:var(--fs-2);color:var(--mute);line-height:1.5;cursor:pointer}
+.lf__ok input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--navy);flex:none;cursor:pointer}
+.lf__ok a{color:var(--ink-2)}
+.lf__err{margin:0;font-size:var(--fs-2);color:var(--err);line-height:1.5}
+.lf__go{align-self:flex-start;min-height:52px}
+.lf__fine{margin:0}
+.lf.is-sent .lf__grid,.lf.is-sent .lf__when,.lf.is-sent .lf__ok,.lf.is-sent .lf__go,.lf.is-sent .lf__fine{display:none}
+.lf__done{margin:0;font-size:var(--fs-3);color:var(--teal);line-height:1.55}
+
+/* всплывающее окно */
+.lfpop{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;
+  padding:clamp(16px,4vw,40px);padding-bottom:max(env(safe-area-inset-bottom,0px),16px)}
+.lfpop[hidden]{display:none}
+.lfpop__back{position:absolute;inset:0;background:rgba(20,22,26,.45);backdrop-filter:blur(2px);
+  animation:lfin .45s ease both}
+.lfpop__box{position:relative;width:100%;max-width:520px;max-height:100%;overflow:auto;
+  background:var(--bg);border:1px solid var(--hair);border-radius:2px;
+  padding:clamp(24px,4vw,36px);box-shadow:0 24px 60px rgba(20,22,26,.18);
+  animation:lfup .52s cubic-bezier(.22,.61,.36,1) both}
+@keyframes lfin{from{opacity:0}to{opacity:1}}
+@keyframes lfup{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.lfpop__x{position:absolute;right:10px;top:10px;width:44px;height:44px;border:0;background:none;
+  cursor:pointer;border-radius:2px;color:var(--ink-2)}
+.lfpop__x::before,.lfpop__x::after{content:"";position:absolute;left:50%;top:50%;width:16px;height:1.4px;
+  background:currentColor;translate:-50% -50%}
+.lfpop__x::before{rotate:45deg}.lfpop__x::after{rotate:-45deg}
+.lfpop__x:hover{color:var(--ink)}
+.lfpop .lf{max-width:none}
+.lfpop .lf__t{font-size:var(--fs-5)}
+
+/* ---------------------------------------------------------------------------
+   ВСПЛЫВАЮЩЕЕ ОКНО: КОРОТКОЕ И БЕЗ НАЖИМА
+
+   Окно занимало 94 % высоты телефона, а кнопка отправки оказывалась за нижним
+   краем: человек видел не предложение, а перекрытый экран, и первое движение
+   руки — искать крестик. Сокращаем спрос до имени и телефона (время звонка
+   всё равно уточняют при звонке) и убираем лишний воздух внутри.
+--------------------------------------------------------------------------- */
+.lf--compact .lf__when{display:none}
+.lf--compact .lf__p{margin-top:8px;font-size:var(--fs-3)}
+.lf--compact .lf__head{margin-bottom:18px}
+.lfpop .lf__t{line-height:1.2}
+.lfpop .lf__fine{margin-top:12px}
+
+@media(max-width:620px){
+  /* На телефоне окно приходит снизу — оттуда, где лежит большой палец, и
+     никогда не закрывает экран целиком: высота по содержимому, не больше
+     четырёх пятых экрана. Это лист, который можно смахнуть, а не заслон. */
+  .lfpop{align-items:flex-end;padding:0}
+  .lfpop__box{max-width:none;max-height:86svh;border-radius:14px 14px 0 0;border-bottom:0;
+    padding:22px 18px calc(18px + env(safe-area-inset-bottom,0px));
+    animation-name:lfsheet;animation-duration:.42s}
+  /* полоска-ручка: подсказывает, что лист можно закрыть, и отделяет его от страницы */
+  .lfpop__box::before{content:"";position:absolute;left:50%;top:8px;translate:-50% 0;
+    width:38px;height:4px;border-radius:2px;background:var(--hair)}
+  .lfpop__box > .lf{margin-top:8px}
+  .lfpop .lf__t{font-size:var(--fs-5)}
+  .lfpop__x{right:4px;top:6px}
+}
+/* Лист выезжает снизу и тормозит без отскока: кривая без «перелёта» за
+   конечную точку — резкое появление на телефоне читается как ошибка. */
+@keyframes lfsheet{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:none}}
+
+/* В статичном режиме и без скрипта всплывающего окна нет: отправлять заявку
+   нечем, а окно, которое нельзя закрыть скриптом, — ловушка. */
+.still .lfpop{display:none!important}
+html.vi .lfpop{display:none!important}
+html.vi .lf__i,html.vi .lf__chip span{border-color:var(--ink)}
+html.vi .lfband,html.vi .faqt{background:var(--bg);border-color:var(--ink)}
+/* В режиме для слабовидящих снимок не нужен — он декоративный, имя врача
+   есть в заголовке раздела и в «Враче». Колонка убирается целиком, вопросы
+   занимают всю ширину. */
+html.vi .faqt__who{display:none}
+html.vi .faqt__in{grid-template-columns:minmax(0,1fr);justify-content:stretch}
+
+/* ВОПРОСЫ */
+/* ---- разворот «интервью» ----
+   Узкая колонка с тем, кто отвечает, и колонка вопросов читаемой ширины —
+   как разворот в журнале. Весь блок на сером поле: халат белый, и на белой
+   странице вырезанная фигура растворялась. Подложки под снимком нет, вместо
+   неё растушёванная тень у ног — она даёт опору, не рисуя прямоугольника. */
+.faqt{background:var(--band);border-top:1px solid var(--hair-2);border-bottom:1px solid var(--hair-2)}
+/* Колонки выровнены по верху. Раньше по низу — и при раскрытии вопроса
+   правая колонка росла, а портрет уезжал вместе с ней. */
+.faqt__in{display:grid;grid-template-columns:minmax(0,200px) minmax(0,640px);
+  gap:clamp(28px,4vw,64px);align-items:start;justify-content:center}
+.faqt .sec__head{margin-bottom:clamp(24px,3vw,34px)}
+.faqt__who{margin:0}
+.faqt__ph-w{position:relative;display:block}
+/* Тень — мягкое пятно под ногами, без краёв и без заливки, нарисованное за
+   фигурой: поверх неё оно читалось бы как дымка на обуви. */
+.faqt__ph-w::before{content:"";position:absolute;left:50%;bottom:-4px;
+  width:92%;height:38px;translate:-50% 0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side ellipse,rgba(23,30,42,.26) 0%,rgba(23,30,42,.11) 46%,rgba(23,30,42,0) 100%)}
+.faqt__ph{width:100%;height:auto;display:block;position:relative}
+/* Кнопка стояла вплотную к тексту — отбивка задана явно, а не остатком
+   от соседнего правила. */
+.faqt__all{margin:clamp(24px,3vw,34px) 0 0}
+@media(max-width:900px){
+  /* На узком экране сначала вопросы, портрет под ними: сперва то, за чем
+     пришли, потом тот, кто отвечает. Снимок небольшой и по центру — в полную
+     ширину колонки он занял бы весь экран. */
+  .faqt__in{grid-template-columns:minmax(0,1fr);gap:30px;justify-content:stretch}
+  .faqt__talk{order:1}
+  .faqt__who{order:2;width:170px;margin-inline:auto}
+  .faqt__ph-w::before{height:28px;bottom:-3px}
+}
+/* Вопрос и ответ с тире — так набирают интервью в печати. Разметка не
+   меняется: тире рисует стиль, в тексте и в поиске его нет. */
+.qas--talk .qa summary > span::before,
+.qas--talk .qa__a > p:first-child::before{content:"— "}
+.qas{border-top:1px solid var(--ink)}
+.qa{border-bottom:1px solid var(--hair-2)}
+.qa summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:18px 0;font-size:var(--fs-4);font-weight:500;line-height:1.35;min-height:48px}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary:hover{color:var(--navy)}
+.qa summary i{flex:none;width:12px;height:12px;transition:transform var(--t-std);
+  background:linear-gradient(var(--ink),var(--ink)) center/12px 1px no-repeat,linear-gradient(var(--ink),var(--ink)) center/1px 12px no-repeat}
+.qa[open] summary i{transform:rotate(45deg)}
+.qa__a{padding:0 0 20px;color:var(--ink-2);max-width:64ch;font-size:15px;line-height:1.6}
+.qa__a p:last-child{margin-bottom:0}
+@media(max-width:900px){.faqt__in{grid-template-columns:minmax(0,1fr)}}
+
+/* КОНТАКТЫ */
+/* Карта идёт под текстом, а не рядом: адрес, телефон и часы читают
+   сверху вниз, и карта оказывается там, где она нужна — в конце. */
+.contact__in{display:block}
+/* Реквизиты и фото входа — рядом, а не друг под другом: раньше слева стояла
+   узкая колонка, а рядом оставалось пустое поле во весь экран. Фото не даём
+   расти шире 300 px — это опознавательный кадр, а не иллюстрация во всю
+   страницу. */
+/* Фотография слева, сведения справа — как в блоке первого визита. Причина та
+   же: у колонки с текстом ровный левый край и рваный правый, и рваный не
+   должен смотреть в середину разворота. */
+.contact__top{display:grid;grid-template-columns:300px minmax(0,1fr);
+  gap:clamp(28px,5vw,72px);align-items:start}
+.contact__info{max-width:70ch}
+@media(min-width:861px){.contact__photo{order:-1}}
+/* На узком экране порядок прежний: сначала адрес и телефон, фотография после.
+   Человеку с телефона нужен не вид подъезда, а номер, по которому звонить. */
+@media(max-width:860px){.contact__top{grid-template-columns:minmax(0,1fr)}}
+/* ---------------------------------------------------------------------------
+   МЕСТО ПОД КАРТУ
+
+   Карта подключается по нажатию: до него ни один запрос к Яндексу не уходит,
+   то есть IP посетителя никуда не передаётся, — и никакой блокировщик не
+   оставит на её месте пустой прямоугольник.
+
+   Но само ожидание не должно перестраивать страницу. В первом варианте на
+   месте карты лежала фотография входа, а по нажатию она уезжала наверх и
+   превращалась в миниатюру рядом с реквизитами: человек нажимал на карту, а
+   менялась вся секция. Теперь фотография всегда стоит на своём месте, а здесь
+   спокойная плашка с адресом и кнопкой. Высота у плашки и у рамки одна и та
+   же, поэтому при открытии ничего не подпрыгивает — карта просто встаёт.
+--------------------------------------------------------------------------- */
+/* Высота задана числом, а не пропорцией: на широком мониторе 16 к 9 давали
+   семьсот пикселей, и до нажатия это была почти пустая плашка в целый экран.
+   Полоса в четыреста с небольшим читается как карта и не съедает страницу. */
+.map{position:relative;margin-top:clamp(28px,4vw,48px);
+  height:clamp(280px,40svh,440px);
+  background:var(--tint);border:1px solid var(--hair-2);overflow:hidden}
+.map__frame{position:absolute;inset:0;width:100%;height:100%;border:0;filter:grayscale(.15)}
+
+.map__ask{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+/* ---- схема проезда ----
+   Улица — полоса с осевой пунктирной линией, дома висят на ней с одной
+   стороны. Клиника выделена цветом и стоит первой: читают слева направо, и
+   первым должно быть то, что ищут. */
+.plan{width:100%;margin:0 auto;text-align:left}
+.plan__street,.plan__row{max-width:720px;margin-inline:auto}
+.plan__street{margin-top:0;margin-bottom:7px;font-size:var(--fs-1);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+/* Улица идёт через весь кадр, а дома висят на ней только посередине: так
+   видно, что это кусок длинной улицы, а не замкнутая картинка. */
+.plan__road{height:28px;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  background-image:repeating-linear-gradient(to right,var(--mute) 0 18px,transparent 18px 38px);
+  background-size:100% 1px;background-position:center;background-repeat:no-repeat;opacity:.9}
+.plan__row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start;gap:0}
+.plan__sp{padding:16px 18px;border:1px solid var(--hair-2);border-top:0;background:var(--bg)}
+/* Клиника: цветная кромка там, где дом выходит на улицу, — это и есть метка. */
+.plan__sp:first-child{border-top:3px solid var(--navy);border-color:var(--navy) var(--hair-2) var(--hair-2)}
+.plan__sp--nb{opacity:.82}
+.plan__n{margin:0;font-size:var(--fs-1);letter-spacing:.06em;color:var(--mute)}
+.plan__name{margin:2px 0 0;font-size:var(--fs-3);font-weight:500;line-height:1.3}
+.plan__sp:first-child .plan__name{color:var(--navy)}
+.plan__fine{margin:6px 0 0;font-size:var(--fs-2);color:var(--ink-2);line-height:1.45}
+/* Мерка между домами: пунктир по центру и цифра на фоне. */
+.plan__dist{position:relative;align-self:center;margin:0;padding:0 14px;min-width:96px;text-align:center}
+.plan__dist::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px dashed var(--hair)}
+.plan__dist span{position:relative;display:inline-block;padding:0 8px;background:var(--tint);
+  font-size:var(--fs-2);color:var(--mute);font-variant-numeric:tabular-nums}
+/* На узком экране схема встаёт столбиком и перестаёт влезать в фиксированную
+   высоту плашки — поэтому там плашка растёт под содержимое, а не обрезает его. */
+@media(max-width:640px){
+  .map{height:auto;min-height:clamp(280px,40svh,440px)}
+  .map__ask{position:relative;inset:auto;min-height:clamp(280px,40svh,440px);padding:20px 16px}
+  .plan__row{grid-template-columns:minmax(0,1fr);gap:0}
+  .plan__dist{min-width:0;padding:10px 0;text-align:left}
+  .plan__dist::before{display:none}
+  .plan__dist span{padding:0;background:none}
+  .plan__sp--nb{border-top:1px solid var(--hair-2)}
+}
+.map__ask-t{margin:0;font-size:var(--fs-4);color:var(--ink);max-width:34ch}
+.map__ask-f{margin:0;font-size:var(--fs-2);color:var(--mute);max-width:48ch}
+.map.is-live .map__ask{display:none}
+
+.map__go{min-height:52px;padding:14px 26px;border:1px solid var(--ink);border-radius:2px;
+  background:var(--bg);color:var(--ink);font:inherit;font-size:var(--fs-3);font-weight:500;
+  cursor:pointer;transition:background var(--t-fast),color var(--t-fast)}
+.map__go:hover{background:var(--ink);color:var(--bg)}
+.map__go:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+/* Без скрипта подключить карту нечем, и кнопка, которая ничего не делает,
+   хуже её отсутствия: остаются адрес и строка о том, где вход. */
+.no-js .map__go{display:none}
+
+@media(max-width:620px){
+  .map{height:clamp(260px,38svh,320px)}
+  .map__ask{gap:12px;padding:18px}
+  .map__ask-t{font-size:var(--fs-3)}
+  .map__go{font-size:var(--fs-2);padding:12px 20px;min-height:48px}
+}
+.map__note{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:rgba(255,255,255,.9);font-size:var(--fs-2);margin:0}
+.contact__in h2{margin-bottom:8px}
+.contact__photo{margin:0;max-width:300px}
+@media(max-width:860px){.contact__photo{margin-top:28px}}
+.contact__photo img{aspect-ratio:4/5;object-fit:cover;width:100%}
+.contact__photo figcaption{margin-top:10px;font-size:var(--fs-2);color:var(--mute)}
+@media(max-width:860px){.contact__in{grid-template-columns:minmax(0,1fr)}}
+
+/* ВНУТРЕННИЕ СТРАНИЦЫ */
+.page{padding:clamp(40px,6vw,72px) 0 var(--sec)}
+.page__head{max-width:820px;margin-bottom:clamp(28px,4vw,48px)}
+.page__head h1{margin-bottom:20px}
+.pnav{position:sticky;top:var(--hdr);z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-top:1px solid var(--hair-2);border-bottom:1px solid var(--hair-2);margin-bottom:clamp(28px,4vw,48px)}
+/* Группы услуг переносятся на вторую строку, а не уезжают вбок.
+   Горизонтальная лента прячет половину названий: на ноутбуке не видно,
+   что список продолжается, и мышью её листать неудобно. */
+.pnav__in{display:flex;flex-wrap:wrap;gap:0 22px;padding-block:4px}
+.pnav__in::-webkit-scrollbar{display:none}
+.pnav a,.pnav--inline a{font-size:var(--fs-2);color:var(--ink-2);padding:10px 0;display:inline-block;border-bottom:1px solid transparent}
+.pnav a:hover,.pnav a.is-active{color:var(--ink);border-color:var(--ink)}
+.pnav--inline{position:static;background:none;backdrop-filter:none;border:0;display:flex;flex-wrap:wrap;gap:0 22px;margin:0}
+.pnav--inline a{padding:8px 0}
+.prices{max-width:900px}
+.pgrp{padding:8px 0 40px;scroll-margin-top:calc(var(--hdr) + 56px)}
+.pgrp h2{font-size:var(--fs-6);margin-bottom:14px}
+.pgrp table{width:100%;border-collapse:collapse;font-size:15px}
+.pgrp td{padding:11px 0;border-top:1px solid var(--hair-2);vertical-align:top}
+.pgrp td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-family:var(--serif);font-size:var(--fs-3);padding-left:24px}
+.pgrp td span{display:block;font-size:var(--fs-1);color:var(--mute);margin-top:2px}
+/* Короткий список частого над полным прейскурантом: те же суммы, но
+   человеческим языком. Полный список нужен по правилам оказания платных
+   услуг, а читать его пациенту незачем. */
+.pmain{max-width:900px;margin-bottom:clamp(28px,4vw,44px)}
+.pmain h2{font-size:var(--fs-6);margin-bottom:14px}
+.pmain table{width:100%;border-collapse:collapse;font-size:var(--fs-3)}
+.pmain td{padding:13px 0;border-top:1px solid var(--hair);vertical-align:top}
+.pmain tr:first-child td{border-top:2px solid var(--ink)}
+.pmain td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-family:var(--serif);font-size:var(--fs-4);padding-left:24px}
+.pmain td span{display:block;font-size:var(--fs-1);color:var(--mute);margin-top:2px}
+.pmain__note{margin-top:18px;font-size:var(--fs-2);color:var(--mute);max-width:62ch}
+.pgrp__note{margin:-4px 0 14px;font-size:var(--fs-2);color:var(--mute);max-width:70ch}
+/* ---- версия для слабовидящих ----
+   Требование приказа Минздрава № 118н, ориентир — ГОСТ Р 52872-2019, уровень AA.
+   Сделана не отдельным сайтом, а режимом отображения: отдельная версия всегда
+   отстаёт по содержанию от основной, а здесь текст один и тот же.
+   Переключение перезагружает страницу — вступление и игры настраиваются
+   при загрузке, а в этом режиме их быть не должно. */
+.vi-btn{display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid var(--hair);
+  border-radius:2px;padding:7px 11px;color:var(--ink-2);font:500 13px/1 var(--sans);cursor:pointer;
+  transition:border-color var(--t-fast),color var(--t-fast)}
+.vi-btn:hover{border-color:var(--navy);color:var(--navy)}
+.vi-btn__t{white-space:nowrap}
+/* Подпись у кнопки сворачивается заметно раньше. Раньше порог стоял на
+   1080 px, и на обычном ноутбуке — 1280, 1440, 1600 — шапка не помещалась:
+   кнопка «Для слабовидящих» уезжала за правый край экрана и была попросту
+   недоступна. Для кнопки, которая существует ради доступности, это худшая
+   из возможных поломок. Значок остаётся, подпись читает программа чтения
+   с экрана, место экономится полторы сотни пикселей. */
+@media(max-width:1800px){.vi-btn__t{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .vi-btn{padding:0;width:40px;height:40px;justify-content:center}}
+
+.vip{background:var(--tint);border-bottom:1px solid var(--hair)}
+.vip__in{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px;padding-block:14px}
+.vip__g{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.vip__l{font-size:var(--fs-1);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.vip__b{min-height:44px;min-width:44px;padding:8px 14px;background:var(--bg);color:var(--ink);
+  border:1px solid var(--hair);border-radius:2px;font:500 15px/1.2 var(--sans);cursor:pointer}
+.vip__b:hover{border-color:var(--ink)}
+.vip__b[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.vip__b--a1{font-size:15px}.vip__b--a2{font-size:19px}.vip__b--a3{font-size:24px}
+.vip__off{margin-left:auto;min-height:44px;padding:8px 16px;background:none;color:var(--ink);
+  border:1px solid var(--ink);border-radius:2px;font:500 15px/1.2 var(--sans);cursor:pointer}
+.vip__off:hover{background:var(--ink);color:var(--bg)}
+
+html.vi{--vi-k:1}
+html.vi.vi-2{--vi-k:1.28}
+html.vi.vi-3{--vi-k:1.6}
+html.vi{
+  --fs-1:calc(15px*var(--vi-k)); --fs-2:calc(17px*var(--vi-k)); --fs-3:calc(19px*var(--vi-k));
+  --fs-4:calc(21px*var(--vi-k)); --fs-5:calc(24px*var(--vi-k)); --fs-6:calc(28px*var(--vi-k));
+  --fs-7:calc(32px*var(--vi-k)); --fs-8:calc(36px*var(--vi-k));
+  --sec:clamp(40px,6vw,72px);
+  --bg:#FFFFFF; --ink:#000000; --ink-2:#121212; --mute:#2B2B2B;
+  --hair:rgba(0,0,0,.45); --hair-2:rgba(0,0,0,.22); --tint:#F1F1F1; --band:#F1F1F1;
+  --navy:#00308F; --navy-d:#001F5C; --teal:#0A5057; --uv:#48108F; --err:#8E0000;
+}
+html.vi.vi-dark{
+  --bg:#000000; --ink:#FFFFFF; --ink-2:#F2F2F2; --mute:#D9D9D9;
+  --hair:rgba(255,255,255,.5); --hair-2:rgba(255,255,255,.26); --tint:#141414; --band:#141414;
+  --navy:#8CBCFF; --navy-d:#B6D4FF; --teal:#6FD0D9; --uv:#CBA8FF; --err:#FF9E94;
+}
+html.vi.vi-sepia{
+  --bg:#F7F3D8; --ink:#33280B; --ink-2:#3D3010; --mute:#524217;
+  --hair:rgba(51,40,11,.45); --hair-2:rgba(51,40,11,.22); --tint:#EDE6BF; --band:#EDE6BF;
+  --navy:#123C86; --navy-d:#0C2A60; --teal:#0A4F47; --uv:#4E2490; --err:#8A1A00;
+}
+html.vi body{font-size:var(--fs-3);line-height:1.8;letter-spacing:.01em}
+html.vi p,html.vi li,html.vi dd,html.vi dt{line-height:1.8}
+html.vi h1,html.vi h2,html.vi h3{line-height:1.3}
+html.vi a{text-decoration:underline;text-underline-offset:3px}
+html.vi .nav a,html.vi .ftr__nav a,html.vi .vip__b,html.vi .vip__off,html.vi .btn{text-decoration:none}
+html.vi .btn,html.vi .nav a,html.vi .ftr__nav a{min-height:44px;display:inline-flex;align-items:center}
+html.vi .btn--fill{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+html.vi .intro{display:none!important}
+/* Игры — это мелкие цели, перетаскивание и реакция на движение мыши.
+   В режиме для слабовидящих они не помогают, а мешают: убираем целиком. */
+html.vi #stone,html.vi .offer__crumbs,html.vi #drill-pct,html.vi #hp,
+html.vi .hint,html.vi #fill-arena,html.vi #tray-stage,html.vi #promo,
+html.vi .slab__stone{display:none!important}
+/* Сами разделы остаются: в них есть текст, который больше нигде не повторяется.
+   Вместо площадки для игры показываем те же этапы обычным списком. */
+.vi-only{display:none}
+html.vi .vi-only{display:block}
+html.vi .tray__cta[hidden]{display:block}
+.steps{list-style:none;margin:0 auto;padding:0;max-width:64rem;counter-reset:st}
+.steps li{counter-increment:st;display:grid;grid-template-columns:auto minmax(0,1fr);
+  gap:4px 16px;padding:16px 0;border-top:1px solid var(--hair-2)}
+.steps li::before{content:counter(st);grid-row:span 2;font-family:var(--serif);
+  font-size:var(--fs-5);line-height:1;color:var(--mute);min-width:1.4em}
+.steps b{font-weight:500;font-size:var(--fs-4)}
+.steps span{font-size:var(--fs-2);color:var(--mute);line-height:1.6}
+.steps--plain{counter-reset:none}
+.steps--plain li::before{content:"—"}
+/* Крупный шрифт на узком экране: длинное слово раздувало колонку сетки,
+   и правый край текста уходил за экран. */
+html.vi h1,html.vi h2,html.vi h3,html.vi h4,html.vi p,html.vi li,html.vi dd,html.vi dt,
+html.vi td,html.vi th,html.vi b,html.vi span,html.vi a,html.vi figcaption,html.vi summary{
+  /* Перенос по слогам включаем только здесь. Без него длинное слово рубится
+     по месту переполнения: на 390 px при крупном кегле «стоматолог-терапевт»
+     оставлял на следующей строке одну букву «т». Со слогами браузер ставит
+     разрыв там, где положено, и рисует знак переноса. */
+  overflow-wrap:break-word;hyphens:auto}
+/* Два места, где break-word не спасал, замерено при кегле ×1.8 на 390 px.
+   1. Блок врача — гибкая строка: у элемента внутри min-width по умолчанию
+      равен минимальной ширине содержимого, и колонка с текстом не ужималась,
+      вылезая за правый край на 59 px.
+   2. Адрес надзорного органа — ссылка строчно-блочная: её ширину считают
+      по самому длинному слову, поэтому перенос внутри слова не срабатывал.
+      anywhere, в отличие от break-word, учитывается и при подсчёте ширины. */
+html.vi .doc__head{flex-wrap:wrap}
+html.vi .doc__head > *{min-width:0}
+html.vi .lnk,html.vi a[href^="http"]{overflow-wrap:anywhere}
+/* Панель настроек: подпись и кнопки на узком экране встают друг под друга,
+   иначе подпись оказывается в одной строке с кнопкой, а остальные переносятся. */
+@media(max-width:700px){
+  .vip__in{display:block}
+  .vip__g{flex-direction:column;align-items:stretch;gap:8px;width:100%;margin-bottom:18px}
+  .vip__b{width:100%;text-align:left}
+  .vip__off{margin-left:0;width:100%}
+}
+/* Прейскурант: при крупном шрифте цена не влезала рядом с названием
+   и обрезалась справа. Раскладываем строку в два уровня. */
+@media(max-width:620px){
+  html.vi :is(.pgrp,.pmain) table,html.vi :is(.pgrp,.pmain) tbody,
+  html.vi :is(.pgrp,.pmain) tr,html.vi :is(.pgrp,.pmain) td{display:block}
+  html.vi :is(.pgrp,.pmain) tr{border-top:1px solid var(--hair-2);padding:14px 0}
+  html.vi .pmain tr:first-child{border-top:2px solid var(--ink)}
+  html.vi :is(.pgrp,.pmain) td{border:0;padding:0}
+  html.vi :is(.pgrp,.pmain) td:last-child{text-align:left;padding-left:0;margin-top:8px;white-space:normal}
+}
+/* Согласие на cookie: вместо карточки поверх текста — полоса во всю ширину
+   внизу, а страница получает отступ на её высоту. */
+/* Шапка: при крупном шрифте горизонтальное меню не помещается — ссылки,
+   телефон и кнопка режима уезжали за правый край экрана. В этом режиме
+   меню всегда раскрывающееся, как на телефоне. */
+html.vi .nav{position:fixed;left:0;right:0;top:var(--hdr);flex-direction:column;gap:0;
+  background:var(--bg);border-bottom:1px solid var(--hair);padding:8px var(--gut) 20px;
+  opacity:0;visibility:hidden;margin-left:0;max-height:calc(100svh - var(--hdr));overflow:auto}
+html.vi body.nav-open .nav{opacity:1;visibility:visible}
+html.vi .nav a{padding:14px 0;border-bottom:1px solid var(--hair-2);font-size:var(--fs-3)}
+html.vi .nav a::after{display:none}
+html.vi .nav .nav__quick{display:block;padding-top:4px}
+html.vi .hdr__tel{width:44px;height:44px;justify-content:center;border:1px solid var(--hair);
+  border-radius:2px;padding:0;margin-left:auto}
+html.vi .hdr__tel span{display:none}
+html.vi .hdr__tel-i{display:block}
+html.vi .vi-btn__t{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+html.vi .burger{display:flex;margin-left:0}
+html.vi .brand__t i{display:none}
+html.vi .cookie{left:0;right:0;bottom:0;max-width:none;width:100%;border-radius:0;
+  border:0;border-top:2px solid var(--ink)}
+html.vi body{padding-bottom:var(--cookie-h,0px)}
+html.vi *,html.vi *::before,html.vi *::after{animation:none!important;transition:none!important}
+html.vi :focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+html.vi .tag{color:var(--ink);border-color:var(--ink)}
+/* Поверхности, у которых белый цвет вписан в стили числом: в схеме
+   «белым на чёрном» на них оставался белый фон с белым текстом. */
+html.vi .slab__offer,html.vi .nav,html.vi .cookie,html.vi .obj__n{background:var(--bg);color:var(--ink)}
+html.vi .skip,html.vi .btn:hover{background:var(--ink);color:var(--bg)}
+html.vi .obj--tool:not(.is-off) .obj__n{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+html.vi .notes,html.vi .equip__grid{grid-template-columns:minmax(0,1fr)}
+html.vi-noimg img:not(.vi-keep),html.vi-noimg svg:not(.vi-keep),
+html.vi-noimg video,html.vi-noimg iframe,html.vi-noimg .map__frame{display:none!important}
+html.vi-noimg .vi-btn svg,html.vi-noimg .hdr__tel-i{display:inline!important}
+
+/* ---- раздел «Документы» ---- */
+.docs{max-width:64rem}
+.docs h2{font-family:var(--serif);font-size:var(--fs-5);font-weight:400;margin:48px 0 0;padding-bottom:12px;border-bottom:1px solid var(--ink)}
+.docs h2:first-child{margin-top:8px}
+.docs__l{list-style:none;margin:0;padding:0}
+.docs__l li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 20px;align-items:baseline;
+  padding:18px 0;border-bottom:1px solid var(--hair-2)}
+.docs__t{font-size:var(--fs-4);color:var(--ink);text-decoration:none;font-weight:500;border-bottom:1px solid var(--hair);padding-bottom:1px}
+.docs__t:hover{color:var(--navy);border-bottom-color:var(--navy)}
+.docs__t--off{font-weight:500;color:var(--mute);border:0;padding:0}
+.docs__l p{grid-column:1/-1;margin:0;font-size:var(--fs-2);color:var(--ink-2);max-width:56ch}
+.docs__s{justify-self:end;font-size:var(--fs-1);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--mute);background:var(--tint);border:1px solid var(--hair-2);border-radius:2px;padding:4px 8px;white-space:nowrap}
+/* Документы врача. Раскрытие на теге details: миниатюра в строке,
+   по нажатию под ней разворачивается полный скан. Без скрипта — значит
+   работает и с клавиатуры, и при отключённом JavaScript. */
+.edu__note{margin:14px 0 20px;font-size:var(--fs-2);color:var(--mute);max-width:68ch}
+.edu{border-top:1px solid var(--hair)}
+.edu__i{border-bottom:1px solid var(--hair)}
+.edu__i summary{display:grid;grid-template-columns:88px minmax(0,1fr) 20px;gap:18px;align-items:center;
+  padding:14px 0;cursor:pointer;list-style:none}
+.edu__i summary::-webkit-details-marker{display:none}
+.edu__i summary:hover .edu__tx b{color:var(--navy)}
+.edu__i summary:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+.edu__th{width:88px;height:64px;object-fit:cover;object-position:center 30%;border:1px solid var(--hair-2);background:var(--tint)}
+.edu__tx b{display:block;font-weight:500;font-size:var(--fs-3);line-height:1.3}
+.edu__tx span{display:block;margin-top:3px;font-size:var(--fs-2);color:var(--mute);line-height:1.4}
+.edu__i i{position:relative;width:14px;height:14px;justify-self:end}
+.edu__i i::before,.edu__i i::after{content:"";position:absolute;background:var(--ink-2);transition:transform var(--t-fast) var(--ease)}
+.edu__i i::before{left:0;top:6px;width:14px;height:1.5px}
+.edu__i i::after{left:6px;top:0;width:1.5px;height:14px}
+.edu__i[open] i::after{transform:scaleY(0)}
+.edu__a{padding:0 0 22px}
+.edu__a img{display:block;width:100%;max-width:820px;height:auto;border:1px solid var(--hair-2)}
+.edu__a p{margin:12px 0 0;font-size:var(--fs-2);color:var(--ink-2);max-width:60ch}
+@media(max-width:560px){
+  .edu__i summary{grid-template-columns:64px minmax(0,1fr) 16px;gap:12px}
+  .edu__th{width:64px;height:48px}
+}
+.docs__note{margin:40px 0 0;padding:18px 20px;background:var(--tint);border-left:2px solid var(--hair);font-size:var(--fs-2);color:var(--ink-2)}
+/* Путь назад в раздел. Документ открывается из «Документов», и без этой
+   строки вернуться можно только на главную или кнопкой браузера. */
+.crumb{margin:0 0 14px;font-size:var(--fs-2)}
+.crumb a{color:var(--mute);text-decoration:none;border-bottom:1px solid transparent}
+.crumb a:hover{color:var(--ink);border-bottom-color:var(--hair)}
+.crumb--foot{margin:40px 0 0;padding-top:18px;border-top:1px solid var(--hair);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+.crumb--foot a{min-height:44px;display:inline-flex;align-items:center}
+/* Внешняя ссылка помечена стрелкой: она уводит с сайта и открывается
+   в новой вкладке, об этом лучше предупредить до нажатия. */
+.docs__t--ext::after{content:"↗";margin-left:6px;font-size:.85em;color:var(--mute);vertical-align:baseline}
+.docs__s--form{border-color:#256A71;color:#1F5B61}
+.docs__s--ask{border-color:var(--hair);color:var(--mute)}
+@media(max-width:640px){
+  .docs__l li{grid-template-columns:minmax(0,1fr)}
+  .docs__s{justify-self:start}
+}
+
+.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:24px;padding-top:32px;border-top:1px solid var(--ink);font-size:var(--fs-2);color:var(--ink-2)}
+.notes p{margin:0}.notes b{color:var(--ink);font-weight:500}
+@media(max-width:760px){.notes{grid-template-columns:minmax(0,1fr);gap:14px}}
+.faq{max-width:820px}
+.faqg{padding:8px 0 36px;scroll-margin-top:calc(var(--hdr) + 16px)}
+.faqg h2{font-size:var(--fs-6);margin-bottom:8px;padding-bottom:12px;border-bottom:1px solid var(--ink)}
+.faq__foot{max-width:820px;padding-top:24px}
+
+/* ПОДВАЛ */
+.ftr{border-top:1px solid var(--hair);padding:40px 0 32px;margin-top:var(--sec)}
+/* Если последняя секция страницы — полоса, её собственный нижний отступ уже
+   отделил её от подвала. Второй отступ сверху давал пустую белую полосу в
+   треть экрана между фотографией входа и реквизитами.
+   Подвал лежит не внутри main, а рядом с ним, поэтому смотрим через :has. */
+main:has(> section:last-child.sec--band) + .ftr{margin-top:0}
+.ftr__in{display:flex;flex-wrap:wrap;align-items:center;gap:20px 40px;padding-bottom:28px;border-bottom:1px solid var(--hair-2)}
+.ftr__nav{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:var(--fs-2);color:var(--ink-2)}
+.ftr__nav a{padding:6px 0}
+.ftr__c{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px 22px;font-size:var(--fs-2);color:var(--ink-2)}
+/* Юридический блок шёл одной узкой лентой у левого края, а справа
+   оставалось полстраницы пустоты. Текста там много и читают его редко —
+   значит, ему и место в две колонки: строка остаётся короткой, а подвал
+   перестаёт быть перекошенным. Последний абзац и ссылки идут во всю ширину,
+   чтобы не разрывать их между колонками. */
+.ftr__legal{padding-top:22px;font-size:var(--fs-1);line-height:1.55;color:var(--mute);
+  display:grid;gap:10px clamp(32px,5vw,72px)}
+@media(min-width:900px){.ftr__legal{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.ftr__legal p{margin:0 0 10px;max-width:none}
+.ftr__col > p:last-child{margin-bottom:0}
+.ftr__warn{color:var(--ink-2)}
+.page + .ftr{margin-top:0}
+
+/* статичная версия */
+.no-js .slab__stone,.no-js .hint,.no-js .intro,
+.still .slab__stone,.still .hint,.still .intro{display:none}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .rv{opacity:1;transform:none;transition:none}
+  .obj--hp.is-drill img{animation:none}
+  .wiggle,.pulse,.cure:not([disabled]),.hint__i,.intro__hint,.intro__aura{animation:none}
+}
+
+
+/* СОГЛАСИЕ НА COOKIE */
+.cookie{position:fixed;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));
+  z-index:130;max-width:460px;margin-inline:auto;background:#fff;border:1px solid var(--ink);padding:16px 18px 18px;
+  box-shadow:0 22px 50px rgba(20,22,26,.16);animation:cookieIn .5s ease both}
+@keyframes cookieIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.cookie__t{margin:0 0 6px;font-size:var(--fs-2)}
+.cookie__d{margin:0 0 14px;font-size:var(--fs-1);line-height:1.5;color:var(--ink-2)}
+.cookie__d a{color:var(--navy)}
+.cookie__b{display:flex;flex-wrap:wrap;gap:8px}
+.cookie__b .btn{padding:9px 14px;font-size:var(--fs-1)}
+.cookie__b .btn{flex:1 1 auto;justify-content:center;text-align:center}
+/* доля снятого камня — тихой цифрой в углу сцены */
+.drill__pct{position:absolute;right:2px;bottom:52px;font-size:11px;letter-spacing:.08em;color:var(--mute);opacity:.45;
+  font-variant-numeric:tabular-nums;pointer-events:none;transition:opacity .4s}
+.offer.is-open .drill__pct{opacity:0}
+/* Страницы с документами читаются сверху вниз, а не в три колонки: в сетке
+   из трёх колонок заголовок раздела оказывался ниже собственного текста —
+   замер вёрстки насчитал 33 % перевёрнутых пар на ноутбуке. Заодно строка
+   перестала быть в 20–30 знаков. */
+.doc__legal{grid-template-columns:minmax(0,1fr);gap:0;max-width:68ch}
+.doc__legal h2{font-size:var(--fs-3);margin:26px 0 8px;scroll-margin-top:calc(var(--hdr) + 16px)}
+.doc__legal p{margin-bottom:10px;scroll-margin-top:calc(var(--hdr) + 16px)}
+.doc__legal p:last-child{margin-bottom:0}
+.no-js .cookie{display:none}
+@media(max-width:520px){.cookie{max-width:none}.cookie__b{flex-direction:column}}
+
+/* Пока вступление не закончилось, остальную страницу браузер не размечает и не
+   растрирует: липкий кадр перестаёт делить процессор с полутора десятками
+   секций и тремя холстами. Как только сайт открыт — всё как обычно. */
+html.lite .sec:not(.lite-off){content-visibility:auto;contain-intrinsic-size:auto 900px}
+html.lite .ftr:not(.lite-off){content-visibility:auto;contain-intrinsic-size:auto 620px}
+/* Заглушка высоты была одна на все секции — 900 px. На деле они от 270 до
+   1260: пока человек прокручивал страницу первый раз, каждая секция при
+   разметке меняла высоту на сотни пикселей и утаскивала за собой всё, что
+   ниже. Замерено на быстрой прокрутке: суммарный сдвиг 0,74 — втрое выше
+   порога, за которым Google считает страницу «дёргающейся».
+   Теперь у каждой секции своя высота, снятая измерением на двух ширинах.
+   Ключевое слово auto оставлено: со второго показа браузер берёт настоящий
+   размер, а эти числа нужны ровно для первого прохода. */
+html.lite #napravleniya{contain-intrinsic-size:auto 911px}
+html.lite #pervyj-vizit{contain-intrinsic-size:auto 943px}
+html.lite #kabinet{contain-intrinsic-size:auto 626px}
+html.lite #ekskursiya{contain-intrinsic-size:auto 977px}
+html.lite #plomba{contain-intrinsic-size:auto 1259px}
+html.lite #vrach{contain-intrinsic-size:auto 883px}
+html.lite #zapis{contain-intrinsic-size:auto 716px}
+html.lite #otzyvy{contain-intrinsic-size:auto 902px}
+html.lite #sterilno{contain-intrinsic-size:auto 1024px}
+html.lite #voprosy{contain-intrinsic-size:auto 1051px}
+html.lite #svyaz{contain-intrinsic-size:auto 271px}
+html.lite #kontakty{contain-intrinsic-size:auto 1140px}
+html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 398px}
+@media(max-width:700px){
+  html.lite #napravleniya{contain-intrinsic-size:auto 1288px}
+  html.lite #pervyj-vizit{contain-intrinsic-size:auto 1464px}
+  html.lite #kabinet{contain-intrinsic-size:auto 924px}
+  html.lite #ekskursiya{contain-intrinsic-size:auto 1110px}
+  html.lite #plomba{contain-intrinsic-size:auto 1000px}
+  html.lite #vrach{contain-intrinsic-size:auto 1128px}
+  html.lite #zapis{contain-intrinsic-size:auto 1157px}
+  html.lite #otzyvy{contain-intrinsic-size:auto 1209px}
+  html.lite #sterilno{contain-intrinsic-size:auto 736px}
+  html.lite #voprosy{contain-intrinsic-size:auto 1605px}
+  html.lite #svyaz{contain-intrinsic-size:auto 287px}
+  html.lite #kontakty{contain-intrinsic-size:auto 1523px}
+  html.lite .ftr:not(.lite-off){contain-intrinsic-size:auto 949px}
+}
+
+/* ---- ВСТУПЛЕНИЕ НА СТОРОНЕ БРАУЗЕРА ----
+   Те же значения, что в скриптовой версии, но привязаны к прокрутке
+   средствами самого браузера: JavaScript на кадр не выполняется вовсе,
+   поэтому картинка не может отстать от пальца. Длину дорожки подставляет
+   скрипт один раз в переменную --intro-len. */
+@supports (animation-timeline: scroll()){
+  html.sda .intro__on,
+  html.sda .intro__hot,
+  html.sda .intro__stage,
+  html.sda .intro__glow,
+  html.sda .intro__bloom,
+  html.sda .intro__flash,
+  html.sda .intro__slogan,
+  html.sda .intro__hint,
+  html.sda .hero__txt,
+  html.sda .hero__ph,
+  html.sda #hdr,
+  html.sda .intro.is-tall .intro__inner{
+    animation-timeline:scroll(root block);
+    animation-range:0 var(--intro-len,2700px);
+    animation-fill-mode:both;
+    animation-timing-function:linear;
+    animation-duration:1s;
+  }
+  /* Смещение к центру задано отдельным свойством translate, кадры трогают
+     только transform — центровка от анимации не зависит.
+     Плавности повторяют скриптовый путь: cubic-bezier(.45,0,.55,1) — это
+     power1.inOut, cubic-bezier(.11,0,.5,0) — power1.in,
+     cubic-bezier(.32,0,.67,0) — power2.in. */
+  html.sda .intro__stage{animation-name:iZoom,iStageOut;transform-origin:50% 50%}
+  html.sda .intro__on{animation-name:iOn}
+  html.sda .intro__hot{animation-name:iHot}
+  html.sda .intro__glow{animation-name:iGlow}
+  html.sda .intro__bloom{animation-name:iBloomFade,iBloomScale}
+  html.sda .intro__flash{animation-name:iFlash}
+  html.sda .intro__slogan{animation-name:iSlogTop}
+  html.sda .intro__slogan--under{animation-name:iSlogBot}
+  html.sda .intro__hint{animation-name:iHint}
+  html.sda .intro.is-tall .intro__inner{animation-name:iVeil}
+  /* Первый экран не просто проявляется из белого — он поднимается ему
+     навстречу и приходит в своё положение ровно тогда, когда свет сходит.
+     Текст и фотография идут с разной амплитудой: так у кадра есть глубина,
+     а переход читается как одно продолжающееся движение, а не как склейка. */
+  /* Шапка проявляется той же кривой и в том же окне, что и завеса. Раньше
+     она переключалась скачком: если прокрутка останавливалась посреди
+     перехода, на экране оставалась резкая непрозрачная шапка над почти
+     белой страницей — и это читалось как поломка, а не как переход. */
+  html.sda #hdr{animation-name:iHdr}
+  html.sda .hero__txt{animation-name:iRise}
+  html.sda .hero__ph{animation-name:iRiseSoft}
+
+  /* Скорость нигде не обрывается. Раньше почти каждая дорожка разгонялась
+     до предела и в свою последнюю точку влетала на полном ходу, после чего
+     мгновенно замирала: разрыв по скорости глаз читает как угол. Теперь у
+     каждого движения три части — разгон, ровный ход и торможение, — и на
+     стыках скорости совпадают: кривые подобраны так, чтобы наклон в конце
+     одного отрезка равнялся наклону в начале следующего.
+     Наезд и засвет заканчиваются на 66 %, ровно там, где начинает сходить
+     завеса: белой паузы между ними не остаётся. */
+  @keyframes iOn{0%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}14%,100%{opacity:1}}
+  @keyframes iHot{0%,6%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}44%,100%{opacity:1}}
+  @keyframes iZoom{
+    0%{transform:scale(1);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    20%{transform:scale(1.353);animation-timing-function:linear}
+    56%{transform:scale(2.624);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
+    66%,100%{transform:scale(2.8)}
+  }
+  @keyframes iStageOut{0%,58%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.3,1)}66%,100%{opacity:0}}
+  @keyframes iGlow{0%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.35,1)}58%,100%{opacity:1}}
+  @keyframes iBloomFade{0%,10%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.35,1)}66%,100%{opacity:1}}
+  @keyframes iBloomScale{
+    0%,10%{transform:scale(.18);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    26%{transform:scale(.556);animation-timing-function:linear}
+    56%{transform:scale(1.965);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
+    66%,100%{transform:scale(2.2)}
+  }
+  @keyframes iFlash{0%,52%{opacity:0;animation-timing-function:cubic-bezier(.4,0,.3,1)}66%,100%{opacity:1}}
+  @keyframes iSlogTop{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.4,0,.25,1)}11%,100%{opacity:0;transform:translateY(-26px)}}
+  @keyframes iSlogBot{0%{opacity:1;transform:translateY(0);animation-timing-function:cubic-bezier(.4,0,.25,1)}11%,100%{opacity:0;transform:translateY(26px)}}
+  @keyframes iHint{0%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.3,1)}8%,100%{opacity:0}}
+  @keyframes iVeil{0%,66%{opacity:1;animation-timing-function:cubic-bezier(.4,0,.35,1)}90%,100%{opacity:0}}
+  @keyframes iHdr{
+    0%,66%{background-color:rgba(255,255,255,0);animation-timing-function:cubic-bezier(.4,0,.35,1)}
+    90%,100%{background-color:rgba(255,255,255,.92)}
+  }
+  /* На телефоне шапку к прокрутке не привязываем. Цвет подложки — свойство
+     отрисовочное: видеокарта его не интерполирует, и каждый кадр перехода
+     браузер заново закрашивает липкую полосу поверх едущего содержимого.
+     Именно это и выглядит наклейкой, отстающей на кадр.
+     Замена равноценна на глаз: скрипт снимает класс hdr--ghost в тот момент,
+     когда кадр уже залит белым, и подложка проявляется одним переходом на
+     450 мс. Под белым светом подмену всё равно не видно. */
+  @media(hover:none),(max-width:1260px){
+    html.sda #hdr{animation-name:none}
+  }
+  /* Подъём первого экрана начинается ещё под светом и идёт ровным ходом всю
+     видимую часть перехода, а тормозит только в самом конце. Так движение не
+     выдыхается к моменту, когда завеса сходит. */
+  @keyframes iRise{
+    0%,54%{transform:translateY(86px);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    66%{transform:translateY(69px);animation-timing-function:linear}
+    82%{transform:translateY(25px);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
+    100%{transform:translateY(0)}
+  }
+  @keyframes iRiseSoft{
+    0%,54%{transform:translateY(40px);animation-timing-function:cubic-bezier(.4,0,.6,.2)}
+    66%{transform:translateY(32px);animation-timing-function:linear}
+    82%{transform:translateY(12px);animation-timing-function:cubic-bezier(.3,.6,.45,1)}
+    100%{transform:translateY(0)}
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   ШАПКА НА СЕНСОРНЫХ ЭКРАНАХ
+
+   Во встроенном браузере Telegram шапка при прокрутке вела себя как наклейка:
+   содержимое едет, а панель догоняет его через кадр. Причина — размытие
+   подложки. backdrop-filter заставляет браузер каждый кадр заново взять
+   картинку под шапкой, размыть её и наложить; в обычном браузере это делает
+   видеокарта, а во встроенном webview такой слой часто отрисовывается
+   отдельно и с опозданием на кадр. Видно это именно на прокрутке — как
+   отклеившийся стикер.
+
+   На телефоне размытие и не нужно: подложка и так почти непрозрачная (92 %),
+   разницы на глаз никакой. Делаем её сплошной, размытие убираем — и шапке
+   больше нечего пересчитывать, она едет вместе со страницей.
+--------------------------------------------------------------------------- */
+@media(hover:none),(max-width:1260px){
+  .hdr{background:var(--bg);backdrop-filter:none}
+  .hdr--ghost{background:rgba(255,255,255,0)}
+  .hdr--ghost:hover,.hdr--ghost:focus-within{background:rgba(255,255,255,.86);backdrop-filter:none}
+}
+
+/* ---- КНОПКА ВЫЗОВА В УГЛУ ----
+   Прежняя круглая кнопка с облачком; вернулась 3 октября 2026, когда маскота
+   на главной спрятали. Мера важнее заметности: не загораживает текст, не
+   выезжает сама, не мигает бесконечно и не показывается, пока человек не
+   прочёл хотя бы экран. Пульсация — три волны, потом тишина. */
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right));
+  bottom:calc(max(16px,env(safe-area-inset-bottom)) + var(--cookie-h,0px));z-index:110;
+  display:inline-flex;align-items:center;gap:0;
+  height:56px;padding:0;border:0;border-radius:28px;cursor:pointer;
+  background:var(--navy);color:#fff;
+  box-shadow:0 10px 28px rgba(27,61,150,.28),0 2px 6px rgba(20,22,26,.14);
+  -webkit-tap-highlight-color:transparent;
+  opacity:0;visibility:hidden;transform:translateY(12px) scale(.9);
+  transition:opacity .45s var(--ease),transform .45s var(--ease),visibility 0s .45s,
+             gap .3s var(--ease),padding .3s var(--ease),background var(--t-fast),bottom .3s var(--ease)}
+.fab.is-on{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.fab__ph{position:relative;z-index:2;display:grid;place-items:center;
+  width:56px;height:56px;border-radius:50%;flex:none}
+.fab__ph svg{width:22px;height:22px}
+.fab__t{max-width:0;overflow:hidden;white-space:nowrap;font-size:15px;font-weight:500;
+  opacity:0;transition:max-width .3s var(--ease),opacity .25s var(--ease)}
+@media(hover:hover){
+  .fab:hover{background:var(--navy-d);padding-right:20px}
+  .fab:hover .fab__t{max-width:140px;opacity:1}
+}
+.fab:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.fab__ring{position:absolute;inset:0;border-radius:inherit;z-index:1;
+  border:2px solid var(--navy);opacity:0;pointer-events:none}
+.fab.is-on .fab__ring{animation:fabRing 3.4s ease-out 3}
+@keyframes fabRing{
+  0%{transform:scale(1);opacity:.5}
+  22%{transform:scale(1.45);opacity:0}
+  100%{transform:scale(1.45);opacity:0}
+}
+@media(max-width:620px){
+  .ftr__legal{padding-bottom:76px}
+  .fab{height:52px}
+  .fab__ph{width:52px;height:52px}
+}
+@media(prefers-reduced-motion:reduce){
+  .fab{transition:none}
+  .fab.is-on .fab__ring{animation:none}
+}
+/* Версия для слабовидящих: квадратная, контрастная, без волн; ведёт к форме
+   на странице, а не к всплывающему окну. */
+html.vi .fab{background:var(--ink);color:var(--bg);border:2px solid var(--ink);border-radius:2px;height:auto;
+  padding:10px 16px;box-shadow:none}
+html.vi .fab__ph{display:none}
+html.vi .fab__t{max-width:none;opacity:1;overflow:visible;font-size:1em}
+html.vi .fab__ring{display:none}
+.no-js .fab{display:none}
+
+/* ---------------------------------------------------------------------------
+   ПОМОЩНИК В УГЛУ
+
+   Решение записаться приходит не там, где стоит форма. Человек читает про
+   первый визит, про стерилизацию, смотрит цены — и в любой из этих моментов
+   может решиться; возвращаться за формой вверх или вниз он не станет.
+   Поэтому запись всегда под рукой, в углу.
+
+   Мера здесь важнее заметности. Помощник не загораживает текст, не выезжает
+   сам, не мигает бесконечно и не показывается, пока человек не прочёл хотя бы
+   экран. Волна расходится несколько раз и затихает: задача привлечь взгляд
+   один раз, а не тянуть за рукав.
+
+   Кадры персонажа — картинки в общем холсте 256×256. Контейнер всегда одного
+   размера, картинка вписывается целиком: при смене кадра ничего не прыгает,
+   даже когда в кадре персонаж подскочил и занимает холст иначе.
+--------------------------------------------------------------------------- */
+.msc{position:fixed;right:max(12px,env(safe-area-inset-right));
+  bottom:max(10px,env(safe-area-inset-bottom));z-index:110;
+  display:flex;flex-direction:column;align-items:flex-end;gap:0;
+  /* сдвиг от переноса живёт в переменных: сам блок остаётся привязан к углу,
+     а вернуть его на место — это обнулить две величины */
+  /* --msc-drop отдельной величиной: это короткое падение после того, как
+     помощника отпустили. Запомненное положение от него не меняется. */
+  transform:translate3d(var(--msc-x,0px),calc(var(--msc-y,0px) + var(--msc-drop,0px)),0);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .45s var(--ease),visibility 0s .45s}
+.msc.is-on{opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
+.msc.is-drag{transition:none;cursor:grabbing;user-select:none}
+/* Над площадками игр помощник уходит: по инструментам надо попадать пальцем,
+   а он их накрывал. Скрипт ставит класс, пока площадка на экране. */
+.msc.is-shy{opacity:0;visibility:hidden;pointer-events:none}
+
+.msc__btn{position:relative;display:block;width:104px;height:104px;padding:0;border:0;
+  background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  touch-action:none}
+.msc__img{display:block;width:100%;height:100%;object-fit:contain;
+  /* опора у земли: персонаж дышит и приземляется, не отрываясь от места */
+  transform-origin:50% 100%;pointer-events:none;
+  /* Тени тут нет намеренно. Мягкая тень уже нарисована в самих кадрах, а
+     CSS-фильтр на элементе, который дышит, пересчитывается каждый кадр:
+     при вшестеро замедленном процессоре из 200 кадров прокрутки 8 выходили
+     длиннее 32 мс. Без фильтра — ни одного. */
+  will-change:transform}
+.msc:not(.is-drag) .msc__img{animation:mscBreath 3.8s ease-in-out infinite}
+@keyframes mscBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.014)}}
+.msc__btn:focus-visible{outline:2px solid var(--navy);outline-offset:4px;border-radius:12px}
+
+/* Наклон при переносе: помощник заваливается в сторону движения, как если бы
+   его тянули за руку. Угол считает скрипт по скорости, здесь только способ
+   его применить и скорость возврата. */
+.msc.is-drag .msc__img{transform:rotate(var(--msc-tilt,0deg));transition:transform .12s linear}
+/* Искра, сердце или вопросительный знак — короткая вспышка над плечом.
+   Лежит в своём слое, персонажа не двигает. */
+.msc__fx{position:absolute;right:4%;top:2%;width:34%;height:auto;
+  opacity:0;pointer-events:none;transform-origin:50% 100%}
+.msc__fx.is-on{animation:mscFx 1.5s ease-out}
+@keyframes mscFx{
+  0%{opacity:0;transform:translateY(6px) scale(.7)}
+  22%{opacity:1;transform:translateY(-2px) scale(1)}
+  70%{opacity:1;transform:translateY(-6px) scale(1)}
+  100%{opacity:0;transform:translateY(-12px) scale(.96)}
+}
+.msc__lines{position:absolute;left:50%;top:34%;width:62%;height:auto;
+  translate:-50% -50%;opacity:0;pointer-events:none;z-index:-1;
+  transition:opacity .18s ease}
+.msc.is-drag .msc__lines{opacity:var(--msc-speed,0)}
+/* Полоски всегда отстают от движения: вправо тащат — они слева. */
+.msc.is-back .msc__lines{scale:-1 1}
+
+/* Волна: расходится из-под ног и гаснет. Три раза с перерывом — этого хватает,
+   чтобы глаз зацепился, и мало, чтобы надоесть. */
+.msc__ring{position:absolute;left:50%;bottom:6px;width:64px;height:20px;
+  margin-left:-32px;border-radius:50%;z-index:-1;
+  border:2px solid var(--navy);opacity:0;pointer-events:none}
+.msc.is-on .msc__ring{animation:mscRing 3.4s ease-out 3}
+@keyframes mscRing{
+  0%{transform:scale(.6);opacity:.45}
+  26%{transform:scale(1.5);opacity:0}
+  100%{transform:scale(1.5);opacity:0}
+}
+
+/* Облачко. Рисуем стилями, а не картинкой: в нём живой текст и кнопки, а
+   растянутая картинка под переменную высоту не подходит. */
+/* Ширина по содержимому, а не фиксированная: при max-width коробка держала
+   полную ширину, даже когда во второй строке стояло одно слово, — и половина
+   облачка оставалась пустой. max-content ужимает её ровно по фразе, а предел
+   не даёт расплыться на длинной. */
+/* Между облачком и головой должен быть воздух, иначе оно выглядит приклеенным
+   ко лбу. Расстояние держит не отступ, а длинный хвостик: он тянется к макушке
+   и связывает их, а само облачко стоит отдельно. В кадре 256x256 персонаж
+   начинается примерно с одной девятой сверху — эти пустые пиксели внутри
+   картинки хвостик и перекрывает. */
+.msc__bub{position:relative;width:max-content;max-width:min(272px,calc(100vw - 28px));
+  margin-bottom:4px;
+  background:var(--bg);color:var(--ink);border:1px solid var(--hair);
+  border-radius:11px;padding:8px 12px;
+  box-shadow:0 10px 26px rgba(20,22,26,.14),0 2px 5px rgba(20,22,26,.07);
+  transform-origin:100% 100%;animation:mscBubIn .28s var(--ease) both}
+@keyframes mscBubIn{from{opacity:0;transform:translateY(6px) scale(.96)}
+  to{opacity:1;transform:none}}
+/* Хвостик у облачка. Два треугольника: нижний — цвет рамки, верхний — фон. */
+.msc__bub::before,.msc__bub::after{content:"";position:absolute;top:100%;
+  right:26px;width:0;height:0;
+  border-left:6px solid transparent;border-right:6px solid transparent;
+  border-top:15px solid var(--hair)}
+.msc__bub::after{top:calc(100% - 1.5px);right:27px;
+  border-left-width:5px;border-right-width:5px;border-top:13px solid var(--bg)}
+.msc--left .msc__bub::before{right:auto;left:26px}
+.msc--left .msc__bub::after{right:auto;left:27px}
+.msc--left{align-items:flex-start}
+
+.msc__say{margin:0;padding-right:20px;font-size:14px;line-height:1.35;font-weight:500}
+/* Три точки вместо фразы, пока помощник «набирает». */
+.msc__dots{display:none;gap:4px;padding:4px 10px 4px 0}
+.msc__bub.is-dots .msc__dots{display:flex}
+.msc__bub.is-dots .msc__say{display:none}
+.msc__dots i{width:7px;height:7px;border-radius:50%;background:var(--mute);
+  animation:mscDot 1.1s ease-in-out infinite}
+.msc__dots i:nth-child(2){animation-delay:.18s}
+.msc__dots i:nth-child(3){animation-delay:.36s}
+@keyframes mscDot{0%,60%,100%{opacity:.35;transform:translateY(0)}
+  30%{opacity:1;transform:translateY(-3px)}}
+/* Крестик нужен только там, где подсказку показывает сам сайт — на телефоне.
+   При наведении мышью облачко уходит вместе с курсором, и крестик в нём
+   недостижим: пока ведёшь к нему мышь, облачка уже нет. */
+@media(hover:hover){.msc__x{display:none}.msc__say{padding-right:0}}
+/* На телефоне крестик остаётся, но мельче: облачко теперь по ширине фразы,
+   и прежний в 26 px занимал в нём заметную долю. */
+.msc__x{position:absolute;top:3px;right:3px;width:22px;height:22px;padding:0;
+  border:0;background:none;cursor:pointer;color:var(--mute);border-radius:5px}
+.msc__x::before,.msc__x::after{content:"";position:absolute;left:6px;top:10px;
+  width:9px;height:1.5px;background:currentColor}
+.msc__x::before{transform:rotate(45deg)} .msc__x::after{transform:rotate(-45deg)}
+.msc__x:hover{color:var(--ink)}
+.msc__x:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+
+/* На телефоне помощник мельче, и подвал получает запас снизу ровно на его
+   высоту, чтобы нижняя строка текста не пряталась под ним. */
+@media(max-width:620px){
+  .ftr__legal{padding-bottom:104px}
+  .msc__btn{width:84px;height:84px}
+  .msc__say{font-size:13.5px}
+  /* Полоса о cookie на узком экране разворачивается во всю ширину и накрывает
+     угол. Раньше кнопку на это время прятали — и если человек полосу не
+     трогал, её не было до конца визита. Теперь помощник поднимается над
+     полосой: видны оба. На мониторе карточка стоит по центру и до угла не
+     достаёт, там ничего не двигаем. */
+  .msc{bottom:calc(max(10px,env(safe-area-inset-bottom)) + var(--cookie-h,0px))}
+}
+
+/* Покой есть покой: ни дыхания, ни волн, ни выезда облачка. Персонаж просто
+   стоит. Переносить его при этом можно — это действие человека, а не
+   самодеятельность страницы. */
+@media(prefers-reduced-motion:reduce){
+  .msc,.msc__bub{transition:none;animation:none}
+  .msc:not(.is-drag) .msc__img{animation:none}
+  .msc.is-on .msc__ring{animation:none}
+  .msc.is-drag .msc__img{transform:none;transition:none}
+  .msc__lines,.msc__dots i,.msc__fx{display:none;animation:none}
+}
+
+/* Версия для слабовидящих: рисунка нет, есть прямоугольная контрастная кнопка
+   со словом. Картинка там мешает — крупный шрифт, высокий контраст, ничего
+   лишнего; и всплывающего окна в этом режиме тоже нет, помощник ведёт прямо к
+   форме на странице. */
+html.vi .msc__img,html.vi .msc__ring,html.vi .msc__lines,html.vi .msc__fx{display:none}
+html.vi .msc__btn{width:auto;height:auto;padding:10px 16px;background:var(--ink);
+  color:var(--bg);border:2px solid var(--ink);border-radius:2px;font:inherit;font-size:1em}
+html.vi .msc__btn::after{content:"Записаться"}
+html.vi .msc__bub{border:2px solid var(--ink);border-radius:0;box-shadow:none}
+
+/* Без скрипта отправлять заявку нечем — помощника нет. */
+.no-js .msc{display:none}
+
+/* Помощник во всплывающей форме. Сначала он выглядывал над верхним краем
+   окна — и оказывался обрезан: у окна overflow:auto, всё, что снаружи, ему
+   срезает. На телефоне из-за этого над шторкой торчали одни ноги. Поэтому
+   он стоит внутри, первой строкой, над надзаголовком. */
+.lfpop__msc{display:block;width:76px;height:76px;margin:-6px 0 2px -6px;
+  object-fit:contain;transform-origin:50% 100%;pointer-events:none;
+  filter:drop-shadow(0 6px 12px rgba(20,22,26,.16))}
+@media(max-width:620px){.lfpop__msc{width:64px;height:64px;margin:0 0 2px -4px}}
+html.vi .lfpop__msc{display:none}
+
+/* Запасная строка в форме: видна только при выключенных скриптах — её
+   показывает <style> внутри <noscript> в самой странице. */
+.lf__nojs{display:none;margin:0;font-size:var(--fs-3);line-height:1.6;color:var(--ink-2)}
+
+/* Ссылка «открыть сразу» рядом с камнем: мелкая и спокойная, без
+   маркера-точки — она не должна спорить с самим предложением. */
+.hint--quiet{margin-top:18px;padding-left:0}
+.hint--quiet .hint__i{display:none}
+.hint--quiet .offer__skip{color:var(--mute);font-size:var(--fs-2)}
+.hint--quiet .offer__skip:hover{color:var(--ink)}
+.offer.is-open .hint--quiet{opacity:0;pointer-events:none}
+
+/* ---------------------------------------------------------------------------
+   ВЫКЛЮЧАТЕЛЬ ЗВУКА
+
+   Звук на сайте есть только в играх, но человек должен уметь его убрать,
+   не дослушав. Кнопка стоит в шапке рядом с версией для слабовидящих, а не
+   прячется в подвале: выключатель, который надо искать, — это не выключатель.
+--------------------------------------------------------------------------- */
+.sfx-btn{display:inline-flex;align-items:center;justify-content:center;
+  width:40px;height:40px;flex:none;margin-left:10px;padding:0;
+  border:1px solid var(--hair);border-radius:2px;background:transparent;
+  color:var(--ink-2);cursor:pointer;transition:color var(--t-fast),border-color var(--t-fast)}
+.sfx-btn:hover{color:var(--ink);border-color:var(--hair)}
+.sfx-btn:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+/* Перечёркнутый динамик — когда звук выключен; волны — когда включён. */
+.sfx-off{opacity:0;transition:opacity var(--t-fast)}
+.sfx-wave{opacity:1;transition:opacity var(--t-fast)}
+.sfx-btn[aria-pressed="false"] .sfx-off{opacity:1}
+.sfx-btn[aria-pressed="false"] .sfx-wave{opacity:0}
+.sfx-btn[aria-pressed="false"]{color:var(--mute)}
+/* Текст только для читалок: рядом уже есть понятный значок. */
+.vis-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-width:1260px){.sfx-btn{margin-left:auto}}
+.no-js .sfx-btn{display:none}
+
+/* На узком экране две круглые кнопки и телефон вместе с названием клиники
+   перестают помещаться в строку: не хватало полусотни пикселей, и содержимое
+   шапки вылезало за правый край. Ужимаем сами кнопки и промежутки. */
+@media(max-width:620px){
+  .hdr__in{gap:10px}
+  .sfx-btn,.vi-btn{width:36px;height:36px;margin-left:0}
+  .sfx-btn{margin-left:auto}
+  .brand__t b{font-size:17px}
+}
+
+/* Шапка шире текстовой колонки. Колонка ограничена ради длины строки, а в
+   шапке строк нет — там логотип, разделы, телефон и кнопки. На большом
+   мониторе они в 1360 px не помещались и вылезали в поля. */
+@media(min-width:1800px){.hdr .wrap{max-width:1600px}}
+/* Совсем узкие экраны: ещё немного ужимаем промежутки. */
+@media(max-width:400px){
+  .hdr__in{gap:8px}
+  .brand{gap:8px}
+  .brand__t b{font-size:16px}
+}
+/* 320 px — самый узкий экран, который ещё встречается. Там место есть только
+   на название, телефон и три значка: подпись под логотипом уходит. */
+@media(max-width:340px){
+  .brand img{width:28px;height:24px}
+  .brand__t b{font-size:15px}
+  .sfx-btn,.vi-btn,.burger{width:32px;height:32px;flex:none}
+  .hdr__in{gap:6px}
+  /* название сжимается и при нехватке места обрезается многоточием:
+     на 320 px иначе не помещается ни при каких промежутках */
+  .brand{gap:6px;min-width:0;flex-shrink:1}
+  .brand__t{min-width:0}
+  .brand__t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+
+/* ---------------------------------------------------------------------------
+   ПЕЧАТЬ
+
+   Прейскурант и адрес люди печатают. На бумаге не нужны ни меню, ни игры, ни
+   плавающая кнопка записи — нужны название, телефон, адрес и сам текст.
+--------------------------------------------------------------------------- */
+@media print{
+  .hdr,.msc,.fab,.cookie,.lfpop,.vip,.intro,.map,.lfband,.sfx-btn,.vi-btn,.burger,
+  .offer__stage,.fill__in,.tray__stage,.tray__cta,.hint,.skip{display:none!important}
+  html,body{background:#fff;color:#000}
+  .sec{padding-block:16pt;break-inside:avoid}
+  .sec--band{background:none;border:0}
+  a{color:#000;text-decoration:none}
+  /* адрес ссылки рядом с текстом: на бумаге ссылка без адреса бесполезна */
+  .ftr a[href^="http"]::after{content:" (" attr(href) ")";font-size:9pt;color:#444}
+  table{break-inside:auto}
+  tr{break-inside:avoid}
+  thead{display:table-header-group}
+}
